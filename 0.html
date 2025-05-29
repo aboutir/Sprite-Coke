@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blocage Utilisateur</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+       :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --light-bg: #f5f7fa;
+            --dark-text: #2c3e50;
+            --light-text: #ecf0f1;
+            --border-radius: 14px;
+            --shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', 'Segoe UI', Arial, sans-serif;
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            padding-bottom: 80px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            padding: 16px;
+            max-width: 540px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: linear-gradient(145deg, var(--primary-color), var(--secondary-color));
+            color: var(--light-text);
+            padding: 24px 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            width: 120px;
+            height: 120px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 25px 0 15px;
+            color: var(--dark-text);
+            padding-left: 10px;
+            border-left: 3px solid var(--primary-color);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            transition: border 0.3s ease;
+        }
+        
+        .form-input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+        
+        .btn {
+            padding: 12px 18px;
+            border-radius: 30px;
+            color: white;
+            font-weight: 600;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s ease;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+            width: 100%;
+        }
+        
+        .btn i {
+            margin-right: 8px;
+        }
+        
+        .btn-blue {
+            background-color: var(--primary-color);
+        }
+        
+        .btn-blue:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        
+        .btn-red { 
+            background-color: var(--danger-color);
+        }
+        
+        .btn-red:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+        }
+        
+        .btn-green { 
+            background-color: var(--success-color);
+        }
+        
+        .btn-green:hover {
+            background-color: #219652;
+            transform: translateY(-2px);
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            color: white;
+            display: none;
+        }
+        
+        .alert-success {
+            background-color: var(--success-color);
+        }
+        
+        .alert-danger {
+            background-color: var(--danger-color);
+        }
+        
+        .alert-warning {
+            background-color: var(--warning-color);
+        }
+        
+        .user-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            display: none;
+        }
+        
+        .user-info {
+            margin-bottom: 15px;
+        }
+        
+        .user-label {
+            font-weight: 500;
+            display: inline-block;
+            width: 120px;
+        }
+        
+        .user-value {
+            font-weight: 400;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 500;
+            color: white;
+        }
+        
+        .status-active {
+            background-color: var(--success-color);
+        }
+        
+        .status-blocked {
+            background-color: var(--danger-color);
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .loading-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .back-link i {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Overlay de chargement -->
+    <div class="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+    
+    <div class="container">
+        <a href="accueil.html" class="back-link"><i class="fas fa-arrow-left"></i> Retour à l'accueil</a>
+        
+        <div class="header">
+            <h1>Bloquer un utilisateur</h1>
+            <p>Gérer l'accès aux fonctionnalités</p>
+        </div>
+        
+        <!-- Alertes -->
+        <div id="alert-success" class="alert alert-success">
+            <i class="fas fa-check-circle"></i> Opération réussie!
+        </div>
+        
+        <div id="alert-danger" class="alert alert-danger">
+            <i class="fas fa-exclamation-circle"></i> Erreur lors de l'opération.
+        </div>
+        
+        <div id="alert-warning" class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle"></i> Utilisateur non trouvé.
+        </div>
+        
+        <!-- Formulaire de recherche -->
+        <div class="section-title">Rechercher un utilisateur</div>
+        
+        <div class="form-group">
+            <label for="phoneNumber" class="form-label">Numéro de téléphone</label>
+            <input type="tel" id="phoneNumber" class="form-input" placeholder="Ex: 0102030405">
+        </div>
+        
+        <button id="searchBtn" class="btn btn-blue">
+            <i class="fas fa-search"></i> Rechercher
+        </button>
+        
+        <!-- Informations utilisateur -->
+        <div id="userCard" class="user-card">
+            <div class="section-title">Informations utilisateur</div>
+            
+            <div class="user-info">
+                <span class="user-label">Téléphone:</span>
+                <span id="userPhone" class="user-value">-</span>
+            </div>
+            
+            <div class="user-info">
+                <span class="user-label">Solde:</span>
+                <span id="userBalance" class="user-value">-</span>
+            </div>
+            
+            <div class="user-info">
+                <span class="user-label">Statut:</span>
+                <span id="userStatus" class="status-badge status-active">Actif</span>
+            </div>
+            
+            <div class="form-group" style="margin-top: 20px;">
+                <button id="blockBtn" class="btn btn-red">
+                    <i class="fas fa-ban"></i> Bloquer l'utilisateur
+                </button>
+                
+                <button id="unblockBtn" class="btn btn-green" style="margin-top: 10px; display: none;">
+                    <i class="fas fa-unlock"></i> Débloquer l'utilisateur
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+        import { getDatabase, ref, get, update, set, child, onValue } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyDIB-raa12rkzqxRhflOMLBwL4hBycTgmo",
+            authDomain: "coke-eea48.firebaseapp.com",
+            databaseURL: "https://coke-eea48-default-rtdb.firebaseio.com",
+            projectId: "coke-eea48",
+            storageBucket: "coke-eea48.firebasestorage.app",
+            messagingSenderId: "217366074971",
+            appId: "1:217366074971:web:948bdc5baeeea93fac117e"
+        };
+
+        // Initialisation de Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+        
+        // Éléments DOM
+        const searchBtn = document.getElementById('searchBtn');
+        const phoneInput = document.getElementById('phoneNumber');
+        const userCard = document.getElementById('userCard');
+        const userPhone = document.getElementById('userPhone');
+        const userBalance = document.getElementById('userBalance');
+        const userStatus = document.getElementById('userStatus');
+        const blockBtn = document.getElementById('blockBtn');
+        const unblockBtn = document.getElementById('unblockBtn');
+        const alertSuccess = document.getElementById('alert-success');
+        const alertDanger = document.getElementById('alert-danger');
+        const alertWarning = document.getElementById('alert-warning');
+        
+        // Variable pour stocker l'utilisateur actuel
+        let currentUser = null;
+        let foundUserKey = null;
+        
+        // Gestionnaire d'interface utilisateur
+        class UIManager {
+            static showLoading() {
+                const loader = document.querySelector('.loading-overlay');
+                if (loader) loader.classList.add('active');
+            }
+            
+            static hideLoading() {
+                const loader = document.querySelector('.loading-overlay');
+                if (loader) loader.classList.remove('active');
+            }
+            
+            static showAlert(type, message) {
+                // Masquer toutes les alertes d'abord
+                alertSuccess.style.display = 'none';
+                alertDanger.style.display = 'none';
+                alertWarning.style.display = 'none';
+                
+                // Afficher l'alerte demandée
+                switch (type) {
+                    case 'success':
+                        alertSuccess.textContent = message || 'Opération réussie!';
+                        alertSuccess.style.display = 'block';
+                        break;
+                    case 'danger':
+                        alertDanger.textContent = message || 'Erreur lors de l\'opération.';
+                        alertDanger.style.display = 'block';
+                        break;
+                    case 'warning':
+                        alertWarning.textContent = message || 'Utilisateur non trouvé.';
+                        alertWarning.style.display = 'block';
+                        break;
+                }
+                
+                // Masquer l'alerte après 5 secondes
+                setTimeout(() => {
+                    alertSuccess.style.display = 'none';
+                    alertDanger.style.display = 'none';
+                    alertWarning.style.display = 'none';
+                }, 5000);
+            }
+            
+            static updateUserInfo(userData, userKey) {
+                foundUserKey = userKey;
+                
+                // Mise à jour des éléments d'interface
+                userPhone.textContent = userData.phoneNumber || 'Non spécifié';
+                userBalance.textContent = `${userData.balance || 0} FCFA`;
+                
+                // Mise à jour du statut
+                if (userData.isBlocked) {
+                    userStatus.textContent = 'Bloqué';
+                    userStatus.className = 'status-badge status-blocked';
+                    blockBtn.style.display = 'none';
+                    unblockBtn.style.display = 'block';
+                } else {
+                    userStatus.textContent = 'Actif';
+                    userStatus.className = 'status-badge status-active';
+                    blockBtn.style.display = 'block';
+                    unblockBtn.style.display = 'none';
+                }
+                
+                // Afficher la carte utilisateur
+                userCard.style.display = 'block';
+            }
+        }
+        
+        // Gestionnaire d'utilisateurs
+        class UserManager {
+            static async findUserByPhone(phoneNumber) {
+                UIManager.showLoading();
+                
+                try {
+                    // Nettoyer le numéro
+                    const cleanNumber = phoneNumber.replace(/\D/g, '');
+                    if (!cleanNumber) {
+                        UIManager.hideLoading();
+                        UIManager.showAlert('warning', 'Veuillez entrer un numéro de téléphone valide.');
+                        return null;
+                    }
+                    
+                    // Référence à tous les utilisateurs
+                    const usersRef = ref(database, 'users');
+                    const snapshot = await get(usersRef);
+                    
+                    if (snapshot.exists()) {
+                        const users = snapshot.val();
+                        let foundUser = null;
+                        let foundKey = null;
+                        
+                        // Parcourir tous les utilisateurs
+                        for (const key in users) {
+                            const user = users[key];
+                            
+                            // Vérifier le numéro de téléphone dans différents emplacements
+                            let userPhone = user.phoneNumber || user.telephone || user.numero || user.tel || user.phone;
+                            
+                            // Vérifier dans les sous-objets
+                            if (!userPhone && user.profile) {
+                                userPhone = user.profile.phoneNumber;
+                            }
+                            if (!userPhone && user.contact) {
+                                userPhone = user.contact.phoneNumber;
+                            }
+                            
+                            if (userPhone) {
+                                // Nettoyer le numéro de l'utilisateur
+                                const cleanUserPhone = userPhone.replace(/\D/g, '');
+                                
+                                // Comparer les numéros nettoyés
+                                if (cleanUserPhone.includes(cleanNumber) || cleanNumber.includes(cleanUserPhone)) {
+                                    foundUser = user;
+                                    foundKey = key;
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        UIManager.hideLoading();
+                        
+                        if (foundUser) {
+                            // Assurer que le champ isBlocked existe
+                            if (foundUser.isBlocked === undefined) {
+                                foundUser.isBlocked = false;
+                            }
+                            
+                            UIManager.updateUserInfo(foundUser, foundKey);
+                            return { user: foundUser, key: foundKey };
+                        } else {
+                            UIManager.showAlert('warning', 'Aucun utilisateur trouvé avec ce numéro.');
+                            userCard.style.display = 'none';
+                            return null;
+                        }
+                    } else {
+                        UIManager.hideLoading();
+                        UIManager.showAlert('warning', 'Aucun utilisateur enregistré dans la base de données.');
+                        return null;
+                    }
+                } catch (error) {
+                    console.error("Erreur lors de la recherche:", error);
+                    UIManager.hideLoading();
+                    UIManager.showAlert('danger', 'Erreur lors de la recherche: ' + error.message);
+                    return null;
+                }
+            }
+            
+            static async blockUser(userKey) {
+                if (!userKey) {
+                    UIManager.showAlert('warning', 'Aucun utilisateur sélectionné.');
+                    return false;
+                }
+                
+                UIManager.showLoading();
+                
+                try {
+                    // Mettre à jour le statut de blocage
+                    const updates = {};
+                    updates[`users/${userKey}/isBlocked`] = true;
+                    
+                    await update(ref(database), updates);
+                    
+                    UIManager.hideLoading();
+                    UIManager.showAlert('success', 'Utilisateur bloqué avec succès.');
+                    
+                    // Mettre à jour l'affichage
+                    const userRef = ref(database, `users/${userKey}`);
+                    const snapshot = await get(userRef);
+                    if (snapshot.exists()) {
+                        UIManager.updateUserInfo(snapshot.val(), userKey);
+                    }
+                    
+                    return true;
+                } catch (error) {
+                    console.error("Erreur lors du blocage:", error);
+                    UIManager.hideLoading();
+                    UIManager.showAlert('danger', 'Erreur lors du blocage: ' + error.message);
+                    return false;
+                }
+            }
+            
+            static async unblockUser(userKey) {
+                if (!userKey) {
+                    UIManager.showAlert('warning', 'Aucun utilisateur sélectionné.');
+                    return false;
+                }
+                
+                UIManager.showLoading();
+                
+                try {
+                    // Mettre à jour le statut de blocage
+                    const updates = {};
+                    updates[`users/${userKey}/isBlocked`] = false;
+                    
+                    await update(ref(database), updates);
+                    
+                    UIManager.hideLoading();
+                    UIManager.showAlert('success', 'Utilisateur débloqué avec succès.');
+                    
+                    // Mettre à jour l'affichage
+                    const userRef = ref(database, `users/${userKey}`);
+                    const snapshot = await get(userRef);
+                    if (snapshot.exists()) {
+                        UIManager.updateUserInfo(snapshot.val(), userKey);
+                    }
+                    
+                    return true;
+                } catch (error) {
+                    console.error("Erreur lors du déblocage:", error);
+                    UIManager.hideLoading();
+                    UIManager.showAlert('danger', 'Erreur lors du déblocage: ' + error.message);
+                    return false;
+                }
+            }
+        }
+        
+        // Gestionnaire d'authentification
+        class AuthManager {
+            static init() {
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        console.log("Administrateur connecté:", user.uid);
+                        currentUser = user;
+                    } else {
+                        console.log("Aucun utilisateur connecté");
+                        window.location.href = 'login.html';
+                    }
+                });
+            }
+        }
+        
+        // Initialisation des écouteurs d'événements
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialiser l'authentification
+            AuthManager.init();
+            
+            // Écouteur pour le bouton de recherche
+            searchBtn.addEventListener('click', async () => {
+                const phoneNumber = phoneInput.value.trim();
+                await UserManager.findUserByPhone(phoneNumber);
+            });
+            
+            // Écouter la touche Entrée dans le champ de téléphone
+            phoneInput.addEventListener('keypress', async (e) => {
+                if (e.key === 'Enter') {
+                    const phoneNumber = phoneInput.value.trim();
+                    await UserManager.findUserByPhone(phoneNumber);
+                }
+            });
+            
+            // Écouteur pour le bouton de blocage
+            blockBtn.addEventListener('click', async () => {
+                if (foundUserKey) {
+                    await UserManager.blockUser(foundUserKey);
+                } else {
+                    UIManager.showAlert('warning', 'Veuillez d\'abord rechercher un utilisateur.');
+                }
+            });
+            
+            // Écouteur pour le bouton de déblocage
+            unblockBtn.addEventListener('click', async () => {
+                if (foundUserKey) {
+                    await UserManager.unblockUser(foundUserKey);
+                } else {
+                    UIManager.showAlert('warning', 'Veuillez d\'abord rechercher un utilisateur.');
+                }
+            });
+            
+            // Masquer le loader au chargement initial
+            UIManager.hideLoading();
+        });
+    </script>
+</body>
+</html>
+ 

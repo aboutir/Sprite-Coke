@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Soldes Utilisateurs</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.9.0/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.9.0/firebase-database-compat.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        h3 {
+            color: #444;
+            margin-bottom: 15px;
+        }
+
+        .search-form {
+            margin-bottom: 30px;
+        }
+
+        .search-form input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        .edit-form {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 4px;
+            margin-bottom: 30px;
+        }
+
+        input, button {
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+
+        .disabled-user {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        #message {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Gestion des Soldes Utilisateurs</h1>
+        
+        <div class="search-form">
+            <input type="text" id="searchInput" placeholder="Rechercher par email" onkeyup="filterUsers()">
+        </div>
+
+        <div class="edit-form">
+            <h3>Modifier le solde</h3>
+            <input type="text" id="userIdInput" placeholder="Email Utilisateur">
+            <input type="number" id="balanceInput" placeholder="Nouveau solde">
+            <button onclick="updateBalance()">Mettre à jour</button>
+            <button onclick="toggleUserStatus()" style="background-color: #dc3545;">Désactiver/Activer</button>
+        </div>
+
+        <div id="message"></div>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>Solde</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="userTable">
+                <!-- Les utilisateurs seront ajoutés ici -->
+            </tbody>
+        </table>
+    </div>
+
+          <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+    import { getAuth } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+    import { getDatabase, ref, set, onValue, update, get, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
+    
+    const firebaseConfig = {
+        apiKey: "AIzaSyDIB-raa12rkzqxRhflOMLBwL4hBycTgmo",
+        authDomain: "coke-eea48.firebaseapp.com",
+        databaseURL: "https://coke-eea48-default-rtdb.firebaseio.com",
+        projectId: "coke-eea48",
+        storageBucket: "coke-eea48.firebaseapp.com",
+        messagingSenderId: "217366074971",
+        appId: "1:217366074971:web:948bdc5baeeea93fac117e"
+    };
+
+    // Initialisation Firebase avec la nouvelle syntaxe
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    // Gestionnaire d'utilisateurs
+    class UserManager {
+        static async loadUsers() {
+            const usersRef = ref(database, 'users');
+            onValue(usersRef, (snapshot) => {
+                const userTable = document.getElementById('userTable');
+                userTable.innerHTML = '';
+                
+                snapshot.forEach((userSnapshot) => {
+                    const userData = userSnapshot.val();
+                    if (userData.email) {
+                        this.addUserToTable(userData);
+                    }
+                });
+            });
+        }
+
+        static addUserToTable(userData) {
+            const userTable = document.getElementById('userTable');
+            const row = document.createElement('tr');
+            row.classList.toggle('disabled-user', userData.isDisabled);
+            row.innerHTML = `
+                <td>${userData.email}</td>
+                <td>${userData.balance || 0}</td>
+                <td>${userData.isDisabled ? 'Désactivé' : 'Actif'}</td>
+                <td>
+                    <button onclick="window.prepareEdit('${userData.email}', ${userData.balance || 0})">
+                        Modifier
+                    </button>
+                </td>
+            `;
+            userTable.appendChild(row);
+        }
+
+        static prepareEdit(email, currentBalance) {
+            document.getElementById('userIdInput').value = email;
+            document.getElementById('balanceInput').value = currentBalance;
+        }
+
+        static async updateBalance() {
+            const userEmail = document.getElementById('userIdInput').value;
+            const newBalance = parseFloat(document.getElementById('balanceInput').value);
+            
+            try {
+                await this.validateAndUpdate(userEmail, newBalance);
+                this.showMessage('Solde mis à jour avec succès!', 'success');
+            } catch (error) {
+                this.showMessage(error.message, 'error');
+            }
+        }
+
+        static async validateAndUpdate(userEmail, newBalance) {
+            if (!userEmail || isNaN(newBalance)) {
+                throw new Error('Veuillez remplir tous les champs correctement.');
+            }
+
+            const usersRef = ref(database, 'users');
+            const userQuery = query(usersRef, orderByChild('email'), equalTo(userEmail));
+            const snapshot = await get(userQuery);
+
+            if (!snapshot.exists()) {
+                throw new Error('Utilisateur non trouvé');
+            }
+
+            let userId = null;
+            snapshot.forEach((childSnapshot) => {
+                userId = childSnapshot.key;
+            });
+            
+            if (userId) {
+                const userRef = ref(database, `users/${userId}`);
+                await update(userRef, { balance: newBalance });
+            }
+        }
+
+        static async toggleUserStatus() {
+            const userEmail = document.getElementById('userIdInput').value;
+            
+            try {
+                await this.validateAndToggle(userEmail);
+                this.showMessage('Statut de l\'utilisateur mis à jour!', 'success');
+            } catch (error) {
+                this.showMessage(error.message, 'error');
+            }
+        }
+
+        static async validateAndToggle(userEmail) {
+            if (!userEmail) {
+                throw new Error('Veuillez saisir un email.');
+            }
+
+            const usersRef = ref(database, 'users');
+            const userQuery = query(usersRef, orderByChild('email'), equalTo(userEmail));
+            const snapshot = await get(userQuery);
+
+            if (!snapshot.exists()) {
+                throw new Error('Utilisateur non trouvé');
+            }
+
+            let userId = null;
+            let userData = null;
+            
+            snapshot.forEach((childSnapshot) => {
+                userId = childSnapshot.key;
+                userData = childSnapshot.val();
+            });
+            
+            if (userId && userData) {
+                const userRef = ref(database, `users/${userId}`);
+                await update(userRef, {
+                    isDisabled: !userData.isDisabled
+                });
+            }
+        }
+
+        static showMessage(message, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = `<p class="${type}">${message}</p>`;
+            setTimeout(() => messageDiv.innerHTML = '', 3000);
+        }
+
+        static filterUsers() {
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+            const rows = document.getElementById('userTable').getElementsByTagName('tr');
+            
+            Array.from(rows).forEach(row => {
+                const emailCell = row.cells[0];
+                if (emailCell) {
+                    const emailText = emailCell.textContent.toLowerCase();
+                    row.style.display = emailText.includes(searchInput) ? '' : 'none';
+                }
+            });
+        }
+    }
+
+    // Expose les méthodes au scope global pour les appels dans le HTML
+    window.UserManager = UserManager;
+    window.filterUsers = () => UserManager.filterUsers();
+    window.updateBalance = () => UserManager.updateBalance();
+    window.toggleUserStatus = () => UserManager.toggleUserStatus();
+    window.prepareEdit = (email, balance) => UserManager.prepareEdit(email, balance);
+
+    // Chargement initial des utilisateurs
+    document.addEventListener('DOMContentLoaded', () => {
+        UserManager.loadUsers();
+    });
+</script>
+</body>
+</html>

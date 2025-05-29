@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentification | Sprite-coke</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            padding: 1rem;
+        }
+
+        .app-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #dc2626;
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.8),
+                         -2px -2px 4px rgba(255, 255, 255, 0.8),
+                         2px -2px 4px rgba(255, 255, 255, 0.8),
+                         -2px 2px 4px rgba(255, 255, 255, 0.8);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            padding: 2rem;
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            background-color: white;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group:focus-within {
+            border-color: #dc2626;
+        }
+
+        .input-group i {
+            color: #9ca3af;
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .country-select {
+            position: relative;
+            margin-right: 0.5rem;
+        }
+
+        .selected-code {
+            padding: 0.5rem;
+            border: none;
+            background: none;
+            cursor: pointer;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 1000;
+            max-height: 300px;
+            overflow-y: auto;
+            width: 200px;
+        }
+
+        .dropdown.show {
+            display: block;
+        }
+
+        .country-option {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            transition: background-color 0.2s ease;
+        }
+
+        .country-option:hover {
+            background-color: #f3f4f6;
+        }
+
+        input {
+            width: 100%;
+            border: none;
+            outline: none;
+            color: #374151;
+            padding: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        input::placeholder {
+            color: #9ca3af;
+        }
+
+        .verification-code {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 0.25rem;
+        }
+
+        .verification-input {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .verification-input input {
+            width: 2.5rem;
+            height: 2.5rem;
+            text-align: center;
+            font-size: 1.25rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.25rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .verification-input input:focus {
+            border-color: #dc2626;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background-color: #dc2626;
+            color: white;
+            padding: 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background-color: #b91c1c;
+            transform: translateY(-1px);
+        }
+
+        .submit-btn:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .toggle-page {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .toggle-page button {
+            color: #4b5563;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        .toggle-page button:hover {
+            color: #1f2937;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .error-alert {
+            color: #dc2626;
+            background-color: #fee2e2;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-top: 0.5rem;
+            display: none;
+            font-size: 0.875rem;
+            text-align: center;
+        }
+
+        .error-alert.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .error-message {
+            color: #dc2626;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .error-message.show {
+            opacity: 1;
+        }
+
+        .success-message {
+            color: #059669;
+            background-color: #d1fae5;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-top: 0.5rem;
+            display: none;
+            font-size: 0.875rem;
+            text-align: center;
+        }
+
+        .success-message.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .app-title {
+                font-size: 2rem;
+            }
+
+            .verification-input input {
+                width: 2rem;
+                height: 2rem;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1 class="app-title">Sprite-coke</h1>
+    
+    <div id="loginPage" class="container">
+        <div class="error-alert" id="loginError"></div>
+        <div class="success-message" id="successMessage"></div>
+        <div class="input-group">
+            <i class="fas fa-phone"></i>
+            <div class="country-select">
+                <button class="selected-code" onclick="toggleDropdown(this)">
+                    <span>+225</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="dropdown">
+                    <div class="country-option" data-code="+225" data-country="Côte d'Ivoire" data-max="10">
+                        <span>+225</span>
+                        <span>Côte d'Ivoire</span>
+                    </div>
+                    <div class="country-option" data-code="+229" data-country="Bénin" data-max="8">
+                        <span>+229</span>
+                        <span>Bénin</span>
+                    </div>
+                    
+                    
+                    <div class="country-option" data-code="+226" data-country="Burkina Faso" data-max="6">
+                        <span>+226</span>
+                        <span>Burkina Faso</span>
+                    </div>
+                    <div class="country-option" data-code="+228" data-country="Togo" data-max="8">
+                        <span>+228</span>
+                        <span>Togo</span>
+                    </div>
+                    
+                    <div class="country-option" data-code="+221" data-country="Sénégal" data-max="9">
+                        <span>+221</span>
+                        <span>Sénégal</span>
+                    </div>
+                </div>
+            </div>
+            <input type="tel" id="loginTelephone" placeholder="Numéro de téléphone" maxlength="10">
+        </div>
+
+        <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="loginPassword" placeholder="Mot de passe">
+        </div>
+
+        <button class="submit-btn" onclick="handleLogin()">Se connecter</button>
+
+        <div class="toggle-page">
+            <button onclick="togglePage()">Pas de compte ? S'inscrire</button>
+        </div>
+        
+        <div class="toggle-page">
+            <button onclick="showForgotPasswordPage()">Mot de passe oublié ?</button>
+        </div>
+    </div>
+
+    <div id="forgotPasswordPage" class="container hidden">
+        <div class="error-alert" id="forgotPasswordError"></div>
+        <div class="success-message" id="forgotPasswordSuccess"></div>
+        <div class="input-group">
+            <i class="fas fa-phone"></i>
+            <div class="country-select">
+                <button class="selected-code" onclick="toggleDropdown(this)">
+                    <span>+225</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="dropdown">
+                    <div class="country-option" data-code="+225" data-country="Côte d'Ivoire" data-max="10">
+                        <span>+225</span>
+                        <span>Côte d'Ivoire</span>
+                    </div>
+                    <div class="country-option" data-code="+229" data-country="Bénin" data-max="8">
+                        <span>+229</span>
+                        <span>Bénin</span>
+                    </div>
+                    <div class="country-option" data-code="+226" data-country="Burkina Faso" data-max="6">
+                        <span>+226</span>
+                        <span>Burkina Faso</span>
+                    </div>
+                    <div class="country-option" data-code="+228" data-country="Togo" data-max="8">
+                        <span>+228</span>
+                        <span>Togo</span>
+                    </div>
+                    <div class="country-option" data-code="+221" data-country="Sénégal" data-max="9">
+                        <span>+221</span>
+                        <span>Sénégal</span>
+                    </div>
+                </div>
+            </div>
+            <input type="tel" id="forgotPasswordTelephone" placeholder="Numéro de téléphone" maxlength="10">
+        </div>
+
+        <button class="submit-btn" onclick="handleForgotPassword()">Réinitialiser le mot de passe</button>
+
+        <div class="toggle-page">
+            <button onclick="showLoginPage()">Retour à la connexion</button>
+        </div>
+    </div>
+
+    <div id="registrationPage" class="container hidden">
+        <div class="error-alert" id="registerError"></div>
+        <div class="input-group">
+            <i class="fas fa-phone"></i>
+            <div class="country-select">
+                <button class="selected-code" onclick="toggleDropdown(this)">
+                    <span>+225</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="dropdown">
+                    <div class="country-option" data-code="+225" data-country="Côte d'Ivoire" data-max="10">
+                        <span>+225</span>
+                        <span>Côte d'Ivoire</span>
+                    </div>
+                    <div class="country-option" data-code="+229" data-country="Bénin" data-max="8">
+                        <span>+229</span>
+                        <span>Bénin</span>
+                    </div>
+                    
+                    
+                    <div class="country-option" data-code="+226" data-country="Burkina Faso" data-max="6">
+                        <span>+226</span>
+                        <span>Burkina Faso</span>
+                    </div>
+                    <div class="country-option" data-code="+228" data-country="Togo" data-max="8">
+                        <span>+228</span>
+                        <span>Togo</span>
+                    </div>
+                    
+                    <div class="country-option" data-code="+221" data-country="Sénégal" data-max="9">
+                        <span>+221</span>
+                        <span>Sénégal</span>
+                    </div>
+                </div>
+            </div>
+            <input type="tel" id="signupTelephone" placeholder="Numéro de téléphone" maxlength="10">
+        </div>
+
+        <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="signupPassword" placeholder="Veuillez saisir le mot de passe de connexion">
+        </div>
+
+        <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="confirmPassword" placeholder="Veuillez confirmer votre mot de passe">
+        </div>
+
+        <div class="input-group">
+            <i class="fas fa-user-plus"></i>
+            <input type="text" placeholder="Code de parrainage (optionnel)" id="referralCode">
+        </div>
+
+        <div class="input-group">
+            <i class="fas fa-hashtag"></i>
+            <div class="verification-input">
+                <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric">
+            </div>
+        </div>
+
+        <div class="input-group">
+            <i class="fas fa-check-circle"></i>
+            <div class="verification-code">
+                <span style="color: #DC2626">7</span>
+                <span style="color: #2563EB">2</span>
+                <span style="color: #059669">9</span>
+                <span style="color: #7C3AED">4</span>
+                <span style="color: #DB2777">1</span>
+            </div>
+        </div>
+
+        <div class="error-message" id="errorMessage">
+            Le code de vérification est incorrect
+        </div>
+
+        <button id="registerBtn" class="submit-btn" onclick="handleRegistration()">S'inscrire maintenant</button>
+
+        <div class="toggle-page">
+            <button onclick="togglePage()">Déjà un compte ? Se connecter</button>
+        </div>
+    </div>
+
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, updatePassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+import { getDatabase, ref, set, get, update } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
+
+// ------------ CONFIGURATION FIREBASE ------------
+const firebaseConfig = {
+    apiKey: "AIzaSyDIB-raa12rkzqxRhflOMLBwL4hBycTgmo",
+    authDomain: "coke-eea48.firebaseapp.com",
+    databaseURL: "https://coke-eea48-default-rtdb.firebaseio.com",
+    projectId: "coke-eea48",
+    storageBucket: "coke-eea48.firebasestorage.app",
+    messagingSenderId: "217366074971",
+    appId: "1:217366074971:web:948bdc5baeeea93fac117e"
+};
+
+// Initialisation Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth();
+const database = getDatabase(app);
+
+// Rendre les instances Firebase disponibles globalement
+window.auth = auth;
+window.database = database;
+
+// ------------ FONCTIONS UTILITAIRES ------------
+
+// Validation de saisie pour les champs numériques
+function validateInput(e) {
+    const input = e.target;
+    input.value = input.value.replace(/[^0-9]/g, '');
+}
+
+// Validation du numéro de téléphone
+function validatePhoneNumber(phone, countryCode) {
+    let maxLength = 10; // Par défaut pour la Côte d'Ivoire
+    
+    // Obtenir la longueur maximale du pays sélectionné
+    const countryOptions = document.querySelectorAll('.country-option');
+    for (const option of countryOptions) {
+        if (option.dataset.code === countryCode) {
+            maxLength = parseInt(option.dataset.max);
+            break;
+        }
+    }
+    
+    return phone.length === maxLength;
+}
+
+// Génération d'un mot de passe aléatoire à 6 chiffres
+function generateRandomPassword() {
+    const digits = '0123456789';
+    let password = '';
+    for (let i = 0; i < 6; i++) {
+        password += digits.charAt(Math.floor(Math.random() * digits.length));
+    }
+    // S'assurer que le mot de passe a bien 6 caractères
+    if (password.length !== 6) {
+        console.error("Erreur: le mot de passe généré n'a pas 6 caractères");
+        return '123456'; // Mot de passe par défaut en cas d'erreur
+    }
+    console.log("Mot de passe généré avec succès:", password);
+    return password;
+}
+
+// Génération d'un code de parrainage unique
+function generateReferralCode() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let code = '';
+    for (let i = 0; i < 6; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
+}
+
+// Formatage d'email cohérent
+function formatEmail(countryCode, telephone) {
+    return `${countryCode.replace('+', '')}${telephone}@temp.com`;
+}
+
+// Fonction utilitaire pour afficher un message d'erreur
+function showError(elementId, message) {
+    const errorElement = document.getElementById(elementId);
+    errorElement.textContent = message;
+    errorElement.classList.add('show');
+}
+
+// Fonction utilitaire pour afficher un message de succès
+function showSuccess(elementId, message) {
+    const successElement = document.getElementById(elementId);
+    successElement.textContent = message;
+    successElement.classList.add('show');
+}
+
+// Fonction utilitaire pour masquer un message
+function hideMessage(elementId) {
+    const element = document.getElementById(elementId);
+    element.classList.remove('show');
+}
+
+// ------------ GESTION DE L'INTERFACE ------------
+
+// Basculer entre les pages
+window.togglePage = () => {
+    const loginPage = document.getElementById('loginPage');
+    const registrationPage = document.getElementById('registrationPage');
+    loginPage.classList.toggle('hidden');
+    registrationPage.classList.toggle('hidden');
+    document.getElementById('forgotPasswordPage').classList.add('hidden');
+
+    // Réinitialiser les messages d'erreur
+    document.querySelectorAll('.error-message, .success-message').forEach(el => {
+        el.classList.remove('show');
+    });
+};
+
+// Afficher la page de mot de passe oublié
+window.showForgotPasswordPage = () => {
+    document.getElementById('loginPage').classList.add('hidden');
+    document.getElementById('registrationPage').classList.add('hidden');
+    document.getElementById('forgotPasswordPage').classList.remove('hidden');
+    
+    // Réinitialiser les messages d'erreur
+    document.querySelectorAll('.error-message, .success-message').forEach(el => {
+        el.classList.remove('show');
+    });
+};
+
+// Afficher la page de connexion
+window.showLoginPage = () => {
+    document.getElementById('loginPage').classList.remove('hidden');
+    document.getElementById('registrationPage').classList.add('hidden');
+    document.getElementById('forgotPasswordPage').classList.add('hidden');
+    
+    // Réinitialiser les messages d'erreur
+    document.querySelectorAll('.error-message, .success-message').forEach(el => {
+        el.classList.remove('show');
+    });
+};
+
+// Gérer le menu déroulant
+window.toggleDropdown = (button) => {
+    const dropdown = button.nextElementSibling;
+    dropdown.classList.toggle('show');
+
+    // Fermer le menu lors d'un clic extérieur
+    const closeDropdown = (event) => {
+        if (!button.contains(event.target)) {
+            dropdown.classList.remove('show');
+            document.removeEventListener('click', closeDropdown);
+        }
+    };
+    setTimeout(() => {
+        document.addEventListener('click', closeDropdown);
+    }, 0);
+};
+
+// ------------ AUTHENTIFICATION ET GESTION DES UTILISATEURS ------------
+
+// Gérer la connexion - CORRIGÉ POUR RÉSOUDRE LE PROBLÈME D'AUTHENTIFICATION
+window.handleLogin = async () => {
+    // Réinitialiser les messages
+    hideMessage('loginError');
+    hideMessage('successMessage');
+    
+    const telephone = document.getElementById('loginTelephone').value;
+    const password = document.getElementById('loginPassword').value;
+    const countryCode = document.querySelector('#loginPage .selected-code span').textContent;
+
+    try {
+        // Validations de base
+        if (!telephone || !password) {
+            throw new Error('Veuillez remplir tous les champs');
+        }
+
+        if (!validatePhoneNumber(telephone, countryCode)) {
+            throw new Error(`Le numéro de téléphone doit correspondre au format du pays sélectionné`);
+        }
+
+        // Format d'email cohérent
+        const email = formatEmail(countryCode, telephone);
+        console.log("Tentative de connexion avec email:", email);
+        
+        // 1. Rechercher l'utilisateur dans la base de données
+        const userRef = ref(database, 'users');
+        const usersSnapshot = await get(userRef);
+        
+        let userId = null;
+        let hasResetPassword = false;
+        let tempPassword = null;
+        
+        if (usersSnapshot.exists()) {
+            usersSnapshot.forEach((childSnapshot) => {
+                const userData = childSnapshot.val();
+                if (userData.countryCode === countryCode && userData.telephone === telephone) {
+                    userId = childSnapshot.key;
+                    hasResetPassword = userData.passwordResetRequested === true;
+                    tempPassword = userData.tempPassword;
+                }
+            });
+        }
+        
+        if (!userId) {
+            throw new Error('Aucun compte associé à ce numéro de téléphone');
+        }
+        
+        console.log("Infos utilisateur trouvées:", {
+            userId,
+            hasResetPassword,
+            tempPassword
+        });
+        
+        // 2. Cas standard: essayer d'abord avec le mot de passe saisi par l'utilisateur
+        try {
+            console.log("Tentative de connexion avec le mot de passe saisi");
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            
+            console.log("Connexion réussie avec le mot de passe standard");
+            
+            // Si l'utilisateur avait demandé une réinitialisation, mettre à jour les flags
+            if (hasResetPassword) {
+                await update(ref(database, `users/${userId}`), {
+                    passwordResetRequested: false,
+                    tempPassword: null
+                });
+                console.log("Flags de réinitialisation mis à jour");
+            }
+            
+            // Redirection vers l'accueil
+            window.location.href = 'accueil.html';
+            return;
+        } catch (loginError) {
+            console.log("Échec de la connexion standard:", loginError.code);
+            
+            // 3. Si la connexion avec mot de passe normal échoue et qu'il y a un mot de passe temporaire
+            if (hasResetPassword && tempPassword) {
+                try {
+                    console.log("Tentative avec mot de passe temporaire:", tempPassword);
+                    const tempCredential = await signInWithEmailAndPassword(auth, email, tempPassword);
+                    console.log("Connexion réussie avec mot de passe temporaire");
+                    
+                    // Si connecté avec succès, mettre à jour le mot de passe
+                    try {
+                        await updatePassword(tempCredential.user, password);
+                        console.log("Mot de passe mis à jour avec succès");
+                        
+                        // Mettre à jour les flags dans la base de données
+                        await update(ref(database, `users/${userId}`), {
+                            passwordResetRequested: false,
+                            tempPassword: null
+                        });
+                        
+                        showSuccess('successMessage', 'Votre mot de passe a été mis à jour avec succès.');
+                        
+                        // Redirection après un court délai
+                        setTimeout(() => {
+                            window.location.href = 'accueil.html';
+                        }, 2000);
+                        return;
+                    } catch (updateError) {
+                        console.error("Erreur lors de la mise à jour du mot de passe:", updateError);
+                        // Même en cas d'échec de mise à jour, l'utilisateur est connecté
+                        window.location.href = 'accueil.html';
+                        return;
+                    }
+                } catch (tempLoginError) {
+                    console.error("Échec de la connexion avec mot de passe temporaire:", tempLoginError);
+                    
+                    // Pour une raison quelconque, la connexion avec le mot de passe temporaire a échoué
+                    // Afficher explicitement le mot de passe temporaire à l'utilisateur
+                    showError('loginError', `Le mot de passe que vous avez saisi est incorrect et la connexion avec le mot de passe temporaire a échoué. Votre mot de passe temporaire est : ${tempPassword}`);
+                    return;
+                }
+            } else {
+                // Pas de réinitialisation demandée ou pas de mot de passe temporaire
+                showError('loginError', 'Mot de passe incorrect');
+                return;
+            }
+        }
+    } catch (error) {
+        console.error("Erreur générale de connexion:", error);
+        showError('loginError', error.message);
+    }
+};
+
+// Gérer l'inscription
+window.handleRegistration = async () => {
+    hideMessage('registerError');
+    
+    const telephone = document.getElementById('signupTelephone').value;
+    const password = document.getElementById('signupPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    const referralCode = document.getElementById('referralCode').value;
+    const countryCode = document.querySelector('#registrationPage .selected-code span').textContent;
+    
+    // Obtenir les codes de vérification
+    const verificationInputs = document.querySelectorAll('.verification-input input');
+    const userCode = Array.from(verificationInputs).map(input => input.value).join('');
+    const correctCode = '72941'; // Code affiché dans l'interface
+
+    try {
+        // Validations
+        if (!telephone || !password || !confirmPassword) {
+            throw new Error('Veuillez remplir tous les champs obligatoires');
+        }
+
+        if (password !== confirmPassword) {
+            throw new Error('Les mots de passe ne correspondent pas');
+        }
+
+        if (password.length < 6) {
+            throw new Error('Le mot de passe doit contenir au moins 6 caractères');
+        }
+
+        if (!validatePhoneNumber(telephone, countryCode)) {
+            throw new Error(`Le numéro de téléphone doit correspondre au format du pays sélectionné`);
+        }
+
+        if (userCode !== correctCode) {
+            document.getElementById('errorMessage').classList.add('show');
+            throw new Error('Code de vérification incorrect');
+        }
+
+        // Format d'email cohérent
+        const email = formatEmail(countryCode, telephone);
+        
+        // Vérifier si l'utilisateur existe déjà
+        const usersRef = ref(database, 'users');
+        const usersSnapshot = await get(usersRef);
+        let userExists = false;
+        
+        if (usersSnapshot.exists()) {
+            usersSnapshot.forEach((childSnapshot) => {
+                const userData = childSnapshot.val();
+                if (userData.countryCode === countryCode && userData.telephone === telephone) {
+                    userExists = true;
+                }
+            });
+        }
+        
+        if (userExists) {
+            throw new Error('Un compte avec ce numéro de téléphone existe déjà');
+        }
+        
+        console.log("Tentative d'inscription avec:", email, "Mot de passe:", password);
+        
+        // Créer l'utilisateur Firebase Auth
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        console.log("Utilisateur créé avec succès:", user.uid);
+
+        // Générer un code de parrainage unique
+        const newReferralCode = generateReferralCode();
+
+        // Enregistrer les données utilisateur dans la base de données
+        await set(ref(database, 'users/' + user.uid), {
+            telephone: telephone,
+            countryCode: countryCode,
+            balance: 0,
+            referralCode: newReferralCode,
+            referredBy: referralCode || null,
+            createdAt: Date.now()
+        });
+        
+        console.log("Données utilisateur enregistrées");
+
+        // Traiter le code de parrainage si fourni
+        if (referralCode) {
+            let referrerId = null;
+            
+            // Rechercher l'utilisateur avec le code de parrainage correspondant
+            if (usersSnapshot.exists()) {
+                usersSnapshot.forEach((childSnapshot) => {
+                    const userData = childSnapshot.val();
+                    if (userData.referralCode === referralCode) {
+                        referrerId = childSnapshot.key;
+                    }
+                });
+            }
+            
+            if (referrerId) {
+                // Obtenir le solde actuel du parrain
+                const referrerRef = ref(database, `users/${referrerId}`);
+                const referrerSnapshot = await get(referrerRef);
+                
+                if (referrerSnapshot.exists()) {
+                    const referrerData = referrerSnapshot.val();
+                    const currentBalance = referrerData.balance || 0;
+                    
+                    // Ajouter un bonus au parrain (10 unités)
+                    await update(referrerRef, {
+                        balance: currentBalance + 10
+                    });
+                    
+                    // Ajouter un bonus au nouvel utilisateur
+                    await update(ref(database, `users/${user.uid}`), {
+                        balance: 5 // Donner au nouvel utilisateur un bonus de bienvenue
+                    });
+                    
+                    console.log("Bonus de parrainage appliqué");
+                }
+            } else {
+                console.log("Code de parrainage invalide");
+            }
+        }
+
+        // Succès - redirection vers la page d'accueil
+        window.location.href = 'accueil.html';
+        
+    } catch (error) {
+        console.error("Erreur d'inscription:", error);
+        
+        // Traitement spécifique des erreurs Firebase
+        if (error.code === 'auth/email-already-in-use') {
+            showError('registerError', 'Un compte avec ce numéro de téléphone existe déjà');
+        } else {
+            showError('registerError', error.message);
+        }
+    }
+};
+
+// Gérer la réinitialisation du mot de passe
+window.handleForgotPassword = async () => {
+    // Masquer tous les messages
+    hideMessage('forgotPasswordError');
+    hideMessage('forgotPasswordSuccess');
+    
+    const telephone = document.getElementById('forgotPasswordTelephone').value;
+    const countryCode = document.querySelector('#forgotPasswordPage .selected-code span').textContent;
+
+    try {
+        if (!telephone) {
+            throw new Error('Veuillez saisir votre numéro de téléphone');
+        }
+
+        if (!validatePhoneNumber(telephone, countryCode)) {
+            throw new Error(`Le numéro de téléphone doit correspondre au format du pays sélectionné`);
+        }
+
+        // Format d'email cohérent
+        const email = formatEmail(countryCode, telephone);
+        
+        // Vérifier si l'utilisateur existe dans la base de données
+        const userRef = ref(database, 'users');
+        const usersSnapshot = await get(userRef);
+        
+        if (!usersSnapshot.exists()) {
+            throw new Error('Utilisateur non trouvé');
+        }
+        
+        let userId = null;
+        let userFound = false;
+        
+        // Rechercher l'utilisateur avec le numéro correspondant
+        usersSnapshot.forEach((childSnapshot) => {
+            const userData = childSnapshot.val();
+            if (userData.countryCode === countryCode && userData.telephone === telephone) {
+                userId = childSnapshot.key;
+                userFound = true;
+            }
+        });
+        
+        if (!userFound) {
+            throw new Error('Aucun compte associé à ce numéro de téléphone');
+        }
+        
+        // Générer un nouveau mot de passe à 6 chiffres
+        const newPassword = generateRandomPassword();
+        console.log("Nouveau mot de passe généré:", newPassword);
+
+        try {
+            // 1. D'abord, tenter de réinitialiser avec Firebase Auth (peut échouer)
+            try {
+                await sendPasswordResetEmail(auth, email);
+                console.log("Email de réinitialisation envoyé (si la méthode est configurée)");
+            } catch (emailError) {
+                console.log("Impossible d'envoyer l'email de réinitialisation:", emailError);
+                // C'est normal si la méthode n'est pas configurée, on continue
+            }
+            
+            // 2. Mettre à jour notre base de données avec le mot de passe temporaire
+            await update(ref(database, `users/${userId}`), {
+                tempPassword: newPassword,
+                passwordResetRequested: true
+            });
+            
+            console.log("Mot de passe temporaire enregistré dans la base de données:", newPassword);
+            
+            // 3. Afficher le message de succès avec le nouveau mot de passe
+            showSuccess('forgotPasswordSuccess', `Un nouveau mot de passe temporaire a été généré : ${newPassword}`);
+            
+            // 4. Rediriger vers la page de connexion après un délai
+            setTimeout(() => {
+                showLoginPage();
+                showSuccess('successMessage', `Votre mot de passe a été réinitialisé. Veuillez vous connecter avec le mot de passe temporaire : ${newPassword}`);
+            }, 5000);
+            
+        } catch (updateError) {
+            console.error("Erreur lors de la mise à jour de la base de données:", updateError);
+            throw new Error("Impossible de réinitialiser le mot de passe. Veuillez réessayer plus tard.");
+        }
+        
+    } catch (error) {
+        console.error("Erreur de réinitialisation:", error);
+        showError('forgotPasswordError', error.message);
+    }
+};
+
+// Déconnexion
+window.handleLogout = async () => {
+    try {
+        await auth.signOut();
+        window.location.href = 'index.html';
+    } catch (error) {
+        console.error('Erreur lors de la déconnexion:', error);
+    }
+};
+
+// ------------ GESTION DES ÉVÉNEMENTS ------------
+
+// Initialisation de l'application
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOM chargé, initialisation de l'application");
+    
+    // Définir le code pays par défaut si nécessaire
+    const countrySelects = document.querySelectorAll('.selected-code span');
+    countrySelects.forEach(select => {
+        if (!select.textContent) {
+            select.textContent = '+225'; // Par défaut pour la Côte d'Ivoire
+        }
+    });
+    
+    // Initialiser les autres éléments d'interface
+    const currentPage = window.location.pathname.split('/').pop();
+    if (currentPage === 'index.html' || currentPage === '') {
+        // Afficher la page de connexion par défaut
+        showLoginPage();
+    }
+
+    // Gestion de la sélection du pays
+    document.querySelectorAll('.country-option').forEach(option => {
+        option.addEventListener('click', () => {
+            const code = option.dataset.code;
+            const country = option.dataset.country;
+            const maxLength = option.dataset.max;
+            const button = option.closest('.country-select').querySelector('.selected-code span');
+            button.textContent = code;
+            
+            // Mettre à jour la longueur max du champ téléphone
+            const form = option.closest('.container');
+            const telephoneInput = form.querySelector('input[type="tel"]');
+            telephoneInput.maxLength = maxLength;
+            telephoneInput.placeholder = `Numéro de téléphone (${maxLength} chiffres)`;
+            
+            option.closest('.dropdown').classList.remove('show');
+        });
+    });
+
+    // Gestion des champs de vérification de code
+    document.querySelectorAll('.verification-input input').forEach((input, index) => {
+        input.addEventListener('input', (e) => {
+            validateInput(e);
+            if (input.value.length === 1) {
+                const nextInput = input.nextElementSibling;
+                if (nextInput) nextInput.focus();
+            }
+        });
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && input.value.length === 0) {
+                const prevInput = input.previousElementSibling;
+                if (prevInput) prevInput.focus();
+            }
+        });
+    });
+    
+    console.log("Initialisation terminée");
+});
+
+// Vérifier l'état d'authentification
+onAuthStateChanged(auth, (user) => {
+    console.log("État d'authentification changé:", user ? "Connecté" : "Déconnecté");
+    
+    if (user) {
+        // L'utilisateur est connecté, rediriger si nécessaire
+        const currentPage = window.location.pathname.split('/').pop();
+        if (currentPage === 'index.html' || currentPage === '') {
+            console.log("Redirection vers la page d'accueil");
+            window.location.href = 'accueil.html';
+        }
+    } else {
+        // L'utilisateur est déconnecté, rediriger si nécessaire
+        const currentPage = window.location.pathname.split('/').pop();
+        if (currentPage !== 'index.html' && currentPage !== '') {
+            console.log("Redirection vers la page de connexion");
+            window.location.href = 'index.html';
+        }
+    }
+});
+</script>
+</body>
+</html >

@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carte à Gratter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f0f0f0;
+    }
+    
+    .container {
+      text-align: center;
+    }
+    
+    .congratulations {
+      display: none;
+      background-color: rgba(0, 0, 0, 0.7);
+      color: white;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10;
+      justify-content: center;
+      align-items: center;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    
+    .congrats-content {
+      background: linear-gradient(135deg, #ff9933, #ffcc33);
+      padding: 30px;
+      border-radius: 15px;
+      text-align: center;
+      max-width: 80%;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.7);
+    }
+    
+    .congrats-content h2 {
+      color: #c10000;
+      font-size: 24px;
+      margin-bottom: 15px;
+    }
+    
+    .congrats-content p {
+      font-size: 18px;
+      margin-bottom: 20px;
+    }
+    
+    .close-btn {
+      background-color: #c10000;
+      padding: 8px 20px;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s;
+    }
+    
+    .close-btn:hover {
+      background-color: #e50000;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .scratch-card {
+      position: relative;
+      width: 300px;
+      height: 150px;
+      margin: 20px auto;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .prize-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #ffde59, #ff914d);
+      z-index: 1;
+    }
+    
+    .prize {
+      font-size: 26px;
+      font-weight: bold;
+      color: #c10000;
+      text-shadow: 0 0 3px #fff;
+      opacity: 0;
+      transition: opacity 0.1s ease-in-out;
+    }
+    
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 2;
+    }
+    
+    button {
+      background-color: #4CAF50;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin: 10px 2px;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+    
+    button:hover {
+      background-color: #45a049;
+    }
+    
+    .instructions {
+      margin: 20px 0;
+      color: #555;
+    }
+  </style>
+  <!-- Font Awesome pour les icônes -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Carte à Gratter</h1>
+    <div class="instructions">
+      Grattez la carte avec votre souris pour découvrir votre gain en FCFA!
+    </div>
+    
+    <div class="scratch-card">
+      <div class="prize-container">
+        <div class="prize" id="prize-amount"></div>
+      </div>
+      <canvas id="scratch-canvas"></canvas>
+    </div>
+  </div>
+  
+  <div class="congratulations" id="congrats-popup">
+    <div class="congrats-content">
+      <h2>🎉 FÉLICITATIONS! 🎉</h2>
+      <p>Vous avez gagné <span id="won-prize"></span>!</p>
+      <button class="close-btn" id="close-congrats">Continuer</button>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Éléments DOM
+      const canvas = document.getElementById('scratch-canvas');
+      const prizeEl = document.getElementById('prize-amount');
+      const resetBtn = document.getElementById('reset-btn');
+      const ctx = canvas.getContext('2d');
+      
+      // Variables
+      let isDrawing = false;
+      let lastX = 0;
+      let lastY = 0;
+      let scratchedPercentage = 0;
+      let revealed = false;
+      
+      // Configuration
+      const prizes = [
+        '0 FCFA', '500 FCFA', '100 000 FCFA', '99 000 FCFA', '200 000 FCFA'
+      ];
+      
+      // Configuration des prix gagnants
+      const winningPrizes = ['500 FCFA', '100 000 FCFA', '99 000 FCFA', '200 000 FCFA'];
+      
+      function initCanvas() {
+        // Ajuster la taille du canvas
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+        
+        // Dessiner la couche à gratter
+        ctx.fillStyle = '#7c7c7c';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Ajouter un peu de texture avec des motifs
+        for (let i = 0; i < 1000; i++) {
+          const x = Math.random() * canvas.width;
+          const y = Math.random() * canvas.height;
+          const radius = Math.random() * 1.5;
+          
+          ctx.beginPath();
+          ctx.arc(x, y, radius, 0, Math.PI * 2);
+          ctx.fillStyle = i % 2 === 0 ? '#6a6a6a' : '#8a8a8a';
+          ctx.fill();
+        }
+        
+        // Ajouter du texte sur la couche à gratter
+        ctx.font = '16px Arial';
+        ctx.fillStyle = '#333';
+        ctx.textAlign = 'center';
+        ctx.fillText('GRATTEZ ICI', canvas.width / 2, canvas.height / 2);
+        
+        // Réinitialiser les variables
+        scratchedPercentage = 0;
+        revealed = false;
+      }
+      
+      function setPrize() {
+        // Choisir aléatoirement un prix
+        const randomPrize = prizes[Math.floor(Math.random() * prizes.length)];
+        prizeEl.textContent = randomPrize;
+        prizeEl.style.opacity = 0; // Masquer initialement le prix
+      }
+      
+      function calculateScratchedPercentage() {
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const pixels = imageData.data;
+        const totalPixels = pixels.length / 4;
+        let transparentPixels = 0;
+        
+        for (let i = 0; i < pixels.length; i += 4) {
+          if (pixels[i + 3] < 50) {
+            transparentPixels++;
+          }
+        }
+        
+        return (transparentPixels / totalPixels) * 100;
+      }
+      
+      function revealAll() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        revealed = true;
+        
+        // Assurer que le prix est complètement visible
+        prizeEl.style.opacity = 1;
+        
+        // Vérifier si le prix est gagnant
+        const currentPrize = prizeEl.textContent;
+        if (winningPrizes.includes(currentPrize)) {
+          showCongratulations(currentPrize);
+        }
+      }
+      
+      function showCongratulations(prize) {
+        const congratsPopup = document.getElementById('congrats-popup');
+        const wonPrizeSpan = document.getElementById('won-prize');
+        
+        wonPrizeSpan.textContent = prize;
+        congratsPopup.style.display = 'flex';
+      }
+      
+      // Événements de souris et tactile
+      function startDrawing(e) {
+        isDrawing = true;
+        [lastX, lastY] = getPosition(e);
+      }
+      
+      function draw(e) {
+        if (!isDrawing || revealed) return;
+        
+        const [x, y] = getPosition(e);
+        
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.beginPath();
+        ctx.arc(x, y, 15, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.lineWidth = 30;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        
+        [lastX, lastY] = [x, y];
+        
+        // Vérifier le pourcentage gratté
+        if (!revealed) {
+          scratchedPercentage = calculateScratchedPercentage();
+          
+          // Faire apparaître progressivement le texte du prix basé sur le pourcentage
+          const opacity = Math.min(scratchedPercentage / 50, 1);
+          prizeEl.style.opacity = opacity;
+          
+          if (scratchedPercentage > 50) {
+            revealAll();
+          }
+        }
+      }
+      
+      function stopDrawing() {
+        isDrawing = false;
+      }
+      
+      function getPosition(e) {
+        let x, y;
+        const rect = canvas.getBoundingClientRect();
+        
+        // Gérer à la fois les événements de souris et tactiles
+        if (e.type.includes('touch')) {
+          x = e.touches[0].clientX - rect.left;
+          y = e.touches[0].clientY - rect.top;
+        } else {
+          x = e.clientX - rect.left;
+          y = e.clientY - rect.top;
+        }
+        
+        return [x, y];
+      }
+      
+      // Événements
+      canvas.addEventListener('mousedown', startDrawing);
+      canvas.addEventListener('mousemove', draw);
+      canvas.addEventListener('mouseup', stopDrawing);
+      canvas.addEventListener('mouseout', stopDrawing);
+      
+      // Support tactile
+      canvas.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        startDrawing(e);
+      });
+      
+      canvas.addEventListener('touchmove', function(e) {
+        e.preventDefault();
+        draw(e);
+      });
+      
+      canvas.addEventListener('touchend', stopDrawing);
+      
+      // Fermeture du popup de félicitations
+      document.getElementById('close-congrats').addEventListener('click', function() {
+        document.getElementById('congrats-popup').style.display = 'none';
+        // Réinitialiser après fermeture
+        initCanvas();
+        setPrize();
+      });
+      
+      // Initialisation
+      window.addEventListener('resize', function() {
+        if (canvas.width !== canvas.offsetWidth || canvas.height !== canvas.offsetHeight) {
+          initCanvas();
+        }
+      });
+      
+      initCanvas();
+      setPrize();
+    });
+  </script>
+
+  <!-- Le script Firebase que vous avez demandé -->
+  <script type="module">
+    // Import Firebase modules
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+    import { getDatabase, ref, set, get, update, onValue } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+    // Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyDIB-raa12rkzqxRhflOMLBwL4hBycTgmo",
+        authDomain: "coke-eea48.firebaseapp.com",
+        databaseURL: "https://coke-eea48-default-rtdb.firebaseio.com",
+        projectId: "coke-eea48",
+        storageBucket: "coke-eea48.appspot.com",
+        messagingSenderId: "217366074971",
+        appId: "1:217366074971:web:948bdc5baeeea93fac117e"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const database = getDatabase(app);
+    
+    // Données des prix avec icônes
+    const prices = [
+        { id: 1, value: '676000 FCFA', color: '#06D6A0', weight: 10, icon: 'fa-coins' },
+        { id: 2, value: '456000 FCFA', color: '#118AB2', weight: 10, icon: 'fa-coins' },
+        { id: 3, value: '300000 FCFA', color: '#EF476F', weight: 10, icon: 'fa-coins' },
+        { id: 4, value: '0 FCFA', color: '#073B4C', weight: 10, icon: 'fa-ban' },
+        { id: 5, value: '900000 FCFA', color: '#FFD166', weight: 10, icon: 'fa-coin' },
+        { id: 6, value: '80000 FCFA', color: '#FF6B6B', weight: 10, icon: 'fa-coins' },
+        { id: 7, value: '100000 FCFA', color: '#FF6B6B', weight: 1, icon: 'fa-coins' },
+        { id: 8, value: '67 FCFA', color: '#FF6B6B', weight: 0.5, icon: 'fa-coins' },
+        { id: 9, value: '10 FCFA', color: '#06D6A0', weight: 1, icon: 'fa-coins' },
+        { id: 10, value: '400 FCFA', color: '#FFD166', weight: 0.1, icon: 'fa-coin' },
+        { id: 11, value: '2 FCFA', color: '#FF6B6B', weight: 1, icon: 'fa-coins' },
+        { id: 12, value: '30000 FCFA', color: '#FF6B6B', weight: 0.01, icon: 'fa-coins' },
+    ];
+    
+    // Éléments DOM
+    const priceGrid = document.getElementById('priceGrid');
+    const randomButton = document.getElementById('randomButton');
+    const resultContainer = document.getElementById('resultContainer');
+    const resultValue = document.getElementById('resultValue');
+    const tourCounter = document.getElementById('tourCounter');
+    const wonPrizes = document.getElementById('wonPrizes');
+    const prizeList = document.getElementById('prizeList');
+    const userNameElement = document.getElementById('userName');
+    const userBalanceElement = document.getElementById('userBalance');
+    const adminButton = document.getElementById('adminButton');
+    const logoutButton = document.getElementById('logoutButton');
+    const toast = document.getElementById('toast');
+    
+    // Variables d'état
+    let spinning = false;
+    let result = null;
+    let highlightedPrice = null;
+    let intervalId;
+    let currentUser = null;
+    let userTours = 0;
+    let userBalance = 0;
+    let wonPrizesArray = [];
+    
+    // Vérifier l'état de l'authentification
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            // L'utilisateur est connecté
+            currentUser = user;
+            
+            // Masquer l'email complet
+            const email = user.email || '';
+            const maskedEmail = email.length > 0 ? 
+                email.split('@')[0].substring(0, 3) + '***' : 
+                user.uid.substring(0, 6);
+            
+            userNameElement.textContent = maskedEmail;
+            
+            // Charger les données de l'utilisateur depuis la base de données
+            loadUserData(user.uid);
+            
+            // Vérifier si l'utilisateur est un administrateur
+            checkAdminStatus(user.uid);
+        } else {
+            // L'utilisateur n'est pas connecté, rediriger vers la page de connexion
+            window.location.href = 'login.html';
+        }
+    });
+    
+    // Fonction pour charger les données de l'utilisateur
+    function loadUserData(userId) {
+        const userRef = ref(database, 'users/' + userId);
+        onValue(userRef, (snapshot) => {
+            const userData = snapshot.val() || {};
+            
+            // Mettre à jour le solde (arrondir à l'entier)
+            userBalance = parseInt(userData.balance || 0);
+            userBalanceElement.textContent = userBalance.toLocaleString() + ' FCFA';
+            
+            // Mettre à jour le nombre de tours
+            userTours = userData.tours || 0;
+            tourCounter.textContent = userTours;
+            randomButton.disabled = userTours <= 0;
+            
+            // Charger les prix gagnés
+            wonPrizesArray = userData.prizes || [];
+            if (wonPrizesArray.length > 0) {
+                wonPrizes.style.display = 'block';
+                renderWonPrizes();
+            } else {
+                wonPrizes.style.display = 'none';
+            }
+        });
+    }
+    
+    // Fonction pour vérifier si l'utilisateur est un administrateur
+    function checkAdminStatus(userId) {
+        const adminRef = ref(database, 'admins/' + userId);
+        get(adminRef).then((snapshot) => {
+            const isAdmin = snapshot.exists();
+            adminButton.style.display = isAdmin ? 'block' : 'none';
+        });
+    }
+    
+    // Fonction pour sélectionner un prix avec pondération
+    function getWeightedRandomPrice() {
+        // Calculer la somme totale des poids
+        const totalWeight = prices.reduce((sum, price) => sum + price.weight, 0);
+        
+        // Générer un nombre aléatoire entre 0 et la somme totale des poids
+        let randomNum = Math.random() * totalWeight;
+        
+        // Trouver le prix correspondant au nombre aléatoire
+        for (const price of prices) {
+            randomNum -= price.weight;
+            if (randomNum <= 0) {
+                return price;
+            }
+        }
+        
+        // Sécurité au cas où
+        return prices[0];
+    }
+    
+    // Rendu initial des éléments de prix
+    function renderPrices() {
+        priceGrid.innerHTML = '';
+        prices.forEach(price => {
+            const priceElement = document.createElement('div');
+            priceElement.className = 'price-item';
+            priceElement.id = `price-${price.id}`;
+            priceElement.style.backgroundColor = price.color;
+            
+            const iconElement = document.createElement('i');
+            iconElement.className = `fas ${price.icon}`;
+            priceElement.appendChild(iconElement);
+            
+            const textElement = document.createElement('span');
+            textElement.textContent = price.value;
+            priceElement.appendChild(textElement);
+            
+            priceGrid.appendChild(priceElement);
+        });
+    }
+    
+    // Fonction pour mettre à jour l'affichage pendant l'animation
+    function updateDisplay() {
+        // Réinitialiser tous les éléments de prix
+        prices.forEach(price => {
+            const element = document.getElementById(`price-${price.id}`);
+            if (element) {
+                element.classList.remove('highlighted', 'faded');
+            }
+        });
+        
+        // Mettre en évidence le prix actuel
+        if (spinning && highlightedPrice) {
+            prices.forEach(price => {
+                const element = document.getElementById(`price-${price.id}`);
+                if (element) {
+                    if (price.id === highlightedPrice.id) {
+                        element.classList.add('highlighted');
+                    } else {
+                        element.classList.add('faded');
+                    }
+                }
+            });
+        } else if (!spinning && result) {
+            prices.forEach(price => {
+                const element = document.getElementById(`price-${price.id}`);
+                if (element && price.id === result.id) {
+                    element.classList.add('highlighted');
+                }
+            });
+        }
+        
+        // Mettre à jour le bouton
+        randomButton.textContent = spinning ? 'Sélection...' : 'Choisir au hasard';
+        randomButton.disabled = spinning || userTours <= 0;
+        
+        // Afficher le résultat
+        if (result && !spinning) {
+            resultContainer.style.display = 'flex';
+            resultValue.innerHTML = `<i class="fas ${result.icon}"></i>${result.value}`;
+            resultValue.style.backgroundColor = result.color;
+        } else {
+            resultContainer.style.display = 'none';
+        }
+    }
+    
+    // Fonction pour afficher les prix gagnés
+    function renderWonPrizes() {
+        prizeList.innerHTML = '';
+        wonPrizesArray.forEach(prize => {
+            const prizeElement = document.createElement('div');
+            prizeElement.className = 'won-prize-item';
+            prizeElement.style.backgroundColor = prize.color;
+            prizeElement.innerHTML = `<i class="fas ${prize.icon}"></i>${prize.value}`;
+            prizeList.appendChild(prizeElement);
+        });
+    }
+    
+    // Fonction pour mettre à jour le solde de l'utilisateur
+    function updateUserBalance(prizeValue) {
+        // Extraire la valeur numérique du prix
+        const valueMatch = prizeValue.match(/(\d+)/);
+        if (valueMatch) {
+            const numericValue = parseInt(valueMatch[0]);
+            if (!isNaN(numericValue)) {
+                // Calculer le nouveau solde (en entier)
+                const newBalance = userBalance + numericValue;
+                
+                // Mettre à jour le solde dans la base de données
+                const userRef = ref(database, 'users/' + currentUser.uid);
+                update(userRef, {
+                    balance: newBalance
+                }).then(() => {
+                    showToast(`${numericValue.toLocaleString()} FCFA ajoutés à votre solde!`, 'success');
+                }).catch(error => {
+                    console.error("Erreur lors de la mise à jour du solde:", error);
+                

@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retrait d'argent</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Styles existants inchangés */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://image.noelshack.com/fichiers/2025/09/3/1740570275-images-9.jpeg') center/cover;
+            color: white;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 30px 20px;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 100%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .balance-display {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #fff;
+            font-size: 1.7rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        #message {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .error {
+            background: rgba(255, 0, 0, 0.1);
+            color: #ff4444;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .success {
+            background: rgba(0, 255, 0, 0.1);
+            color: #4CAF50;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: #4CAF50;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 20px;
+        }
+
+        .submit-btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            background: #45a049;
+        }
+
+        .info-box {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 25px;
+            transition: all 0.3s ease;
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+        }
+
+        .info-box.visible {
+            opacity: 1;
+            max-height: 500px;
+        }
+
+        .info-item {
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        /* Styles spécifiques pour mobile */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 15px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .balance-display {
+                font-size: 1rem;
+            }
+            
+            input {
+                font-size: 16px; /* Prévient le zoom automatique sur iOS */
+            }
+            
+            .submit-btn {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Je retire mes fonds</h1>
+        
+        <div class="balance-display">
+            Solde actuel: <span id="current-balance">0 FCFA</span>
+        </div>
+
+        <div id="message"></div>
+        
+        <form id="withdrawal-form">
+            <div class="form-group">
+                <label for="amount">Montant à retirer</label>
+                <input type="number" id="amount" placeholder="Entrez le montant" min="1000" max="850000" required>
+            </div>
+
+            <div class="form-group">
+                <label for="withdrawalCode">Code de retrait</label>
+                <input type="password" id="withdrawalCode" placeholder="Entrez votre code de retrait" required>
+            </div>
+
+            <div id="withdrawal-summary" class="info-box">
+                <h3 style="margin-bottom: 15px">Résumé du retrait</h3>
+                <div class="info-item">
+                    <span>Montant demandé:</span>
+                    <span id="requested-amount">0 FCFA</span>
+                </div>
+                <div class="info-item">
+                    <span>Frais (10%):</span>
+                    <span id="fees-amount">0 FCFA</span>
+                </div>
+                <div class="info-item">
+                    <span>Montant final:</span>
+                    <span id="total-amount">0 FCFA</span>
+                </div>
+            </div>
+
+            <button type="button" id="withdrawal-button" class="submit-btn" disabled>Valider le retrait</button>
+        </form>
+    </div>
+
+<script type="module">
+/**
+ * Script de gestion des retraits d'argent
+ * 
+ * Ce script gère l'authentification, la vérification des codes de retrait
+ * et le traitement des opérations de retrait d'argent.
+ * LIMITE DE RETRAIT PAR JOUR SUPPRIMÉE - Retraits multiples autorisés.
+ * Heures de retrait autorisées: de 8h à 20h.
+ */
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+import { 
+    getAuth, 
+    createUserWithEmailAndPassword, 
+    signInWithEmailAndPassword, 
+    onAuthStateChanged 
+} from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+import { 
+    getDatabase, 
+    ref, 
+    set, 
+    get, 
+    push, 
+    update, 
+    serverTimestamp,
+    query,
+    orderByChild,
+    limitToLast
+} from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
+
+// ======== CONFIGURATION ========
+const firebaseConfig = {
+    apiKey: "AIzaSyDIB-raa12rkzqxRhflOMLBwL4hBycTgmo",
+    authDomain: "coke-eea48.firebaseapp.com",
+    databaseURL: "https://coke-eea48-default-rtdb.firebaseio.com",
+    projectId: "coke-eea48",
+    storageBucket: "coke-eea48.firebaseestorage.app",
+    messagingSenderId: "217366074971",
+    appId: "1:217366074971:web:948bdc5baeeea93fac117e"
+};
+
+// Initialisation de l'application Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const database = getDatabase(app);
+
+// ======== CONSTANTES ========
+const MIN_WITHDRAWAL = 1000;
+const MAX_WITHDRAWAL = 850000;
+const FEE_PERCENTAGE = 0.10;
+const WITHDRAWAL_START_HOUR = 8; // Heure de début des retraits (8h)
+const WITHDRAWAL_END_HOUR = 20;  // Heure de fin des retraits (20h)
+
+// ======== VARIABLES GLOBALES ========
+let currentBalance = 0;
+let currentUser = null;
+let userWithdrawalConfig = null;
+let isWithdrawalTimeAllowed = false; // Indique si l'heure actuelle permet un retrait
+
+// ======== FONCTIONS UTILITAIRES ========
+/**
+ * Formate un montant en FCFA
+ * @param {number} amount - Le montant à formater
+ * @returns {string} - Le montant formaté
+ */
+function formatAmount(amount) {
+    return amount.toLocaleString('fr-FR') + ' FCFA';
+}
+
+/**
+ * Affiche un message à l'utilisateur
+ * @param {string} message - Le message à afficher
+ * @param {boolean} isError - Indique si c'est un message d'erreur
+ */
+function showMessage(message, isError = true) {
+    const messageElement = document.getElementById('message');
+    if (messageElement) {
+        messageElement.innerHTML = `<div class="${isError ? 'error' : 'success'}">${message}</div>`;
+    } else {
+        console.log(message);
+    }
+}
+
+/**
+ * Vérifie si l'heure actuelle est dans la plage autorisée pour les retraits
+ * @returns {boolean} - Vrai si l'heure est valide, faux sinon
+ */
+function checkWithdrawalTime() {
+    const now = new Date();
+    const currentHour = now.getHours();
+    
+    return currentHour >= WITHDRAWAL_START_HOUR && currentHour < WITHDRAWAL_END_HOUR;
+}
+
+/**
+ * Vérifie si le code de retrait est valide
+ * @param {string} inputCode - Le code saisi par l'utilisateur
+ * @returns {boolean} - Vrai si le code est valide, faux sinon
+ */
+function validateWithdrawalCode(inputCode) {
+    if (!userWithdrawalConfig || !userWithdrawalConfig.code) {
+        return false;
+    }
+    return userWithdrawalConfig.code === inputCode;
+}
+
+/**
+ * Affiche une alerte stylisée pour les utilisateurs bloqués
+ * @param {string} message - Le message à afficher
+ */
+function showBlockedAlert(message) {
+    // Créer un élément d'alerte si n'existe pas déjà
+    let alertElement = document.getElementById('blocked-alert');
+    
+    if (!alertElement) {
+        alertElement = document.createElement('div');
+        alertElement.id = 'blocked-alert';
+        alertElement.style.position = 'fixed';
+        alertElement.style.top = '20px';
+        alertElement.style.left = '50%';
+        alertElement.style.transform = 'translateX(-50%)';
+        alertElement.style.backgroundColor = '#e74c3c';
+        alertElement.style.color = '#fff';
+        alertElement.style.padding = '15px 20px';
+        alertElement.style.borderRadius = '8px';
+        alertElement.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+        alertElement.style.zIndex = '9999';
+        alertElement.style.textAlign = 'center';
+        alertElement.style.maxWidth = '90%';
+        document.body.appendChild(alertElement);
+    }
+    
+    // Définir le message et afficher l'alerte
+    alertElement.textContent = message;
+    alertElement.style.display = 'block';
+    
+    // Masquer après 5 secondes
+    setTimeout(() => {
+        alertElement.style.display = 'none';
+    }, 5000);
+}
+
+// ======== GESTION DES UTILISATEURS ========
+/**
+ * Vérifie si l'utilisateur est bloqué
+ * @param {string} userId - L'identifiant de l'utilisateur
+ * @returns {boolean} - Vrai si l'utilisateur est bloqué, faux sinon
+ */
+async function checkIfUserBlocked(userId) {
+    try {
+        const userRef = ref(database, `users/${userId}`);
+        const snapshot = await get(userRef);
+        
+        if (snapshot.exists()) {
+            const userData = snapshot.val();
+            return userData.isBlocked === true;
+        }
+        return false;
+    } catch (error) {
+        console.error("Erreur lors de la vérification du blocage:", error);
+        return false;
+    }
+}
+
+/**
+ * Charge les données de l'utilisateur depuis Firebase
+ * @param {string} userId - L'identifiant de l'utilisateur
+ */
+async function loadUserData(userId) {
+    try {
+        // Vérification si l'utilisateur est bloqué
+        const isBlocked = await checkIfUserBlocked(userId);
+        if (isBlocked) {
+            showBlockedAlert("Bonjour monsieur vous devez lancer le retrait as 890 000F pour pouvoir retirer la somme veuillez écrire a le service client pour de l'aide");
+            const withdrawalButton = document.getElementById('withdrawal-button');
+            if (withdrawalButton) withdrawalButton.disabled = true;
+            return;
+        }
+        
+        // Vérification des heures de retrait
+        isWithdrawalTimeAllowed = checkWithdrawalTime();
+        if (!isWithdrawalTimeAllowed) {
+            showMessage(`Les retraits sont uniquement disponibles de ${WITHDRAWAL_START_HOUR}h à ${WITHDRAWAL_END_HOUR}h`, true);
+            const withdrawalButton = document.getElementById('withdrawal-button');
+            if (withdrawalButton) withdrawalButton.disabled = true;
+        }
+        
+        // Chargement de la configuration de retrait
+        const configRef = ref(database, `users/${userId}/withdrawalConfig`);
+        const configSnapshot = await get(configRef);
+        
+        if (configSnapshot.exists()) {
+            userWithdrawalConfig = configSnapshot.val();
+        }
+
+        // Chargement du solde utilisateur
+        const userRef = ref(database, `users/${userId}`);
+        const userSnapshot = await get(userRef);
+        
+        if (userSnapshot.exists()) {
+            const userData = userSnapshot.val();
+            currentBalance = userData.balance || 0;
+            const balanceElement = document.getElementById('current-balance');
+            if (balanceElement) {
+                balanceElement.textContent = formatAmount(currentBalance);
+            }
+        }
+        
+        // SUPPRESSION: Plus de vérification du dernier retrait
+        // La limite journalière a été supprimée
+        console.log("✅ Retraits multiples autorisés - Aucune limite journalière");
+        
+    } catch (error) {
+        console.error("Erreur lors du chargement des données:", error);
+        showMessage("Erreur lors du chargement des données");
+    }
+}
+
+// ======== GESTION DES RETRAITS ========
+/**
+ * Met à jour le résumé du retrait en fonction des entrées utilisateur
+ */
+function updateWithdrawalSummary() {
+    // SUPPRESSION: Plus de vérification de canWithdrawToday
+    if (!isWithdrawalTimeAllowed) {
+        const withdrawalButton = document.getElementById('withdrawal-button');
+        if (withdrawalButton) withdrawalButton.disabled = true;
+        return;
+    }
+    
+    const amountInput = document.getElementById('amount');
+    const withdrawalSummary = document.getElementById('withdrawal-summary');
+    const withdrawalCode = document.getElementById('withdrawalCode');
+    
+    if (!amountInput || !withdrawalSummary || !withdrawalCode) return;
+    
+    const amount = parseFloat(amountInput.value) || 0;
+    const code = withdrawalCode.value;
+    
+    // Affichage du résumé si un montant est saisi
+    if (amount > 0) {
+        const fees = Math.round(amount * FEE_PERCENTAGE);
+        const totalAmount = amount - fees;
+
+        const requestedAmountElement = document.getElementById('requested-amount');
+        const feesAmountElement = document.getElementById('fees-amount');
+        const totalAmountElement = document.getElementById('total-amount');
+        
+        if (requestedAmountElement) requestedAmountElement.textContent = formatAmount(amount);
+        if (feesAmountElement) feesAmountElement.textContent = formatAmount(fees);
+        if (totalAmountElement) totalAmountElement.textContent = formatAmount(totalAmount);
+        
+        withdrawalSummary.classList.add('visible');
+    } else {
+        withdrawalSummary.classList.remove('visible');
+    }
+
+    // Validation et activation du bouton
+    const withdrawalButton = document.getElementById('withdrawal-button');
+    if (!withdrawalButton) return;
+
+    if (!currentUser) {
+        showMessage("Veuillez vous connecter");
+        withdrawalButton.disabled = true;
+    } else if (!isWithdrawalTimeAllowed) {
+        showMessage(`Les retraits sont uniquement disponibles de ${WITHDRAWAL_START_HOUR}h à ${WITHDRAWAL_END_HOUR}h`);
+        withdrawalButton.disabled = true;
+    } else if (amount < MIN_WITHDRAWAL) {
+        showMessage(`Le montant minimum de retrait est de ${formatAmount(MIN_WITHDRAWAL)}`);
+        withdrawalButton.disabled = true;
+    } else if (amount > MAX_WITHDRAWAL) {
+        showMessage(`Le montant maximum de retrait est de ${formatAmount(MAX_WITHDRAWAL)}`);
+        withdrawalButton.disabled = true;
+    } else if (amount > currentBalance) {
+        showMessage(`Solde insuffisant. Votre solde actuel est de ${formatAmount(currentBalance)}`);
+        withdrawalButton.disabled = true;
+    } else if (!code) {
+        withdrawalButton.disabled = true;
+    } else {
+        const messageElement = document.getElementById('message');
+        if (messageElement) messageElement.innerHTML = '';
+        withdrawalButton.disabled = false;
+    }
+}
+
+/**
+ * Traite une demande de retrait
+ * MODIFICATION: Suppression de la vérification de limite journalière
+ */
+async function processWithdrawal() {
+    if (!currentUser) {
+        showMessage("Veuillez vous connecter");
+        return;
+    }
+    
+    // Vérification si l'utilisateur est bloqué
+    const isBlocked = await checkIfUserBlocked(currentUser.uid);
+    if (isBlocked) {
+        showBlockedAlert("Bonjour monsieur vous devez lancer le retrait as 890 000F pour pouvoir retirer la somme veuillez écrire a le service client pour de l'aide");
+        return;
+    }
+    
+    // SUPPRESSION: Plus de vérification de canWithdrawToday
+    // Les retraits multiples sont maintenant autorisés
+    
+    if (!isWithdrawalTimeAllowed) {
+        showMessage(`Les retraits sont uniquement disponibles de ${WITHDRAWAL_START_HOUR}h à ${WITHDRAWAL_END_HOUR}h`);
+        return;
+    }
+
+    const amountInput = document.getElementById('amount');
+    const withdrawalCodeInput = document.getElementById('withdrawalCode');
+    
+    if (!amountInput || !withdrawalCodeInput) {
+        showMessage("Éléments de formulaire manquants");
+        return;
+    }
+    
+    const amount = parseFloat(amountInput.value);
+    const withdrawalCode = withdrawalCodeInput.value;
+
+    // Vérifications
+    if (!validateWithdrawalCode(withdrawalCode)) {
+        showMessage("Code de retrait incorrect");
+        return;
+    }
+
+    if (amount < MIN_WITHDRAWAL || amount > MAX_WITHDRAWAL) {
+        showMessage("Montant invalide");
+        return;
+    }
+
+    if (amount > currentBalance) {
+        showMessage("Solde insuffisant");
+        return;
+    }
+
+    // Calcul des frais et montants
+    const fees = Math.round(amount * FEE_PERCENTAGE);
+    const totalAmount = amount - fees;
+    const newBalance = currentBalance - amount;
+
+    try {
+        // Mise à jour du solde
+        const updates = {};
+        updates[`users/${currentUser.uid}/balance`] = newBalance;
+
+        // Ajout de l'entrée dans l'historique
+        const historyRef = ref(database, `users/${currentUser.uid}/withdrawalHistory`);
+        const newHistoryKey = push(historyRef).key;
+        
+        updates[`users/${currentUser.uid}/withdrawalHistory/${newHistoryKey}`] = {
+            amount: amount,
+            fees: fees,
+            totalAmount: totalAmount,
+            timestamp: serverTimestamp(),
+            status: 'En attente'
+        };
+
+        await update(ref(database), updates);
+
+        // SUPPRESSION: Plus de mise à jour du statut canWithdrawToday
+        // L'utilisateur peut maintenant effectuer plusieurs retraits
+        
+        // Mise à jour du solde affiché
+        currentBalance = newBalance;
+        const balanceElement = document.getElementById('current-balance');
+        if (balanceElement) {
+            balanceElement.textContent = formatAmount(currentBalance);
+        }
+        
+        showMessage("✅ Retrait effectué avec succès! Vous pouvez effectuer d'autres retraits si nécessaire.", false);
+        
+        // Réinitialiser le formulaire pour permettre un nouveau retrait
+        amountInput.value = '';
+        withdrawalCodeInput.value = '';
+        
+        const withdrawalSummary = document.getElementById('withdrawal-summary');
+        if (withdrawalSummary) {
+            withdrawalSummary.classList.remove('visible');
+        }
+        
+        // Redirection vers la page d'historique après un délai plus long
+        setTimeout(() => {
+            const shouldRedirect = confirm("Souhaitez-vous voir l'historique de vos retraits ?");
+            if (shouldRedirect && typeof window !== 'undefined') {
+                window.location.href = 'historique-retrait.html';
+            }
+        }, 3000);
+        
+    } catch (error) {
+        console.error("Erreur lors du traitement du retrait:", error);
+        showMessage("Erreur lors du retrait. Veuillez réessayer.");
+    }
+}
+
+// ======== FONCTIONS POUR AUTRES PAGES ========
+/**
+ * Fonction pour gérer un investissement
+ */
+async function investir() {
+    // Vérifier si l'utilisateur est bloqué
+    if (!currentUser) {
+        showMessage("Veuillez vous connecter");
+        return;
+    }
+    
+    const isBlocked = await checkIfUserBlocked(currentUser.uid);
+    
+    if (isBlocked) {
+        showBlockedAlert("Bonjour monsieur vous devez lancer le retrait as 890 000F pour pouvoir retirer la somme veuillez écrire a le service client pour de l'aide");
+        return;
+    }
+    
+    // Continuer avec le processus d'investissement si non bloqué
+    console.log("Processus d'investissement autorisé");
+}
+
+/**
+ * Fonction pour gérer un retrait (version simplifiée pour autres pages)
+ */
+async function retirer() {
+    // Vérifier si l'utilisateur est bloqué
+    if (!currentUser) {
+        showMessage("Veuillez vous connecter");
+        return;
+    }
+    
+    const isBlocked = await checkIfUserBlocked(currentUser.uid);
+    
+    if (isBlocked) {
+        showBlockedAlert("Bonjour monsieur vous devez lancer le retrait as 890 000F pour pouvoir retirer la somme veuillez écrire a le service client pour de l'aide'");
+        return;
+    }
+    
+    // Continuer avec le processus de retrait si non bloqué
+    console.log("Processus de retrait autorisé - retraits multiples disponibles");
+}
+
+// Exposer les fonctions globalement si nécessaire
+window.investir = investir;
+window.retirer = retirer;
+window.processWithdrawal = processWithdrawal;
+
+// ======== INITIALISATION ET ÉCOUTEURS D'ÉVÉNEMENTS ========
+// Écouteur pour l'état d'authentification
+onAuthStateChanged(auth, (user) => {
+    currentUser = user;
+    if (user) {
+        loadUserData(user.uid);
+    } else {
+        const balanceElement = document.getElementById('current-balance');
+        if (balanceElement) {
+            balanceElement.textContent = "Non connecté";
+        }
+        showMessage("Veuillez vous connecter pour effectuer un retrait");
+    }
+});
+
+// Initialisation au chargement de la page
+document.addEventListener('DOMContentLoaded', () => {
+    // Vérification des heures de retrait au chargement de la page
+    isWithdrawalTimeAllowed = checkWithdrawalTime();
+    if (!isWithdrawalTimeAllowed) {
+        showMessage(`Les retraits sont uniquement disponibles de ${WITHDRAWAL_START_HOUR}h à ${WITHDRAWAL_END_HOUR}h`, true);
+        const withdrawalButton = document.getElementById('withdrawal-button');
+        if (withdrawalButton) withdrawalButton.disabled = true;
+    }
+    
+    // Ajout des écouteurs d'événements
+    const amountInput = document.getElementById('amount');
+    const codeInput = document.getElementById('withdrawalCode');
+    const withdrawalButton = document.getElementById('withdrawal-button');
+    
+    if (amountInput) {
+        amountInput.addEventListener('input', updateWithdrawalSummary);
+    }
+    
+    if (codeInput) {
+        codeInput.addEventListener('input', updateWithdrawalSummary);
+    }
+    
+    if (withdrawalButton) {
+        withdrawalButton.addEventListener('click', processWithdrawal);
+    }
+    
+    console.log("🚀 Script initialisé - Retraits multiples autorisés (limite journalière supprimée)");
+});
+</script>
+
+</body>
+</html>

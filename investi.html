@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Niveaux d'Investissement VIP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+        import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyDIB-raa12rkzqxRhflOMLBwL4hBycTgmo",
+            authDomain: "coke-eea48.firebaseapp.com",
+            databaseURL: "https://coke-eea48-default-rtdb.firebaseio.com",
+            projectId: "coke-eea48",
+            storageBucket: "coke-eea48.firebasestorage.app",
+            messagingSenderId: "217366074971",
+            appId: "1:217366074971:web:948bdc5baeeea93fac117e"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+        
+        // Add event listeners to investment buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            const investButtons = document.querySelectorAll('.invest-button:not(.locked)');
+            investButtons.forEach((button) => {
+                button.addEventListener('click', function() {
+                    const card = this.closest('.investment-card');
+                    const level = card.getAttribute('data-level');
+                    const investment = parseFloat(card.getAttribute('data-investment'));
+                    const dailyReturn = parseFloat(card.getAttribute('data-daily'));
+                    const monthlyReturn = parseFloat(card.getAttribute('data-monthly'));
+                    const annualReturn = parseFloat(card.getAttribute('data-annual'));
+                    const hourlyReturn = parseFloat(card.getAttribute('data-hourly'));
+                    
+                    // Récupérer le cycle d'investissement (en jours)
+                    const cycle = parseFloat(card.getAttribute('data-cycle') || 30); // Par défaut à 30 jours si non spécifié
+                    
+                    const user = auth.currentUser;
+                    
+                    if(user) {
+                        const userId = user.uid;
+                        
+                        // Get user balance from database
+                        const userRef = ref(database, 'users/' + userId);
+                        
+                        // Use get() to fetch the user data once
+                        get(userRef).then((snapshot) => {
+                            if (snapshot.exists()) {
+                                const userData = snapshot.val();
+                                const userBalance = userData.balance || 0;
+                                
+                                if (userBalance >= investment) {
+                                    // User has sufficient balance
+                                    const newBalance = userBalance - investment;
+                                    
+                                    // Update user balance
+                                    set(ref(database, 'users/' + userId + '/balance'), newBalance);
+                                    
+                                    // Calculer le revenu total basé sur le cycle et le revenu journalier
+                                    const totalReturn = dailyReturn * cycle;
+                                    
+                                    // Record the investment
+                                    const levelData = {
+                                        level: level,
+                                        investment: investment,
+                                        hourlyReturn: hourlyReturn,
+                                        dailyReturn: dailyReturn,
+                                        monthlyReturn: monthlyReturn,
+                                        annualReturn: annualReturn,
+                                        cycle: cycle,
+                                        totalReturn: totalReturn,
+                                        timestamp: Date.now(),
+                                        status: 'active',
+                                        endDate: Date.now() + (cycle * 24 * 60 * 60 * 1000) // Date de fin basée sur le cycle en jours
+                                    };
+                                    
+                                    set(ref(database, 'investments/' + userId + '/' + level), levelData)
+                                        .then(() => {
+                                            // Afficher une notification élégante au lieu d'une alerte
+                                            showNotification(`Investissement ${level} enregistré avec succès! Nouveau solde: ${newBalance} FCFA. Cycle: ${cycle} jours.`, 'success');
+                                        })
+                                        .catch((error) => {
+                                            showNotification(`Erreur: ${error.message}`, 'error');
+                                        });
+                                } else {
+                                    // Insufficient balance
+                                    showNotification(`Solde insuffisant. Vous avez ${userBalance} FCFA mais l'investissement nécessite ${investment} FCFA.`, 'error');
+                                }
+                            } else {
+                                showNotification("Données utilisateur non trouvées. Veuillez contacter l'administrateur.", 'error');
+                            }
+                        }).catch((error) => {
+                            showNotification(`Erreur lors de la vérification du solde: ${error.message}`, 'error');
+                        });
+                    } else {
+                        showNotification("Veuillez vous connecter pour investir.", 'warning');
+                    }
+                });
+            });
+
+            // Animation des cartes au chargement
+            const cards = document.querySelectorAll('.investment-card');
+            setTimeout(() => {
+                cards.forEach((card, index) => {
+                    setTimeout(() => {
+                        card.classList.add('card-visible');
+                    }, index * 150);
+                });
+            }, 300);
+        });
+
+        // Fonction pour afficher une notification élégante
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            
+            let icon = '';
+            if (type === 'success') icon = '<i class="fas fa-check-circle"></i>';
+            else if (type === 'error') icon = '<i class="fas fa-exclamation-circle"></i>';
+            else if (type === 'warning') icon = '<i class="fas fa-exclamation-triangle"></i>';
+            else icon = '<i class="fas fa-info-circle"></i>';
+            
+            notification.innerHTML = `${icon} <span>${message}</span>`;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }, 4000);
+        }
+    </script>
+    <style>
+        :root {
+            --primary-color: #3a7bd5;
+            --secondary-color: #00d2ff;
+            --accent-color: #ff4d4d;
+            --text-dark: #2d3748;
+            --text-light: #a0aec0;
+            --white: #ffffff;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --card-hover-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            --gradient-primary: linear-gradient(135deg, #3a7bd5, #00d2ff);
+            --gradient-accent: linear-gradient(135deg, #ff4d4d, #ff9b4d);
+            --gradient-gold: linear-gradient(135deg, #FFD700, #FFA500);
+            --gradient-platinum: linear-gradient(135deg, #C0C0C0, #E5E4E2);
+            --gradient-diamond: linear-gradient(135deg, #b9d3ee, #8aa7cf);
+            --gradient-elite: linear-gradient(135deg, #8E2DE2, #4A00E0);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background: #f8fafc;
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Background avec motif */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 25px 25px, rgba(0, 0, 0, 0.05) 2%, transparent 2%),
+                radial-gradient(circle at 75px 75px, rgba(0, 0, 0, 0.05) 2%, transparent 2%);
+            background-size: 100px 100px;
+            opacity: 0.5;
+            z-index: -1;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 40px;
+            background: var(--gradient-primary);
+            color: white;
+            position: relative;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin: 0;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+            position: relative;
+            display: inline-block;
+        }
+
+        header h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: var(--white);
+            border-radius: 2px;
+        }
+
+        .investment-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 40px;
+            padding: 20px;
+            max-width: 1300px;
+            margin: 0 auto 50px;
+            perspective: 1000px;
+        }
+
+        .investment-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            padding: 40px 30px;
+            width: 300px;
+            transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(30px);
+            z-index: 1;
+        }
+
+        .card-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .investment-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            box-shadow: var(--card-hover-shadow);
+            z-index: 2;
+        }
+
+        /* Gradient de fond pour chaque niveau */
+        .investment-card[data-level="VIP1"]::before {
+            background: var(--gradient-primary);
+        }
+
+        .investment-card[data-level="VIP2"]::before {
+            background: var(--gradient-gold);
+        }
+
+        .investment-card[data-level="VIP3"]::before {
+            background: var(--gradient-platinum);
+        }
+
+        .investment-card[data-level="VIP4"]::before {
+            background: var(--gradient-diamond);
+        }
+
+        .investment-card:nth-of-type(5)::before,
+        .investment-card:nth-of-type(6)::before {
+            background: var(--gradient-elite);
+        }
+
+        .investment-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+        }
+
+        /* Badge VIP */
+        .level {
+            font-size: 2.4em;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f1f3f5;
+            text-align: center;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .level::before {
+            content: '';
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            margin-right: 10px;
+        }
+
+        .investment-card[data-level="VIP1"] .level::before {
+            content: '\f005';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: #3a7bd5;
+        }
+
+        .investment-card[data-level="VIP2"] .level::before {
+            content: '\f521';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: #FFD700;
+        }
+
+        .investment-card[data-level="VIP3"] .level::before {
+            content: '\f559';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: #C0C0C0;
+        }
+
+        .investment-card[data-level="VIP4"] .level::before {
+            content: '\f3a5';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: #b9d3ee;
+        }
+
+        .detail {
+            margin: 18px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .detail::before {
+            position: absolute;
+            left: 0;
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: var(--primary-color);
+            font-size: 1.1em;
+        }
+
+        .detail:nth-of-type(1)::before {
+            content: '\f0d6'; /* Icône d'investissement */
+        }
+
+        .detail:nth-of-type(2)::before {
+            content: '\f017'; /* Icône d'horloge pour les cycles */
+        }
+
+        .detail:nth-of-type(3)::before {
+            content: '\f0e7'; /* Icône de revenu/rendement */
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: var(--text-light);
+            font-size: 0.95em;
+        }
+
+        .detail-value {
+            color: var(--text-dark);
+            font-weight: 700;
+            font-size: 1.05em;
+        }
+
+        .total {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #f1f3f5;
+            font-weight: 700;
+            font-size: 1.3em;
+            color: var(--text-dark);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .total::before {
+            content: '\f51e'; /* Icône de profit */
+            position: absolute;
+            left: 0;
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: var(--accent-color);
+        }
+
+        .total .detail-value {
+            color: var(--accent-color);
+            font-size: 1.2em;
+            font-weight: 800;
+        }
+
+        .invest-button {
+            display: flex;
+            width: 100%;
+            padding: 18px 0;
+            margin-top: 35px;
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(58, 123, 213, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .invest-button::before {
+            content: '\f53d'; /* Icône de flèche vers le haut */
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            margin-right: 10px;
+            font-size: 1.1em;
+        }
+
+        .invest-button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .invest-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(58, 123, 213, 0.4);
+        }
+
+        .invest-button:hover::after {
+            width: 300px;
+            height: 300px;
+        }
+
+        .invest-button:active {
+            transform: translateY(0);
+        }
+
+        .locked {
+            background: linear-gradient(135deg, #d1d1d1, #9e9e9e) !important;
+            cursor: not-allowed !important;
+            box-shadow: none !important;
+        }
+
+        .locked::before {
+            content: '\f023'; /* Icône de cadenas */
+        }
+
+        .locked:hover {
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .locked-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            border-radius: 16px;
+            backdrop-filter: blur(2px);
+        }
+
+        .lock-icon {
+            font-size: 50px;
+            color: #868e96;
+            position: absolute;
+            opacity: 0.2;
+            right: 20px;
+            top: 20px;
+        }
+
+        .coming-soon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-15deg);
+            background-color: var(--accent-color);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            z-index: 11;
+            box-shadow: 0 5px 15px rgba(255, 77, 77, 0.3);
+            font-size: 1.2em;
+            text-transform: uppercase;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: auto;
+            padding: 30px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.95em;
+            background: var(--gradient-primary);
+            position: relative;
+        }
+
+        footer p {
+            margin: 0;
+            font-weight: 500;
+        }
+
+        /* Indicateurs de performances */
+        .performance-indicator {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 0.8em;
+            padding: 5px 10px;
+            border-radius: 20px;
+            color: white;
+            font-weight: 700;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .investment-card[data-level="VIP1"] .performance-indicator {
+            background: var(--gradient-primary);
+        }
+
+        .investment-card[data-level="VIP2"] .performance-indicator {
+            background: var(--gradient-gold);
+        }
+
+        .investment-card[data-level="VIP3"] .performance-indicator {
+            background: var(--gradient-platinum);
+        }
+
+        .investment-card[data-level="VIP4"] .performance-indicator {
+            background: var(--gradient-diamond);
+        }
+
+        /* Notification system */
+        .notification {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: white;
+            color: var(--text-dark);
+            border-radius: 10px;
+            padding: 16px 25px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            max-width: 350px;
+        }
+
+        .notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .notification i {
+            font-size: 1.5em;
+            margin-right: 15px;
+        }
+
+        .notification.success i {
+            color: #10B981;
+        }
+
+        .notification.error i {
+            color: #EF4444;
+        }
+
+        .notification.warning i {
+            color: #F59E0B;
+        }
+
+        .notification.info i {
+            color: #3B82F6;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .investment-container {
+                padding: 10px;
+                gap: 25px;
+            }
+
+            .investment-card {
+                width: 100%;
+                max-width: 350px;
+            }
+
+            header {
+                padding: 20px 0;
+            }
+
+            header h1 {
+                font-size: 2rem;
+            }
+
+            .notification {
+                bottom: 20px;
+                right: 20px;
+                left: 20px;
+                max-width: none;
+            }
+        }
+
+        /* Animation pour la mise en évidence des profits */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+
+        .total .detail-value {
+            animation: pulse 2s infinite;
+        }
+
+        /* Badge pour les meilleurs choix */
+        .investment-card[data-level="VIP4"]::after {
+            content: 'Meilleur Choix';
+            position: absolute;
+            top: 20px;
+            right: -35px;
+            background: var(--accent-color);
+            color: white;
+            padding: 5px 40px;
+            transform: rotate(45deg);
+            font-weight: 700;
+            font-size: 0.8em;
+            box-shadow: 0 3px 10px rgba(255, 77, 77, 0.3);
+            z-index: 3;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><i class="fas fa-crown"></i> Niveaux d'Investissement VIP</h1>
+    </header>
+    
+    <div class="investment-container">
+        <!-- VIP1 -->
+        <div class="investment-card" data-level="VIP1" data-investment="5800" data-hourly="15.11" data-daily="1525" data-monthly="10879.2" data-annual="132363.6" data-cycle="31">
+            <div class="performance-indicator"><i class="fas fa-chart-line"></i> Débutant</div>
+            <div class="level">VIP1</div>
+            <div class="detail">
+                <span class="detail-label">Investissement initial:</span>
+                <span class="detail-value">5 800 FCFA</span>
+            </div>
+            
+            <div class="detail">
+                <span class="detail-label">Cycle :</span>
+                <span class="detail-value">31 jours</span>
+            </div>
+            
+            <div class="detail">
+                <span class="detail-label">Revenu journalier:</span>
+                <span class="detail-value">1 525 FCFA</span>
+            </div>
+            
+            <div class="total">
+                <span class="detail-label">Revenus Total: </span>
+                <span class="detail-value">47 275 FCFA</span>
+            </div>
+            <button class="invest-button">INVESTIR</button>
+        </div>
+     
+        <!-- VIP2 -->
+        <div class="investment-card" data-level="VIP2" data-investment="15800" data-hourly="30.26" data-daily="3200" data-monthly="210800" data-annual="265077.6" data-cycle="31">
+            <div class="performance-indicator"><i class="fas fa-chart-line"></i> Intermédiaire</div>
+            <div class="level">VIP2</div>
+            <div class="detail">
+                <span class="detail-label">Investissement initial:</span>
+                <span class="detail-value">15 800 FCFA</span>
+            </div>
+            
+            <div class="detail">
+                <span class="detail-label">Cycle:</span>
+                <span class="detail-value">31 jours</span>
+            </div>
+            
+            <div class="detail">
+                <span class="detail-label">Revenu journalier:</span>
+                <span class="detail-value">3 200 FCFA</span>
+            </div>
+            
+            <div class="total">
+                <span class="detail-label">Revenus Total: </span>
+                <span class="detail-value">99 200 FCFA</span>
+            </div>
+            <button class="invest-button">INVESTIR</button>
+        </div>
+        
+        <!-- VIP3 -->
+        <div class="investment-card" data-level="VIP3" data-investment="30800" data-hourly="60.2" data-daily="5800" data-monthly="43344" data-annual="527688" data-cycle="20">
+            <div class="performance-indicator"><i class="fas fa-chart-line"></i> Avancé</div>
+            <div class="level">VIP3</div>
+            <div class="detail">
+                <span class="detail-label">Investissement initial:</span>
+                <span class="detail-value">30 800 FCFA</span>
+            </div>
+            
+            <div class="detail">
+                <span class="detail-label">Cycle :</span>
+                <span class="detail-value">20 jours</span>
+            </div>
+            
+            <div class="detail">
+                <span class="detail-label">Revenus journalier :</span>
+                <span class="detail-value">5 800 FCFA</span>
+            </div>
+            
+            <div class="total">
+                <span class="detail-label">Revenus total :</span>
+                <span class="detail-value">116 000 FCFA</span>
+            </div>
+            <button class="invest-button">INVESTIR</button>
+        </div>
+        
+        <!-- VIP4 -->
+        <div class="investment-card" data-level="VIP4" data-investment="100000" data-hourly="185.05" data-daily="35000" data-monthly="133236" data-annual="1621038" data-cycle="7">
+            <div class="performance-indicator"><i class="fas fa-chart-line"></i> Premium</div>
+            <div class="level">VIP4</div>
+            <div class="detail">
+                <span class="detail-label">Investissement initial:</span>
+                <span class="detail-value">100 000 FCFA</span>
+            </div>
+            
+            <div class="detail">
+                <span class="detail-label">Cycle :</span>
+                <span class="detail-value">7 jours</span>
+            </div>
+            
+            <div class="detail">
+                <span class="detail-label">Revenu journalier:</span>
+                <span class="detail-value">35 000 FCFA</span>
+            </div>
+            
+            <div class="total">
+                <span class="detail-label">Revenu total:</span>
+                <span class="detail-value">245 000 FCFA</span>
+            </div>
+            <button class="invest-button">INVESTIR</button>
+        </div>
+        
+        <!-- VIP5 - LOCKED -->
+        <div class="investment-card">
+            <div class="locked-overlay">
+                <span class="coming-soon">Bientôt disponible</span>
+                <i class="fas fa-lock lock-icon"></i>
+            </div>
+            <div class="level">VIP5</div>
+            <div class="detail">
+                <span class="detail-label">Investissement initial:</span>
+                <span class="detail-value">Bientôt </span>
+            </div>
+            <div class="detail">
+                <span class="detail-label">Cycle:</span>
+                <span class="detail-value">Bientôt</span>
+            </div>
+            <div class="detail">
+                <span class="detail-label">Revenu journalier:</span>
+                <span class="detail-value">Bientôt</span>
+            </div>
+            <div class="total">
+                <span class="detail-label">Revenu total:</span>
+               class="detail-value">Bientôt</span>
+            </div>
+            <div class="total">
+                <span class="detail-label">Revenu annuel:</span>
+                <span class="detail-value">Bientôt</span>
+            </div>
+            <button class="invest-button locked">BIENTÔT DISPONIBLE</button>
+        </div>
+    </div> 
+    
+    
+    <!-- VIP6 - LOCKED -->
+        <div class="investment-card">
+            <div class="locked-overlay">
+                <span class="coming-soon">Bientôt disponible</span>
+                <i class="fas fa-lock lock-icon"></i>
+            </div>
+            <div class="level">VIP6</div>
+            <div class="detail">
+                <span class="detail-label">Investissement initial:</span>
+                <span class="detail-value">Bientôt </span>
+            </div>
+            <div class="detail">
+                <span class="detail-label">Cycle:</span>
+                <span class="detail-value">Bientôt</span>
+            </div>
+            <div class="detail">
+                <span class="detail-label">Revenu journalier:</span>
+                <span class="detail-value">Bientôt</span>
+            </div>
+            <div class="total">
+                <span class="detail-label">Revenu total:</span>
+               class="detail-value">Bientôt</span>
+            </div>
+            <div class="total">
+                <span class="detail-label">Revenu annuel:</span>
+                <span class="detail-value">Bientôt</span>
+            </div>
+            <button class="invest-button locked">BIENTÔT DISPONIBLE</button>
+        </div>
+    </div> 
+    
+    <!-- VIP7 - LOCKED -->
+        <div class="investment-card">
+            <div class="locked-overlay">
+                <span class="coming-soon">Bientôt disponible</span>
+                <i class="fas fa-lock lock-icon"></i>
+            </div>
+            <div class="level">VIP7</div>
+            <div class="detail">
+                <span class="detail-label">Investissement initial:</span>
+                <span class="detail-value">Bientôt </span>
+            </div>
+            <div class="detail">
+                <span class="detail-label">Cycle:</span>
+                <span class="detail-value">Bientôt</span>
+            </div>
+            <div class="detail">
+                <span class="detail-label">Revenu journalier:</span>
+                <span class="detail-value">Bientôt</span>
+            </div>
+            <div class="total">
+                <span class="detail-label">Revenu total:</span>
+               class="detail-value">Bientôt</span>
+            </div>
+            <div class="total">
+                <span class="detail-label">Revenu annuel:</span>
+                <span class="detail-value">Bientôt</span>
+            </div>
+            <button class="invest-button locked">BIENTÔT DISPONIBLE</button>
+        </div>
+    </div> 
+    
+    
+    <!-- VIP8 - LOCKED -->
+        <div class="investment-card">
+            <div class="locked-overlay">
+                <span class="coming-soon">Bientôt disponible</span>
+                <i class="fas fa-lock lock-icon"></i>
+            </div>
+            <div class="level">VIP8</div>
+            <div class="detail">
+                <span class="detail-label">Investissement initial:</span>
+                <span class="detail-value">Bientôt </span>
+            </div>
+            <div class="detail">
+                <span class="detail-label">Cycle:</span>
+                <span class="detail-value">Bientôt</span>
+            </div>
+            <div class="detail">
+                <span class="detail-label">Revenu journalier:</span>
+                <span class="detail-value">Bientôt</span>
+            </div>
+            <div class="total">
+                <span class="detail-label">Revenu total:</span>
+               class="detail-value">Bientôt</span>
+            </div>
+            <div class="total">
+                <span class="detail-label">Revenu annuel:</span>
+                <span class="detail-value">Bientôt</span>
+            </div>
+            <button class="invest-button locked">BIENTÔT DISPONIBLE</button>
+        </div>
+    </div>
+    
+    
+     <!-- VIP9 - LOCKED -->
+        <div class="investment-card">
+            <div class="locked-overlay">
+                <span class="coming-soon">Bientôt disponible</span>
+                <i class="fas fa-lock lock-icon"></i>
+            </div>
+            <div class="level">VIP9</div>
+            <div class="detail">
+                <span class="detail-label">Investissement initial:</span>
+                <span class="detail-value">Bientôt </span>
+            </div>
+            <div class="detail">
+                <span class="detail-label">Cycle:</span>
+                <span class="detail-value">Bientôt</span>
+            </div>
+            <div class="detail">
+                <span class="detail-label">Revenu journalier:</span>
+                <span class="detail-value">Bientôt</span>
+            </div>
+            <div class="total">
+                <span class="detail-label">Revenu total:</span>
+               class="detail-value">Bientôt</span>
+            </div>
+            <div class="total">
+                <span class="detail-label">Revenu annuel:</span>
+                <span class="detail-value">Bientôt</span>
+            </div>
+            <button class="invest-button locked">BIENTÔT DISPONIBLE</button>
+        </div>
+    </div> 
+    
+    
+    <!-- VIP10 - LOCKED -->
+        <div class="investment-card">
+            <div class="locked-overlay">
+                <span class="coming-soon">Bientôt disponible</span>
+                <i class="fas fa-lock lock-icon"></i>
+            </div>
+            <div class="level">VIP10</div>
+            <div class="detail">
+                <span class="detail-label">Investissement initial:</span>
+                <span class="detail-value">Bientôt </span>
+            </div>
+            <div class="detail">
+                <span class="detail-label">Cycle:</span>
+                <span class="detail-value">Bientôt</span>
+            </div>
+            <div class="detail">
+                <span class="detail-label">Revenu journalier:</span>
+                <span class="detail-value">Bientôt</span>
+            </div>
+            <div class="total">
+                <span class="detail-label">Revenu total:</span>
+               class="detail-value">Bientôt</span>
+            </div>
+            <div class="total">
+                <span class="detail-label">Revenu annuel:</span>
+                <span class="detail-value">Bientôt</span>
+            </div>
+            <button class="invest-button locked">BIENTÔT DISPONIBLE</button>
+        </div>
+    </div> 
+    
+    </body>
+    </html>

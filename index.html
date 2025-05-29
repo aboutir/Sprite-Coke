@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentification | Sprite-coke</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            padding: 1rem;
+        }
+
+        .app-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #dc2626;
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.8),
+                         -2px -2px 4px rgba(255, 255, 255, 0.8),
+                         2px -2px 4px rgba(255, 255, 255, 0.8),
+                         -2px 2px 4px rgba(255, 255, 255, 0.8);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            padding: 2rem;
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            background-color: white;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group:focus-within {
+            border-color: #dc2626;
+        }
+
+        .input-group i {
+            color: #9ca3af;
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .country-select {
+            position: relative;
+            margin-right: 0.5rem;
+        }
+
+        .selected-code {
+            padding: 0.5rem;
+            border: none;
+            background: none;
+            cursor: pointer;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 1000;
+            max-height: 300px;
+            overflow-y: auto;
+            width: 200px;
+        }
+
+        .dropdown.show {
+            display: block;
+        }
+
+        .country-option {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            transition: background-color 0.2s ease;
+        }
+
+        .country-option:hover {
+            background-color: #f3f4f6;
+        }
+
+        input {
+            width: 100%;
+            border: none;
+            outline: none;
+            color: #374151;
+            padding: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        input::placeholder {
+            color: #9ca3af;
+        }
+
+        .verification-code {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 0.25rem;
+        }
+
+        .verification-input {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .verification-input input {
+            width: 2.5rem;
+            height: 2.5rem;
+            text-align: center;
+            font-size: 1.25rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.25rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .verification-input input:focus {
+            border-color: #dc2626;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background-color: #dc2626;
+            color: white;
+            padding: 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background-color: #b91c1c;
+            transform: translateY(-1px);
+        }
+
+        .submit-btn:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .toggle-page {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .toggle-page button {
+            color: #4b5563;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        .toggle-page button:hover {
+            color: #1f2937;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .error-alert {
+            color: #dc2626;
+            background-color: #fee2e2;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-top: 0.5rem;
+            display: none;
+            font-size: 0.875rem;
+            text-align: center;
+        }
+
+        .error-alert.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .error-message {
+            color: #dc2626;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .error-message.show {
+            opacity: 1;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .app-title {
+                font-size: 2rem;
+            }
+
+            .verification-input input {
+                width: 2rem;
+                height: 2rem;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1 class="app-title">Sprite-coke</h1>
+    
+    <div id="loginPage" class="container">
+        <div class="error-alert" id="loginError"></div>
+        <div class="input-group">
+            <i class="fas fa-phone"></i>
+            <div class="country-select">
+                <button class="selected-code" onclick="toggleDropdown(this)">
+                    <span>+225</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="dropdown">
+                    <div class="country-option" data-code="+225" data-country="Côte d'Ivoire" data-max="10">
+                        <span>+225</span>
+                        <span>Côte d'Ivoire</span>
+                    </div>
+                    <div class="country-option" data-code="+229" data-country="Bénin" data-max="8">
+                        <span>+229</span>
+                        <span>Bénin</span>
+                    </div>
+                    
+                    
+                    <div class="country-option" data-code="+226" data-country="Burkina Faso" data-max="6">
+                        <span>+226</span>
+                        <span>Burkina Faso</span>
+                    </div>
+                    <div class="country-option" data-code="+228" data-country="Togo" data-max="8">
+                        <span>+228</span>
+                        <span>Togo</span>
+                    </div>
+                    
+                    <div class="country-option" data-code="+221" data-country="Sénégal" data-max="9">
+                        <span>+221</span>
+                        <span>Sénégal</span>
+                    </div>
+                </div>
+            </div>
+            <input type="tel" id="loginTelephone" placeholder="Numéro de téléphone" maxlength="10">
+        </div>
+
+        <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="loginPassword" placeholder="Mot de passe">
+        </div>
+
+        <button class="submit-btn" onclick="handleLogin()">Se connecter</button>
+
+        <div class="toggle-page">
+            <button onclick="togglePage()">Pas de compte ? S'inscrire</button>
+        </div>
+    </div>
+
+    <div id="registrationPage" class="container hidden">
+        <div class="error-alert" id="registerError"></div>
+        <div class="input-group">
+            <i class="fas fa-phone"></i>
+            <div class="country-select">
+                <button class="selected-code" onclick="toggleDropdown(this)">
+                    <span>+225</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="dropdown">
+                    <div class="country-option" data-code="+225" data-country="Côte d'Ivoire" data-max="10">
+                        <span>+225</span>
+                        <span>Côte d'Ivoire</span>
+                    </div>
+                    <div class="country-option" data-code="+229" data-country="Bénin" data-max="8">
+                        <span>+229</span>
+                        <span>Bénin</span>
+                    </div>
+                    
+                    
+                    <div class="country-option" data-code="+226" data-country="Burkina Faso" data-max="6">
+                        <span>+226</span>
+                        <span>Burkina Faso</span>
+                    </div>
+                    <div class="country-option" data-code="+228" data-country="Togo" data-max="8">
+                        <span>+228</span>
+                        <span>Togo</span>
+                    </div>
+                    
+                    <div class="country-option" data-code="+221" data-country="Sénégal" data-max="9">
+                        <span>+221</span>
+                        <span>Sénégal</span>
+                    </div>
+                </div>
+            </div>
+            <input type="tel" id="signupTelephone" placeholder="Numéro de téléphone" maxlength="10">
+        </div>
+
+        <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="signupPassword" placeholder="Veuillez saisir le mot de passe de connexion">
+        </div>
+
+        <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="confirmPassword" placeholder="Veuillez confirmer votre mot de passe">
+        </div>
+
+        <div class="input-group">
+            <i class="fas fa-user-plus"></i>
+            <input type="text" placeholder="Code de parrainage (optionnel)" id="referralCode">
+        </div>
+
+        <div class="input-group">
+            <i class="fas fa-hashtag"></i>
+            <div class="verification-input">
+                <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric">
+            </div>
+        </div>
+
+        <div class="input-group">
+            <i class="fas fa-check-circle"></i>
+            <div class="verification-code">
+                <span style="color: #DC2626">7</span>
+                <span style="color: #2563EB">2</span>
+                <span style="color: #059669">9</span>
+                <span style="color: #7C3AED">4</span>
+                <span style="color: #DB2777">1</span>
+            </div>
+        </div>
+
+        <div class="error-message" id="errorMessage">
+            Le code de vérification est incorrect
+        </div>
+
+        <button id="registerBtn" class="submit-btn" onclick="handleRegistration()">S'inscrire maintenant</button>
+
+        <div class="toggle-page">
+            <button onclick="togglePage()">Déjà un compte ? Se connecter</button>
+        </div>
+    </div>
+
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+        import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDIB-raa12rkzqxRhflOMLBwL4hBycTgmo",
+            authDomain: "coke-eea48.firebaseapp.com",
+            databaseURL: "https://coke-eea48-default-rtdb.firebaseio.com",
+            projectId: "coke-eea48",
+            storageBucket: "coke-eea48.firebasestorage.app",
+            messagingSenderId: "217366074971",
+            appId: "1:217366074971:web:948bdc5baeeea93fac117e"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth();
+        const database = getDatabase(app);
+
+        // Make Firebase instances available globally
+        window.auth = auth;
+        window.database = database;
+
+        // Functions to handle page toggling
+        window.togglePage = () => {
+            const loginPage = document.getElementById('loginPage');
+            const registrationPage = document.getElementById('registrationPage');
+            loginPage.classList.toggle('hidden');
+            registrationPage.classList.toggle('hidden');
+        };
+
+        window.toggleDropdown = (button) => {
+            const dropdown = button.nextElementSibling;
+            dropdown.classList.toggle('show');
+
+            // Close dropdown when clicking outside
+            const closeDropdown = (event) => {
+                if (!button.contains(event.target)) {
+                    dropdown.classList.remove('show');
+                    document.removeEventListener('click', closeDropdown);
+                }
+            };
+            setTimeout(() => {
+                document.addEventListener('click', closeDropdown);
+            }, 0);
+        };
+
+        // Handle country selection
+        document.querySelectorAll('.country-option').forEach(option => {
+            option.addEventListener('click', () => {
+                const code = option.dataset.code;
+                const country = option.dataset.country;
+                const maxLength = option.dataset.max;
+                const button = option.closest('.country-select').querySelector('.selected-code span');
+                button.textContent = code;
+                
+                // Update maxlength of telephone input
+                const form = option.closest('.container');
+                const telephoneInput = form.querySelector('input[type="tel"]');
+                telephoneInput.maxLength = maxLength;
+                telephoneInput.placeholder = `Numéro de téléphone (${maxLength} chiffres)`;
+                
+                option.closest('.dropdown').classList.remove('show');
+            });
+        });
+
+        // Handle code verification
+        document.querySelectorAll('.verification-input input').forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                validateInput(e);
+                if (input.value.length === 1) {
+                    const nextInput = input.nextElementSibling;
+                    if (nextInput) nextInput.focus();
+                }
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && input.value.length === 0) {
+                    const prevInput = input.previousElementSibling;
+                    if (prevInput) prevInput.focus();
+                }
+            });
+        });
+
+        // Input validation helper
+        function validateInput(e) {
+            const input = e.target;
+            input.value = input.value.replace(/[^0-9]/g, '');
+        }
+
+        // Phone number validation
+        function validatePhoneNumber(phone, countryCode) {
+            let maxLength = 10; // Default to Côte d'Ivoire
+            
+            // Get the selected country's max length
+            const countryOptions = document.querySelectorAll('.country-option');
+            for (const option of countryOptions) {
+                if (option.dataset.code === countryCode) {
+                    maxLength = parseInt(option.dataset.max);
+                    break;
+                }
+            }
+            
+            return phone.length === maxLength;
+        }
+
+        // Handle login
+        window.handleLogin = async () => {
+            const errorElement = document.getElementById('loginError');
+            const telephone = document.getElementById('loginTelephone').value;
+            const password = document.getElementById('loginPassword').value;
+            const countryCode = document.querySelector('#loginPage .selected-code span').textContent;
+
+            try {
+                if (!telephone || !password) {
+                    throw new Error('Veuillez remplir tous les champs');
+                }
+
+                if (!validatePhoneNumber(telephone, countryCode)) {
+                    throw new Error(`Le numéro de téléphone doit correspondre au format du pays sélectionné`);
+                }
+
+                const email = `${countryCode}${telephone}@temp.com`;
+                await signInWithEmailAndPassword(auth, email, password);
+                window.location.href = 'accueil.html';
+            } catch (error) {
+                errorElement.textContent = error.message === 'Firebase: Error (auth/invalid-credential).' 
+                    ? 'Numéro de téléphone ou mot de passe incorrect' 
+                    : error.message;
+                errorElement.classList.add('show');
+            }
+        };
+
+        // Handle registration
+        window.handleRegistration = async () => {
+            const errorElement = document.getElementById('registerError');
+            const telephone = document.getElementById('signupTelephone').value;
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const referralCode = document.getElementById('referralCode').value;
+            const countryCode = document.querySelector('#registrationPage .selected-code span').textContent;
+            
+            // Get verification code inputs
+            const verificationInputs = document.querySelectorAll('.verification-input input');
+            const userCode = Array.from(verificationInputs).map(input => input.value).join('');
+            const correctCode = '72941'; // Code affiché dans l'interface
+
+            try {
+                // Validations
+                if (!telephone || !password || !confirmPassword) {
+                    throw new Error('Veuillez remplir tous les champs obligatoires');
+                }
+
+                if (password !== confirmPassword) {
+                    throw new Error('Les mots de passe ne correspondent pas');
+                }
+
+                if (password.length < 6) {
+                    throw new Error('Le mot de passe doit contenir au moins 6 caractères');
+                }
+
+                if (!validatePhoneNumber(telephone, countryCode)) {
+                    throw new Error(`Le numéro de téléphone doit correspondre au format du pays sélectionné`);
+                }
+
+                if (userCode !== correctCode) {
+                    document.getElementById('errorMessage').classList.add('show');
+                    throw new Error('Code de vérification incorrect');
+                }
+
+                const email = `${countryCode}${telephone}@temp.com`;
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // Generate unique referral code
+                const newReferralCode = generateReferralCode();
+
+                // Save user data
+                await set(ref(database, 'users/' + user.uid), {
+                    telephone: telephone,
+                    countryCode: countryCode,
+                    balance: 0,
+                    referralCode: newReferralCode,
+                    referredBy: referralCode || null,
+                    createdAt: Date.now()
+                });
+
+                // Update referrer's balance if referral code was used
+                if (referralCode) {
+                    const referrerSnapshot = await get(ref(database, 'users'));
+                    const users = referrerSnapshot.val();
+                    if (users) {
+                        for (const userId in users) {
+                            if (users[userId].referralCode === referralCode) {
+                                const currentBalance = users[userId].balance || 0;
+                                await set(ref(database, `users/${userId}/balance`), currentBalance + 0);
+                                await set(ref(database, `users/${user.uid}/balance`), 0);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                window.location.href = 'accueil.html';
+            } catch (error) {
+                const errorMessage = error.message.includes('auth/email-already-in-use') 
+                    ? 'Ce numéro de téléphone est déjà utilisé' 
+                    : error.message;
+                    
+                errorElement.textContent = errorMessage;
+                errorElement.classList.add('show');
+            }
+        };
+
+        // Helper function to generate referral code
+        function generateReferralCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            return Array.from({ length: 6 }, () => 
+                chars.charAt(Math.floor(Math.random() * chars.length))
+            ).join('');
+        }
+
+        // Initialize auth state observer
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                console.log('Utilisateur connecté:', user.uid);
+            } else {
+                console.log('Utilisateur déconnecté');
+            }
+        });
+
+        // Initialize country data and maxlength on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set initial max length for both forms
+            const loginCountryCode = document.querySelector('#loginPage .selected-code span').textContent;
+            const signupCountryCode = document.querySelector('#registrationPage .selected-code span').textContent;
+            
+            let loginMaxLength = 10;
+            let signupMaxLength = 10;
+            
+            const countryOptions = document.querySelectorAll('.country-option');
+            for (const option of countryOptions) {
+                if (option.dataset.code === loginCountryCode) {
+                    loginMaxLength = option.dataset.max;
+                }
+                if (option.dataset.code === signupCountryCode) {
+                    signupMaxLength = option.dataset.max;
+                }
+            }
+            
+            document.getElementById('loginTelephone').maxLength = loginMaxLength;
+            document.getElementById('loginTelephone').placeholder = `Numéro de téléphone (${loginMaxLength} chiffres)`;
+            
+            document.getElementById('signupTelephone').maxLength = signupMaxLength;
+            document.getElementById('signupTelephone').placeholder = `Numéro de téléphone (${signupMaxLength} chiffres)`;
+        });
+        
+        // Fonction pour récupérer la valeur du paramètre "ref"
+function getReferralCode() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get("ref");
+}
+
+// Attendre que la page soit chargée avant d'exécuter le script
+window.onload = function () {
+    const referralCode = getReferralCode(); // Récupérer le code de parrainage
+    const inputField = document.getElementById("referralCode");
+
+    if (referralCode && inputField) {
+        inputField.value = referralCode; // Insérer le code dans l'input
+    }
+};
+    </script>
+</body>
+</html>

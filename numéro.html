@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration des Comptes de Retrait</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #1a237e;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 5px 5px 0 0;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .main-content {
+            background-color: white;
+            border-radius: 0 0 5px 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .users-table th, .users-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+        .users-table th {
+            background-color: #f2f2f2;
+            font-weight: 600;
+        }
+        .users-table tr:hover {
+            background-color: #f9f9f9;
+        }
+        .search-bar {
+            margin-bottom: 20px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+        }
+        .search-bar input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .btn {
+            background-color: #1a237e;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #303f9f;
+        }
+        .btn-edit {
+            background-color: #4caf50;
+        }
+        .btn-edit:hover {
+            background-color: #388e3c;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 5px;
+            width: 400px;
+            max-width: 80%;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .modal-header h2 {
+            margin: 0;
+            font-size: 20px;
+        }
+        .close {
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        .form-group select, .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .pagination button {
+            margin: 0 5px;
+        }
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .message-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .message-error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .message-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        .logout-btn {
+            background-color: #f44336;
+        }
+        .logout-btn:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Administration des Comptes de Retrait</h1>
+            <button id="logoutBtn" class="btn logout-btn">Déconnexion</button>
+        </div>
+        
+        <div class="main-content">
+            <div id="message" class="message" style="display: none;"></div>
+            
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Rechercher un utilisateur...">
+            </div>
+            
+            <table class="users-table">
+                <thead>
+                    <tr>
+                        <th>ID Utilisateur</th>
+                        <th>Nom</th>
+                        <th>Email</th>
+                        <th>Opérateur</th>
+                        <th>Numéro de compte</th>
+                        <th>Date de configuration</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    <!-- Les données utilisateurs seront chargées ici -->
+                </tbody>
+            </table>
+            
+            <div class="pagination">
+                <button id="prevPageBtn" class="btn">Précédent</button>
+                <button id="nextPageBtn" class="btn">Suivant</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal pour modifier un compte -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Modifier le compte de retrait</h2>
+                <span class="close">&times;</span>
+            </div>
+            <form id="editForm">
+                <input type="hidden" id="editUserId">
+                <div class="form-group">
+                    <label for="editName">Nom</label>
+                    <input type="text" id="editName" disabled>
+                </div>
+                <div class="form-group">
+                    <label for="editEmail">Email</label>
+                    <input type="email" id="editEmail" disabled>
+                </div>
+                <div class="form-group">
+                    <label for="editOperator">Opérateur</label>
+                    <select id="editOperator" required>
+                        <option value="Orange Money">Orange Money</option>
+                        <option value="MTN Mobile Money">MTN Mobile Money</option>
+                        <option value="Moov Money">Moov Money</option>
+                        <option value="Wave">Wave</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editPhone">Numéro de compte</label>
+                    <input type="text" id="editPhone" required pattern="[0-9]{10}" placeholder="Ex: 0102030405">
+                </div>
+                <button type="submit" class="btn">Enregistrer les modifications</button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+        import { getDatabase, ref, set, get, child, update } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDIB-raa12rkzqxRhflOMLBwL4hBycTgmo",
+            authDomain: "coke-eea48.firebaseapp.com",
+            databaseURL: "https://coke-eea48-default-rtdb.firebaseio.com",
+            projectId: "coke-eea48",
+            storageBucket: "coke-eea48.firebasestorage.app",
+            messagingSenderId: "217366074971",
+            appId: "1:217366074971:web:948bdc5baeeea93fac117e"
+        };
+        
+        // Initialisation Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase();
+        const auth = getAuth();
+        
+        // Variables pour la pagination
+        let currentPage = 1;
+        const usersPerPage = 10;
+        let allUsers = [];
+        
+        // Fonction pour formater le numéro de téléphone
+        function formatPhoneNumber(phone) {
+            if (!phone) return "Non défini";
+            return phone.replace(/(\d{2})(?=\d)/g, "$1 ");
+        }
+
+        // Fonction pour formater la date
+        function formatDate(timestamp) {
+            if (!timestamp) return "Non définie";
+            const date = new Date(timestamp);
+            return date.toLocaleDateString('fr-FR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Fonction pour afficher un message
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.className = `message message-${type}`;
+            messageDiv.textContent = text;
+            messageDiv.style.display = 'block';
+            
+            // Cacher le message après 5 secondes
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Fonction pour charger tous les utilisateurs
+        async function loadAllUsers() {
+            try {
+                console.log("Chargement des utilisateurs...");
+                const usersRef = ref(db, 'users');
+                const snapshot = await get(usersRef);
+                
+                console.log("Données récupérées:", snapshot.exists() ? "Données présentes" : "Aucune donnée");
+                
+                if (snapshot.exists()) {
+                    allUsers = [];
+                    let userCount = 0;
+                    
+                    snapshot.forEach((userSnapshot) => {
+                        userCount++;
+                        const userId = userSnapshot.key;
+                        const userData = userSnapshot.val();
+                        
+                        console.log("Utilisateur trouvé:", userId);
+                        console.log("Structure des données:", JSON.stringify(userData).substring(0, 100) + "...");
+                        
+                        // Extraire les informations pertinentes
+                        const user = {
+                            id: userId,
+                            email: userData.email || "Non défini",
+                            name: userData.name || "Non défini",
+                            // Vérifier la structure réelle des données
+                            withdrawalConfig: userData.withdrawalConfig || 
+                                            userData.accountConfig || 
+                                            userData.account || 
+                                            {}
+                        };
+                        
+                        allUsers.push(user);
+                    });
+                    
+                    console.log(`Total d'utilisateurs chargés: ${userCount}`);
+                    
+                    // Afficher la première page
+                    displayUsers(currentPage);
+                } else {
+                    console.log("Aucun utilisateur trouvé - Vérification de la structure de la base de données");
+                    // Tenter de lire la structure de la base de données
+                    const rootRef = ref(db, '/');
+                    const rootSnapshot = await get(rootRef);
+                    
+                    if (rootSnapshot.exists()) {
+                        const keys = Object.keys(rootSnapshot.val());
+                        console.log("Clés principales de la base de données:", keys);
+                        showMessage(`Aucun utilisateur trouvé. Structure de la base: ${keys.join(', ')}`, 'info');
+                    } else {
+                        showMessage('Base de données vide ou inaccessible.', 'error');
+                    }
+                }
+            } catch (error) {
+                showMessage(`Erreur lors du chargement des utilisateurs: ${error.message}`, 'error');
+                console.error("Erreur complète:", error);
+            }
+        }
+
+        // Fonction pour afficher les utilisateurs par page
+        function displayUsers(page) {
+            const tableBody = document.getElementById('usersTableBody');
+            tableBody.innerHTML = '';
+            
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filteredUsers = allUsers.filter(user => 
+                user.name.toLowerCase().includes(searchTerm) || 
+                user.email.toLowerCase().includes(searchTerm) ||
+                (user.withdrawalConfig.phone && user.withdrawalConfig.phone.includes(searchTerm)) ||
+                (user.withdrawalConfig.operator && user.withdrawalConfig.operator.toLowerCase().includes(searchTerm))
+            );
+            
+            const startIndex = (page - 1) * usersPerPage;
+            const endIndex = startIndex + usersPerPage;
+            const usersToDisplay = filteredUsers.slice(startIndex, endIndex);
+            
+            if (usersToDisplay.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td colspan="7" style="text-align: center;">Aucun utilisateur trouvé</td>`;
+                tableBody.appendChild(row);
+                return;
+            }
+            
+            usersToDisplay.forEach(user => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${user.id}</td>
+                    <td>${user.name}</td>
+                    <td>${user.email}</td>
+                    <td>${user.withdrawalConfig.operator || "Non défini"}</td>
+                    <td>${formatPhoneNumber(user.withdrawalConfig.phone || "")}</td>
+                    <td>${formatDate(user.withdrawalConfig.configuredAt)}</td>
+                    <td>
+                        <button class="btn btn-edit" data-userid="${user.id}">Modifier</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            // Mettre à jour les boutons de pagination
+            document.getElementById('prevPageBtn').disabled = page === 1;
+            document.getElementById('nextPageBtn').disabled = endIndex >= filteredUsers.length;
+        }
+
+        // Gestionnaire pour la navigation par page
+        document.getElementById('prevPageBtn').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                displayUsers(currentPage);
+            }
+        });
+
+        document.getElementById('nextPageBtn').addEventListener('click', () => {
+            const totalPages = Math.ceil(allUsers.length / usersPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                displayUsers(currentPage);
+            }
+        });
+
+        // Gestionnaire pour la recherche
+        document.getElementById('searchInput').addEventListener('input', () => {
+            currentPage = 1;
+            displayUsers(currentPage);
+        });
+
+        // Gestionnaire pour le clic sur le bouton "Modifier"
+        document.getElementById('usersTableBody').addEventListener('click', async (e) => {
+            if (e.target.classList.contains('btn-edit')) {
+                const userId = e.target.getAttribute('data-userid');
+                
+                try {
+                    const userRef = ref(db, `users/${userId}`);
+                    const snapshot = await get(userRef);
+                    
+                    if (snapshot.exists()) {
+                        const userData = snapshot.val();
+                        
+                        // Remplir le formulaire avec les données de l'utilisateur
+                        document.getElementById('editUserId').value = userId;
+                        document.getElementById('editName').value = userData.name || "";
+                        document.getElementById('editEmail').value = userData.email || "";
+                        
+                        if (userData.withdrawalConfig) {
+                            document.getElementById('editOperator').value = userData.withdrawalConfig.operator || "";
+                            document.getElementById('editPhone').value = userData.withdrawalConfig.phone || "";
+                        } else {
+                            document.getElementById('editOperator').value = "";
+                            document.getElementById('editPhone').value = "";
+                        }
+                        
+                        // Afficher le modal
+                        document.getElementById('editModal').style.display = 'block';
+                    } else {
+                        showMessage('Utilisateur non trouvé.', 'error');
+                    }
+                } catch (error) {
+                    showMessage(`Erreur: ${error.message}`, 'error');
+                    console.error("Erreur:", error);
+                }
+            }
+        });
+
+        // Gestionnaire pour la soumission du formulaire de modification
+        document.getElementById('editForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const userId = document.getElementById('editUserId').value;
+            const operator = document.getElementById('editOperator').value;
+            const phone = document.getElementById('editPhone').value;
+            
+            try {
+                // Mettre à jour les informations de retrait
+                const updates = {
+                    [`users/${userId}/withdrawalConfig/operator`]: operator,
+                    [`users/${userId}/withdrawalConfig/phone`]: phone,
+                    [`users/${userId}/withdrawalConfig/configuredAt`]: Date.now()
+                };
+                
+                await update(ref(db), updates);
+                
+                // Fermer le modal et recharger les utilisateurs
+                document.getElementById('editModal').style.display = 'none';
+                showMessage('Compte de retrait mis à jour avec succès.', 'success');
+                await loadAllUsers();
+            } catch (error) {
+                showMessage(`Erreur lors de la mise à jour: ${error.message}`, 'error');
+                console.error("Erreur:", error);
+            }
+        });
+
+        // Fermer le modal lorsque l'utilisateur clique sur le X
+        document.querySelector('.close').addEventListener('click', () => {
+            document.getElementById('editModal').style.display = 'none';
+        });
+
+        // Fermer le modal lorsque l'utilisateur clique en dehors du contenu du modal
+        window.addEventListener('click', (e) => {
+            const modal = document.getElementById('editModal');
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        // Gestionnaire pour la déconnexion
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                window.location.href = 'retrait.html';
+            } catch (error) {
+                showMessage(`Erreur lors de la déconnexion: ${error.message}`, 'error');
+                console.error("Erreur:", error);
+            }
+        });
+
+        // Vérification de l'authentification
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Charger directement tous les utilisateurs sans vérification admin
+                // Nous supposons que cette page est déjà protégée par accès
+                loadAllUsers();
+            } else {
+                // L'utilisateur n'est pas connecté, rediriger vers la page de login
+                // Si vous n'avez pas de page de login, commentez cette ligne
+                // window.location.href = 'retrait.html'; 
+                showMessage('Vous n\'êtes pas connecté. Veuillez vous connecter.', 'error');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historique des Retraits</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            line-height: 1.4;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
+            background-image: radial-gradient(circle at 10% 20%, #1a1a1a 0%, #121212 90%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 15px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        header {
+            background: #1f1f1f;
+            color: #e0e0e0;
+            padding: 15px 0;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.5);
+            border-bottom: 2px solid #9c27b0;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 22px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .logo i {
+            color: #03dac6;
+        }
+        
+        main {
+            margin: 20px 0;
+        }
+        
+        .withdrawal-history h2 {
+            color: #ffffff;
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            text-align: center;
+            position: relative;
+            text-shadow: 0 0 15px rgba(187, 134, 252, 0.5);
+            letter-spacing: 1px;
+        }
+        
+        .withdrawal-history h2:after {
+            content: "";
+            position: absolute;
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(to right, #bb86fc, #03dac6);
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 3px;
+            box-shadow: 0 0 10px rgba(3, 218, 198, 0.5);
+        }
+        
+        .withdrawal-item {
+            border-radius: 16px;
+            margin-bottom: 25px;
+            background-color: #1f1f1f;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05);
+            border-left: 3px solid #bb86fc;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            transform: translateZ(0);
+            backdrop-filter: blur(20px);
+            background-image: linear-gradient(135deg, rgba(40, 40, 40, 0.6) 0%, rgba(30, 30, 30, 0.6) 100%);
+        }
+        
+        .withdrawal-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.07);
+            border-left: 3px solid #03dac6;
+        }
+        
+        .withdrawal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: #2d2d2d;
+            border-bottom: 1px solid #3d3d3d;
+        }
+        
+        .withdrawal-date {
+            font-weight: 600;
+            color: #bb86fc;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .withdrawal-date i {
+            color: #03dac6;
+        }
+        
+        .status {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .status-paid {
+            background: #002b16;
+            color: #03dac6;
+            border: 1px solid #03dac6;
+        }
+        
+        .status-pending {
+            background: #3a2600;
+            color: #ffb74d;
+            border: 1px solid #ffb74d;
+        }
+        
+        .withdrawal-details {
+            padding: 15px 20px;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #3d3d3d;
+            align-items: center;
+        }
+        
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        
+        .detail-label {
+            color: #a0a0a0;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 15px;
+            letter-spacing: 0.3px;
+        }
+        
+        .detail-label i {
+            color: #bb86fc;
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .detail-value {
+            font-weight: 700;
+            color: #fff;
+            font-size: 15px;
+            text-shadow: 0 0 10px rgba(255,255,255,0.2);
+        }
+        
+        .fee-row .detail-label {
+            color: #ff4d6d;
+        }
+        
+        .fee-row .detail-label i {
+            color: #ff4d6d;
+        }
+        
+        .fee-row .detail-value {
+            color: #ff4d6d;
+            background: rgba(255, 77, 109, 0.15);
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 77, 109, 0.3);
+            box-shadow: 0 0 15px rgba(255, 77, 109, 0.2);
+        }
+        
+        .summary {
+            background: linear-gradient(135deg, #2d2d2d 0%, #252525 100%);
+            padding: 18px 20px;
+            border-top: 1px solid #3d3d3d;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .summary:before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent);
+        }
+        
+        .summary-label {
+            font-weight: 600;
+            color: #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 15px;
+            letter-spacing: 0.5px;
+        }
+        
+        .summary-label i {
+            color: #03dac6;
+            font-size: 18px;
+        }
+        
+        .summary-value {
+            font-weight: 700;
+            font-size: 20px;
+            color: #03dac6;
+            text-shadow: 0 0 15px rgba(3, 218, 198, 0.4);
+            background: rgba(3, 218, 198, 0.1);
+            padding: 8px 16px;
+            border-radius: 10px;
+            border: 1px solid rgba(3, 218, 198, 0.2);
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 25px;
+            gap: 5px;
+        }
+        
+        .page-btn {
+            padding: 8px 12px;
+            border: none;
+            background-color: #1f1f1f;
+            cursor: pointer;
+            border-radius: 8px;
+            color: #bb86fc;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+            border: 1px solid #3d3d3d;
+        }
+        
+        .page-btn.active {
+            background: #bb86fc;
+            color: #121212;
+            border: 1px solid #bb86fc;
+        }
+        
+        @media (max-width: 600px) {
+            .withdrawal-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .status {
+                margin-top: 8px;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            
+        </div>
+    </header>
+    
+    <main>
+        <div class="container">
+            <div class="withdrawal-history">
+                <h2>Historique des Retraits</h2>
+                
+                <div class="withdrawal-item">
+                    <div class="withdrawal-header">
+                        <div class="withdrawal-date"><i class="far fa-calendar-alt"></i> 14 avril 2025 - 14:30</div>
+                        <div class="status status-paid"><i class="fas fa-check-circle"></i> Payé</div>
+                    </div>
+                    <div class="withdrawal-details">
+                        <div class="detail-row">
+                            <div class="detail-label"><i class="fas fa-money-bill-alt"></i> Montant retiré</div>
+                            <div class="detail-value">- 5 000 F</div>
+                        </div>
+                        <div class="detail-row fee-row">
+                            <div class="detail-label"><i class="fas fa-percent"></i> Frais de retrait (5%)</div>
+                            <div class="detail-value">250 F</div>
+                        </div>
+                    </div>
+                    <div class="summary">
+                        <div class="summary-label"><i class="fas fa-hand-holding-usd"></i> Montant reçu</div>
+                        <div class="summary-value">4 750 F</div>
+                    </div>
+                </div>
+                
+                <div class="withdrawal-item">
+                    <div class="withdrawal-header">
+                        <div class="withdrawal-date"><i class="far fa-calendar-alt"></i> 2 avril 2025 - 09:15</div>
+                        <div class="status status-paid"><i class="fas fa-check-circle"></i> Payé</div>
+                    </div>
+                    <div class="withdrawal-details">
+                        <div class="detail-row">
+                            <div class="detail-label"><i class="fas fa-money-bill-alt"></i> Montant retiré</div>
+                            <div class="detail-value">10 000 F</div>
+                        </div>
+                        <div class="detail-row fee-row">
+                            <div class="detail-label"><i class="fas fa-percent"></i> Frais de retrait (5%)</div>
+                            <div class="detail-value">500 F</div>
+                        </div>
+                    </div>
+                    <div class="summary">
+                        <div class="summary-label"><i class="fas fa-hand-holding-usd"></i> Montant reçu</div>
+                        <div class="summary-value">9 500 F</div>
+                    </div>
+                </div>
+                
+                <div class="withdrawal-item">
+                    <div class="withdrawal-header">
+                        <div class="withdrawal-date"><i class="far fa-calendar-alt"></i> 24 mars 2025 - 16:45</div>
+                        <div class="status status-pending"><i class="fas fa-clock"></i> En attente</div>
+                    </div>
+                    <div class="withdrawal-details">
+                        <div class="detail-row">
+                            <div class="detail-label"><i class="fas fa-money-bill-alt"></i> Montant retiré</div>
+                            <div class="detail-value">7 500 F</div>
+                        </div>
+                        <div class="detail-row fee-row">
+                            <div class="detail-label"><i class="fas fa-percent"></i> Frais de retrait (5%)</div>
+                            <div class="detail-value">375 F</div>
+                        </div>
+                    </div>
+                    <div class="summary">
+                        <div class="summary-label"><i class="fas fa-hand-holding-usd"></i> Montant à recevoir</div>
+                        <div class="summary-value">7 125 F</div>
+                    </div>
+                </div>
+       <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+    import { getAuth } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+    import { getDatabase, ref, set, onValue, update, get, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
+    
+    const firebaseConfig = {
+        apiKey: "AIzaSyDIB-raa12rkzqxRhflOMLBwL4hBycTgmo",
+        authDomain: "coke-eea48.firebaseapp.com",
+        databaseURL: "https://coke-eea48-default-rtdb.firebaseio.com",
+        projectId: "coke-eea48",
+        storageBucket: "coke-eea48.firebaseapp.com",
+        messagingSenderId: "217366074971",
+        appId: "1:217366074971:web:948bdc5baeeea93fac117e"
+    };
+
+    // Initialisation Firebase avec la nouvelle syntaxe
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    // Gestionnaire d'utilisateurs
+    class UserManager {
+        static async loadUsers() {
+            const usersRef = ref(database, 'users');
+            onValue(usersRef, (snapshot) => {
+                const userTable = document.getElementById('userTable');
+                userTable.innerHTML = '';
+                
+                snapshot.forEach((userSnapshot) => {
+                    const userData = userSnapshot.val();
+                    if (userData.email) {
+                        this.addUserToTable(userData);
+                    }
+                });
+            });
+        }
+
+        static addUserToTable(userData) {
+            const userTable = document.getElementById('userTable');
+            const row = document.createElement('tr');
+            row.classList.toggle('disabled-user', userData.isDisabled);
+            row.innerHTML = `
+                <td>${userData.email}</td>
+                <td>${userData.balance || 0}</td>
+                <td>${userData.isDisabled ? 'Désactivé' : 'Actif'}</td>
+                <td>
+                    <button onclick="window.prepareEdit('${userData.email}', ${userData.balance || 0})">
+                        Modifier
+                    </button>
+                </td>
+            `;
+            userTable.appendChild(row);
+        }
+
+        static prepareEdit(email, currentBalance) {
+            document.getElementById('userIdInput').value = email;
+            document.getElementById('balanceInput').value = currentBalance;
+        }
+
+        static async updateBalance() {
+            const userEmail = document.getElementById('userIdInput').value;
+            const newBalance = parseFloat(document.getElementById('balanceInput').value);
+            
+            try {
+                await this.validateAndUpdate(userEmail, newBalance);
+                this.showMessage('Solde mis à jour avec succès!', 'success');
+            } catch (error) {
+                this.showMessage(error.message, 'error');
+            }
+        }
+
+        static async validateAndUpdate(userEmail, newBalance) {
+            if (!userEmail || isNaN(newBalance)) {
+                throw new Error('Veuillez remplir tous les champs correctement.');
+            }
+
+            const usersRef = ref(database, 'users');
+            const userQuery = query(usersRef, orderByChild('email'), equalTo(userEmail));
+            const snapshot = await get(userQuery);
+
+            if (!snapshot.exists()) {
+                throw new Error('Utilisateur non trouvé');
+            }
+
+            let userId = null;
+            snapshot.forEach((childSnapshot) => {
+                userId = childSnapshot.key;
+            });
+            
+            if (userId) {
+                const userRef = ref(database, `users/${userId}`);
+                await update(userRef, { balance: newBalance });
+            }
+        }
+
+        static async toggleUserStatus() {
+            const userEmail = document.getElementById('userIdInput').value;
+            
+            try {
+                await this.validateAndToggle(userEmail);
+                this.showMessage('Statut de l\'utilisateur mis à jour!', 'success');
+            } catch (error) {
+                this.showMessage(error.message, 'error');
+            }
+        }
+
+        static async validateAndToggle(userEmail) {
+            if (!userEmail) {
+                throw new Error('Veuillez saisir un email.');
+            }
+
+            const usersRef = ref(database, 'users');
+            const userQuery = query(usersRef, orderByChild('email'), equalTo(userEmail));
+            const snapshot = await get(userQuery);
+
+            if (!snapshot.exists()) {
+                throw new Error('Utilisateur non trouvé');
+            }
+
+            let userId = null;
+            let userData = null;
+            
+            snapshot.forEach((childSnapshot) => {
+                userId = childSnapshot.key;
+                userData = childSnapshot.val();
+            });
+            
+            if (userId && userData) {
+                const userRef = ref(database, `users/${userId}`);
+                await update(userRef, {
+                    isDisabled: !userData.isDisabled
+                });
+            }
+        }
+
+        static showMessage(message, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = `<p class="${type}">${message}</p>`;
+            setTimeout(() => messageDiv.innerHTML = '', 3000);
+        }
+
+        static filterUsers() {
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+            const rows = document.getElementById('userTable').getElementsByTagName('tr');
+            
+            Array.from(rows).forEach(row => {
+                const emailCell = row.cells[0];
+                if (emailCell) {
+                    const emailText = emailCell.textContent.toLowerCase();
+                    row.style.display = emailText.includes(searchInput) ? '' : 'none';
+                }
+            });
+        }
+    }
+
+    // Expose les méthodes au scope global pour les appels dans le HTML
+    window.UserManager = UserManager;
+    window.filterUsers = () => UserManager.filterUsers();
+    window.updateBalance = () => UserManager.updateBalance();
+    window.toggleUserStatus = () => UserManager.toggleUserStatus();
+    window.prepareEdit = (email, balance) => UserManager.prepareEdit(email, balance);
+
+    // Chargement initial des utilisateurs
+    document.addEventListener('DOMContentLoaded', () => {
+        UserManager.loadUsers();
+    });
+</script>         
+           
+</body>
+</html>

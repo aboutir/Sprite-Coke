@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mes Investissements</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        :root {
+            --primary-color: #3a7bd5;
+            --secondary-color: #00d2ff;
+            --dark-color: #1f2937;
+            --light-color: #f9fafb;
+            --accent-color: #f43f5e;
+            --card-radius: 12px;
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.5;
+            background-color: #f1f5f9;
+            color: #1e293b;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            padding: 1.2rem 0;
+            color: white;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .dashboard {
+            max-width: 1100px;
+            margin: 1.5rem auto;
+            padding: 0 1rem;
+        }
+        
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: var(--card-radius);
+            padding: 1.2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card.balance {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+        
+        .stat-label {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-card.balance .stat-label {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .stat-card.balance .stat-value {
+            font-size: 1.5rem;
+        }
+        
+        .investments-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .investment-card {
+            background: white;
+            border-radius: var(--card-radius);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .investment-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .level-badge {
+            position: absolute;
+            top: 0.8rem;
+            right: 0.8rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            box-shadow: 0 4px 8px rgba(58, 123, 213, 0.3);
+        }
+        
+        .card-details {
+            padding: 1.5rem;
+        }
+        
+        .detail {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+            font-size: 0.9rem;
+        }
+        
+        .detail-label {
+            color: #64748b;
+            font-weight: 500;
+        }
+        
+        .detail-value {
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .progress-container {
+            height: 0.5rem;
+            background-color: #e2e8f0;
+            border-radius: 1rem;
+            overflow: hidden;
+            margin: 0.8rem 0;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        }
+        
+        .total {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+            padding-top: 0.8rem;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .total .detail-value {
+            color: var(--accent-color);
+            font-size: 1.1rem;
+        }
+        
+        .date-info {
+            margin-top: 1rem;
+            font-size: 0.75rem;
+            color: #64748b;
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+        
+        .payout-badge {
+            display: inline-block;
+            background-color: #e2e8f0;
+            padding: 0.2rem 0.5rem;
+            border-radius: 1rem;
+            font-size: 0.7rem;
+        }
+        
+        .message {
+            text-align: center;
+            padding: 2rem;
+            color: #64748b;
+            background: white;
+            border-radius: var(--card-radius);
+            margin-top: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .button-container {
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+        
+        .return-button {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 4px 6px rgba(58, 123, 213, 0.3);
+        }
+        
+        .return-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(58, 123, 213, 0.4);
+        }
+        
+        .notification {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 2rem;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+            transform: translateY(150%);
+            transition: transform 0.5s ease;
+            z-index: 1000;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .notification.show {
+            transform: translateY(0);
+        }
+        
+        footer {
+            margin-top: auto;
+            padding: 1rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #64748b;
+            background-color: white;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        @media (max-width: 768px) {
+            .stats-container {
+                grid-template-columns: 1fr;
+                gap: 0.8rem;
+            }
+            
+            .investments-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .notification {
+                left: 1.5rem;
+                right: 1.5rem;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Mes Investissements</h1>
+    </header>
+    
+    <main class="dashboard">
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-label">Produits actifs</div>
+                <div id="total-products" class="stat-value">0</div>
+            </div>
+            <div class="stat-card balance">
+                <div class="stat-label">Solde disponible</div>
+                <div id="user-balance" class="stat-value">0 FCFA</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Bénéfice total</div>
+                <div id="total-earnings" class="stat-value">0 FCFA</div>
+            </div>
+        </div>
+        
+        <div id="investments-container" class="investments-container">
+            <!-- Investment cards will be added here dynamically -->
+        </div>
+        
+        <div id="loading-message" class="message" style="display: none;">
+            <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="margin: 0 auto 1rem; display: block; animation: rotate 1s linear infinite;">
+                <circle cx="12" cy="12" r="10" stroke="#e2e8f0" stroke-width="4" fill="none" />
+                <path d="M12 2C6.48 2 2 6.48 2 12" stroke="#3a7bd5" stroke-width="4" fill="none" />
+            </svg>
+            Chargement...
+        </div>
+        
+        <div id="no-investments" class="message" style="display: none;">
+            Vous n'avez pas d'investissements actifs en ce moment.
+        </div>
+        
+        <div id="login-message" class="message" style="display: none;">
+            Veuillez vous connecter pour voir vos investissements.
+        </div>
+        
+        <div class="button-container">
+            <button id="return-button" class="return-button">Retour aux investissements</button>
+        </div>
+    </main>
+    
+    <footer>
+        <p>© 2025 | Les informations présentées sont à titre informatif uniquement.</p>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+        import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyDIB-raa12rkzqxRhflOMLBwL4hBycTgmo",
+            authDomain: "coke-eea48.firebaseapp.com",
+            databaseURL: "https://coke-eea48-default-rtdb.firebaseio.com",
+            projectId: "coke-eea48",
+            storageBucket: "coke-eea48.firebasestorage.app",
+            messagingSenderId: "217366074971",
+            appId: "1:217366074971:web:948bdc5baeeea93fac117e"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+
+        // Fonction pour formater les nombres en FCFA
+        function formatCurrency(value) {
+            // S'assurer que la valeur est un nombre
+            const numValue = Number(value) || 0;
+            return numValue.toLocaleString() + ' FCFA';
+        }
+
+        // Éléments DOM
+        const totalProductsElement = document.getElementById('total-products');
+        const totalEarningsElement = document.getElementById('total-earnings');
+        const userBalanceElement = document.getElementById('user-balance');
+        const investmentsContainer = document.getElementById('investments-container');
+        const noInvestmentsMessage = document.getElementById('no-investments');
+        const loginMessage = document.getElementById('login-message');
+        const loadingMessage = document.getElementById('loading-message');
+
+        // Observer l'état de l'authentification
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // User is signed in
+                const userId = user.uid;
+                loginMessage.style.display = 'none';
+                loadingMessage.style.display = 'block';
+                
+                // Process payouts and update investments
+                const processInvestments = () => {
+                    const investmentsRef = ref(database, 'investments/' + userId);
+                    get(investmentsRef).then((snapshot) => {
+                        loadingMessage.style.display = 'none';
+                        
+                        if (snapshot.exists()) {
+                            const investments = snapshot.val();
+                            let hasActiveInvestments = false;
+                            let totalProducts = 0;
+                            let totalEarnings = 0; // Cette variable va stocker le total des bénéfices
+                            let totalDailyPayout = 0;
+                            const currentDate = new Date();
+                            const updatedInvestments = {};
+                            let investmentsUpdated = false;
+                            
+                            // Clear existing cards first
+                            investmentsContainer.innerHTML = '';
+                            
+                            // Process each investment
+                            Object.keys(investments).forEach(key => {
+                                const investment = investments[key];
+                                if (investment.status === 'active') {
+                                    hasActiveInvestments = true;
+                                    totalProducts++;
+                                    
+                                    // S'assurer que toutes les valeurs numériques sont des nombres
+                                    const investmentAmount = Number(investment.investment) || 0;
+                                    
+                                    // MODIFICATION: Vérifier si c'est un VIP 3 avec montant de 90 000 FCFA
+                                    let cycle = Number(investment.cycle) || 31;
+                                    if (investment.level === "VIP 3" && investmentAmount === 90000) {
+                                        cycle = 5; // Cycle de 5 jours pour VIP 3 à 90 000 FCFA
+                                    }
+                                    
+                                    const dailyReturnAmount = Number(investment.dailyReturn) || 0;
+                                    const totalReturnAmount = Number(investment.totalReturn) || 0;
+                                    
+                                    // Calculate dates and payouts
+                                    const startDate = new Date(investment.timestamp);
+                                    const daysPassed = Math.floor((currentDate - startDate) / (1000 * 60 * 60 * 24));
+                                    const daysRemaining = Math.max(0, cycle - daysPassed);
+                                    
+                                    // Calculate earned so far
+                                    const earnedSoFar = Math.min(cycle, daysPassed) * dailyReturnAmount;
+                                    totalEarnings += earnedSoFar; // Ajouter à la somme totale
+                                    
+                                    // Check if we need to make a daily payout
+                                    let lastPayout = investment.lastPayout ? new Date(investment.lastPayout) : null;
+                                    
+                                    // Si investissement fait le 25/02/2025, pas de paiements avant le 26/02/2025
+                                    const investmentDate = new Date(investment.timestamp);
+                                    const isInvestedToday = investmentDate.getDate() === 25 && 
+                                                          investmentDate.getMonth() === 1 && // Février (0-indexé)
+                                                          investmentDate.getFullYear() === 2025;
+                                                          
+                                    const tomorrowDate = new Date('2025-02-26T00:00:00');
+                                    const shouldPayoutBegin = currentDate >= tomorrowDate;
+                                    
+                                    // If no last payout or payout was more than 24 hours ago
+                                    if (!lastPayout || (currentDate - lastPayout >= 24 * 60 * 60 * 1000)) {
+                                        // Only payout if still within cycle period AND not invested today OR payment date is 26/02/2025 or later
+                                        if (daysPassed <= cycle && (!isInvestedToday || shouldPayoutBegin)) {
+                                            totalDailyPayout += dailyReturnAmount;
+                                            
+                                            // Update the last payout timestamp
+                                            updatedInvestments[key] = {
+                                                ...investment,
+                                                lastPayout: currentDate.toISOString()
+                                            };
+                                            investmentsUpdated = true;
+                                        }
+                                    }
+                                    
+                                    // Create investment card
+                                    const card = document.createElement('div');
+                                    card.className = 'investment-card';
+                                    card.innerHTML = `
+                                        <div class="level-badge">${investment.level || ''}</div>
+                                        <div class="card-details">
+                                            <div class="detail">
+                                                <span class="detail-label">Initial:</span>
+                                                <span class="detail-value">${investmentAmount.toLocaleString()} FCFA</span>
+                                            </div>
+                                            <div class="detail">
+                                                <span class="detail-label">Revenu/jour:</span>
+                                                <span class="detail-value">${dailyReturnAmount.toLocaleString()} FCFA</span>
+                                            </div>
+                                            <div class="detail">
+                                                <span class="detail-label">Jours restants:</span>
+                                                <span class="detail-value">${daysRemaining}</span>
+                                            </div>
+                                            <div class="detail">
+                                                <span class="detail-label">Gagné:</span>
+                                                <span class="detail-value">${earnedSoFar.toLocaleString()} FCFA</span>
+                                            </div>
+                                            <div class="progress-container">
+                                                <div class="progress-bar" style="width: ${Math.min(100, (daysPassed / cycle) * 100)}%"></div>
+                                            </div>
+                                            <div class="total">
+                                                <span class="detail-label">Total:</span>
+                                                <span class="detail-value">${totalReturnAmount.toLocaleString()} FCFA</span>
+                                            </div>
+                                            <div class="date-info">
+                                                ${new Date(investment.timestamp).toLocaleDateString()}
+                                                ${lastPayout ? `<span class="payout-badge">Dernier paiement: ${new Date(lastPayout).toLocaleDateString()}</span>` : ''}
+                                            </div>
+                                        </div>
+                                    `;
+                                    investmentsContainer.appendChild(card);
+                                }
+                            });
+                            
+                            // Update the summary stats
+                            totalProductsElement.textContent = totalProducts;
+                            // S'assurer que totalEarnings est mis à jour dans l'interface
+                            totalEarningsElement.textContent = formatCurrency(totalEarnings);
+                            
+                            // If we have payouts to process, update user balance
+                            if (totalDailyPayout > 0) {
+                                const userRef = ref(database, 'users/' + userId);
+                                get(userRef).then((userSnapshot) => {
+                                    if (userSnapshot.exists()) {
+                                        const userData = userSnapshot.val();
+                                        const currentBalance = Number(userData.balance) || 0;
+                                        const newBalance = currentBalance + totalDailyPayout;
+                                        
+                                        // Update user balance
+                                        update(userRef, {
+                                            balance: newBalance
+                                        }).then(() => {
+                                            userBalanceElement.textContent = formatCurrency(newBalance);
+                                            
+                                            // Show notification of credited amount
+                                            const notification = document.createElement('div');
+                                            notification.className = 'notification';
+                                            notification.textContent = `${totalDailyPayout.toLocaleString()} FCFA crédités!`;
+                                            document.body.appendChild(notification);
+                                            
+                                            setTimeout(() => {
+                                                notification.classList.add('show');
+                                            }, 100);
+                                            
+                                            setTimeout(() => {
+                                                notification.classList.remove('show');
+                                                setTimeout(() => {
+                                                    document.body.removeChild(notification);
+                                                }, 500);
+                                            }, 5000);
+                                        });
+                                        
+                                        // Update investment records with new lastPayout timestamps
+                                        if (investmentsUpdated) {
+                                            Object.keys(updatedInvestments).forEach(key => {
+                                                const investmentRef = ref(database, `investments/${userId}/${key}`);
+                                                update(investmentRef, {
+                                                    lastPayout: updatedInvestments[key].lastPayout
+                                                });
+                                            });
+                                        }
+                                    }
+                                });
+                            } else {
+                                // Just get and display the current balance
+                                const userRef = ref(database, 'users/' + userId);
+                                get(userRef).then((userSnapshot) => {
+                                    if (userSnapshot.exists()) {
+                                        const userData = userSnapshot.val();
+                                        const balance = Number(userData.balance) || 0;
+                                        userBalanceElement.textContent = formatCurrency(balance);
+                                    }
+                                });
+                            }
+                            
+                            if (!hasActiveInvestments) {
+                                noInvestmentsMessage.style.display = 'block';
+                            }
+                        } else {
+                            // No investments found
+                            noInvestmentsMessage.style.display = 'block';
+                            totalProductsElement.textContent = '0';
+                            totalEarningsElement.textContent = '0 FCFA';
+                            
+                            // Just get and display the current balance
+                            const userRef = ref(database, 'users/' + userId);
+                            get(userRef).then((userSnapshot) => {
+                                if (userSnapshot.exists()) {
+                                    const userData = userSnapshot.val();
+                                    const balance = Number(userData.balance) || 0;
+                                    userBalanceElement.textContent = formatCurrency(balance);
+                                }
+                            });
+                        }
+                    }).catch((error) => {
+                        loadingMessage.style.display = 'none';
+                        console.error("Erreur:", error);
+                        alert(`Erreur: ${error.message}`);
+                    });
+                };
+                
+                // Process investments when page loads
+                processInvestments();
+                
+            } else {
+                // User is not signed in
+                loginMessage.style.display = 'block';
+                loadingMessage.style.display = 'none';
+            }
+        });
+        
+        // Return to investment page button
+        document.getElementById('return-button').addEventListener('click', function() {
+            window.location.href = 'investi.html';
+        });
+    </script>
+</body>
+</html>

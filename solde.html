@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Immobilier</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+       :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+            --light-bg: #f5f7fa;
+            --dark-text: #2c3e50;
+            --light-text: #ecf0f1;
+            --border-radius: 14px;
+            --shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', 'Segoe UI', Arial, sans-serif;
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            padding-bottom: 80px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            padding: 16px;
+            max-width: 540px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: linear-gradient(145deg, var(--primary-color), var(--secondary-color));
+            color: var(--light-text);
+            padding: 24px 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            width: 120px;
+            height: 120px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+        }
+        
+        .loading {
+            display: inline-block;
+            background-color: rgba(255,255,255,0.2);
+            color: var(--light-text);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .loading-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .balance-title {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 5px;
+            opacity: 0.9;
+        }
+        
+        .user-info {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-bottom: 10px;
+        }
+        
+        .balance-amount {
+            font-size: 42px;
+            font-weight: 700;
+            margin: 8px 0 15px;
+            letter-spacing: 1px;
+        }
+        
+        .buttons-container {
+            margin-top: 20px;
+        }
+        
+        .buttons-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .btn {
+            padding: 12px 18px;
+            border-radius: 30px;
+            color: white;
+            font-weight: 600;
+            text-align: center;
+            width: 48%;
+            text-decoration: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+            border: none;
+            font-size: 14px;
+        }
+        
+        .btn-full {
+            width: 100%;
+            margin-top: 10px;
+            background-color: rgba(255,255,255,0.2);
+            backdrop-filter: blur(5px);
+        }
+        
+        .btn-full:hover {
+            background-color: rgba(255,255,255,0.3);
+        }
+        
+        .btn i {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+        
+        .btn-red { 
+            background-color: var(--danger-color);
+        }
+        
+        .btn-red:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+        }
+        
+        .btn-green { 
+            background-color: var(--success-color);
+        }
+        
+        .btn-green:hover {
+            background-color: #219652;
+            transform: translateY(-2px);
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 25px 0 15px;
+            color: var(--dark-text);
+            padding-left: 10px;
+            border-left: 3px solid var(--primary-color);
+        }
+        
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .menu-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 15px;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        .menu-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+        }
+        
+        .icon {
+            margin-bottom: 12px;
+            font-size: 24px;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+            background-color: rgba(52, 152, 219, 0.1);
+            border-radius: 50%;
+        }
+        
+        .menu-text {
+            font-size: 14px;
+            color: var(--dark-text);
+            font-weight: 500;
+        }
+        
+        .nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-around;
+            background-color: white;
+            padding: 12px 0 8px;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.07);
+            z-index: 1000;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #95a5a6;
+            text-decoration: none;
+            font-size: 12px;
+            padding: 8px 0;
+            width: 20%;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item i {
+            font-size: 22px;
+            margin-bottom: 4px;
+        }
+        
+        .nav-active { 
+            color: var(--primary-color);
+            transform: translateY(-5px);
+        }
+        
+        .nav-active i {
+            background-color: rgba(52, 152, 219, 0.1);
+            padding: 10px;
+            border-radius: 50%;
+        }
+        
+        @media (max-width: 480px) {
+            .menu-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .btn {
+                font-size: 13px;
+                padding: 10px 15px;
+            }
+            
+            .balance-amount {
+                font-size: 36px;
+            }
+        }
+    </style> 
+</head>
+<body>
+    <!-- Overlay de chargement -->
+    <div class="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <span class="loading">Sprite-Coke </span>
+            
+            <div>
+                <div class="balance-title">Mon argent</div>
+                <!-- Ajout de l'élément pour l'identifiant utilisateur -->
+                <div class="user-info">Compte: <span id="user-identifier">Non connecté</span></div>
+                <!-- Ajout de l'ID pour le solde -->
+                <div class="balance-amount" id="user-balance">0 FCFA </div>
+            </div>
+            
+            <div class="buttons-container">
+                <div class="buttons-row">
+                    <a href="retrait.html" class="btn btn-red">
+                        <i class="fas fa-arrow-down"></i> Retirer
+                    </a>
+                    <a href="recharge.html" class="btn btn-green">
+                        <i class="fas fa-arrow-up"></i> Recharger
+                    </a>
+                </div>
+                <a href="revenus.html" class="btn btn-full">
+                    <i class="fas fa-mobile-alt"></i> Appareil
+                </a>
+            </div>
+        </div>
+        
+        <div class="activity-summary">
+            <!-- Ajout des éléments pour les retraits et dépôts -->
+            <div class="activity-card" style="display: none;">
+                <div>Total des retraits: <span id="withdrawals-amount">0 XOF</span></div>
+                <div>Total des dépôts: <span id="deposits-amount">0 XOF</span></div>
+            </div>
+        </div>
+        
+        <h2 class="section-title">Services</h2>
+        
+        <div class="menu-grid">
+            <a href="historique.html" class="menu-item menu-button">
+                <div class="icon"><i class="fas fa-arrow-up"></i></div>
+                <div class="menu-text">Enregistrement de recharge</div>
+            </a>
+            
+            <a href="historique-retrait.html" class="menu-item menu-button">
+                <div class="icon"><i class="fas fa-arrow-down"></i></div>
+                <div class="menu-text">Enregistrement de retrait</div>
+            </a>
+            
+            <a href="portefeuille.html" class="menu-item menu-button">
+                <div class="icon"><i class="fas fa-wallet"></i></div>
+                <div class="menu-text">Enregistrement du portefeuille</div>
+            </a>
+            
+            <a href="carte.html" class="menu-item menu-button">
+                <div class="icon"><i class="fas fa-eye"></i></div>
+                <div class="menu-text">Visite du portefeuille</div>
+            </a>
+            
+            <a href="service.html" class="menu-item menu-button">
+                <div class="icon"><i class="fas fa-question-circle"></i></div>
+                <div class="menu-text">Centre d'aide</div>
+            </a>
+            
+            <a href="index.html" class="menu-item menu-button">
+                <div class="icon"><i class="fas fa-sign-out-alt"></i></div>
+                <div class="menu-text">Déconnexion</div>
+            </a>
+        </div>
+    </div>
+    
+    <div class="nav">
+        <a href="accueil.html" class="nav-item nav-button nav-active">
+            <i class="fas fa-home"></i>
+            <span>Accueil </span>
+        </a>
+        <a href="Historique-retrait.html" class="nav-item nav-button">
+            <i class="fas fa-history"></i>
+            <span>Historique</span>
+        </a>
+        <a href="team.html" class="nav-item nav-button">
+            <i class="fas fa-users"></i>
+            <span>Team</span>
+        </a>
+        <a href="investi.html" class="nav-item nav-button">
+            <i class="fas fa-mobile-alt"></i>
+            <span>Investir </span>
+        </a>
+        <a href="#" class="nav-item nav-button">
+            <i class="fas fa-user"></i>
+            <span>Compte</span>
+        </a>
+    </div>
+    
+  <script type="module">
+       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
+        
+const firebaseConfig = {
+    apiKey: "AIzaSyDIB-raa12rkzqxRhflOMLBwL4hBycTgmo",
+    authDomain: "coke-eea48.firebaseapp.com",
+    databaseURL: "https://coke-eea48-default-rtdb.firebaseio.com",
+    projectId: "coke-eea48",
+    storageBucket: "coke-eea48.firebasestorage.app",
+    messagingSenderId: "217366074971",
+    appId: "1:217366074971:web:948bdc5baeeea93fac117e"
+};
+
+// Initialisation de Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const database = getDatabase(app);
+
+// Gestionnaire d'interface utilisateur
+class UIManager {
+    static updateUserInfo(userData) {
+        if (!userData) return;
+        
+        // Recherchons le numéro de téléphone dans différents emplacements possibles des données
+        let phoneNumber = null;
+        let countryCode = userData.countryCode || "+225"; // Indicatif par défaut (Côte d'Ivoire)
+        
+        // Cas 1: Directement dans userData comme "phoneNumber"
+        if (userData.phoneNumber) {
+            phoneNumber = userData.phoneNumber;
+        } 
+        // Cas 2: Avec un autre nom comme "telephone", "numero", "tel", "phone", etc.
+        else if (userData.telephone) {
+            phoneNumber = userData.telephone;
+        } else if (userData.numero) {
+            phoneNumber = userData.numero;
+        } else if (userData.tel) {
+            phoneNumber = userData.tel;
+        } else if (userData.phone) {
+            phoneNumber = userData.phone;
+        }
+        // Cas 3: Dans un sous-objet comme "profile" ou "contact"
+        else if (userData.profile && userData.profile.phoneNumber) {
+            phoneNumber = userData.profile.phoneNumber;
+            countryCode = userData.profile.countryCode || countryCode;
+        } else if (userData.contact && userData.contact.phoneNumber) {
+            phoneNumber = userData.contact.phoneNumber;
+            countryCode = userData.contact.countryCode || countryCode;
+        }
+        
+        const { balance = 0, withdrawals = 0, deposits = 0 } = userData;
+        
+        // Mise à jour de l'identifiant avec indicatif
+        const userIdentifier = document.getElementById('user-identifier');
+        if (userIdentifier) {
+            if (phoneNumber) {
+                // Nettoyer le numéro en enlevant tous les espaces et caractères non numériques
+                const cleanNumber = phoneNumber.replace(/\D/g, '');
+                
+                // Vérifier si le format correspond au pattern attendu (10 chiffres)
+                if (/^\d{10}$/.test(cleanNumber)) {
+                    // Ajouter l'indicatif et reformater avec des espaces
+                    const formattedNumber = `${countryCode} ${cleanNumber.replace(/(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4 $5')}`;
+                    userIdentifier.textContent = formattedNumber;
+                } else {
+                    // Si le format ne correspond pas, l'afficher avec l'indicatif
+                    userIdentifier.textContent = `${countryCode} ${cleanNumber}`;
+                }
+            } else {
+                console.log("Aucun numéro de téléphone trouvé dans les données:", userData);
+            }
+        }
+
+        // Mise à jour des montants
+        const formatAmount = (amount) => new Intl.NumberFormat('fr-FR').format(amount);
+        
+        const elements = {
+            'user-balance': balance,
+            'withdrawals-amount': withdrawals,
+            'deposits-amount': deposits
+        };
+
+        Object.entries(elements).forEach(([id, value]) => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = `${formatAmount(value)} FCFA `;
+            }
+        });
+        
+        // Afficher l'activité résumée si nécessaire
+        if (withdrawals > 0 || deposits > 0) {
+            const activityCard = document.querySelector('.activity-card');
+            if (activityCard) activityCard.style.display = 'block';
+        }
+    }
+
+    static showLoading() {
+        const loader = document.querySelector('.loading-overlay');
+        if (loader) loader.classList.add('active');
+    }
+
+    static hideLoading() {
+        const loader = document.querySelector('.loading-overlay');
+        if (loader) loader.classList.remove('active');
+    }
+}
+
+// Gestionnaire de navigation
+class NavigationManager {
+    static init() {
+        // Navigation principale
+        const navButtons = document.querySelectorAll('.nav-button');
+        navButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const pagePath = button.getAttribute('href');
+                if (pagePath && pagePath !== '#') {
+                    this.navigateToPage(pagePath);
+                }
+            });
+        });
+
+        // Boutons du menu
+        const menuButtons = document.querySelectorAll('.menu-button');
+        menuButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const pagePath = button.getAttribute('href');
+                if (pagePath && pagePath !== '#') {
+                    this.navigateToPage(pagePath);
+                }
+            });
+        });
+
+        // Boutons d'action
+        const actionButtons = document.querySelectorAll('.action-button');
+        actionButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const pagePath = button.getAttribute('href');
+                if (pagePath && pagePath !== '#') {
+                    this.navigateToPage(pagePath);
+                }
+            });
+        });
+    }
+
+    static navigateToPage(path) {
+        UIManager.showLoading();
+        try {
+            // Vérifier si le chemin est relatif
+            if (path.startsWith('/')) {
+                path = path.substring(1); // Enlever le slash initial
+            }
+            window.location.href = path;
+        } catch (error) {
+            console.error('Erreur de navigation:', error);
+            UIManager.hideLoading();
+        }
+    }
+
+    static updateActiveButton() {
+        const currentPath = window.location.pathname;
+        document.querySelectorAll('.nav-button').forEach(button => {
+            button.classList.remove('active');
+            if (button.getAttribute('href') === currentPath) {
+                button.classList.add('active');
+            }
+        });
+    }
+}
+
+// Gestionnaire d'authentification
+class AuthManager {
+    static init() {
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                console.log("Utilisateur connecté:", user.uid);
+                this.setupUserListeners(user);
+            } else {
+                console.log("Aucun utilisateur connecté");
+                this.redirectToLogin();
+            }
+        });
+    }
+
+    static setupUserListeners(user) {
+        const userRef = ref(database, `users/${user.uid}`);
+        onValue(userRef, (snapshot) => {
+            const userData = snapshot.val();
+            console.log("Données utilisateur (structure complète):", JSON.stringify(userData, null, 2));
+            
+            if (userData) {
+                UIManager.updateUserInfo(userData);
+            } else {
+                console.error("Pas de données utilisateur trouvées pour l'ID:", user.uid);
+            }
+        }, (error) => {
+            console.error("Erreur lors de la récupération des données utilisateur:", error);
+        });
+    }
+
+    static redirectToLogin() {
+        if (!window.location.pathname.includes('login.html')) {
+            window.location.href = 'login.html';
+        }
+    }
+}
+
+// Initialisation de l'application
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("Application initialisée");
+    
+    // Initialiser la navigation
+    NavigationManager.init();
+    NavigationManager.updateActiveButton();
+
+    // Initialiser l'authentification
+    AuthManager.init();
+
+    // Masquer le loader au chargement initial
+    UIManager.hideLoading();
+}) ;
+    </script>
+  </body>
+</html>

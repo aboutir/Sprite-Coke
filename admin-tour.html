@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration - Distribution de Tours</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #118AB2;
+            --secondary-color: #06D6A0;
+            --danger-color: #EF476F;
+            --warning-color: #FFD166;
+            --dark-color: #073B4C;
+            --light-color: #f4f4f4;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            color: var(--dark-color);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .admin-badge {
+            display: flex;
+            align-items: center;
+            background-color: var(--dark-color);
+            padding: 8px 15px;
+            border-radius: 50px;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        
+        .admin-badge i {
+            margin-right: 8px;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 10px;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        thead {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        .user-row:hover {
+            background-color: #e9f7fe;
+        }
+        
+        .badge {
+            padding: 5px 10px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .badge-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .badge-success {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .action-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        
+        .action-btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .action-btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            color: white;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .toast.show {
+            opacity: 1;
+        }
+        
+        .toast.success {
+            background-color: var(--secondary-color);
+        }
+        
+        .toast.error {
+            background-color: var(--danger-color);
+        }
+        
+        .toast.warning {
+            background-color: var(--warning-color);
+            color: var(--dark-color);
+        }
+        
+        .action-confirmation {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .confirmation-box {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+        }
+        
+        .confirmation-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+        
+        .confirmation-message {
+            margin-bottom: 20px;
+        }
+        
+        .confirmation-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #666;
+        }
+        
+        .stat-primary .stat-icon {
+            color: var(--primary-color);
+        }
+        
+        .stat-secondary .stat-icon {
+            color: var(--secondary-color);
+        }
+        
+        .stat-warning .stat-icon {
+            color: var(--warning-color);
+        }
+        
+        .stat-danger .stat-icon {
+            color: var(--danger-color);
+        }
+        
+        @media (max-width: 768px) {
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-actions {
+                flex-direction: column;
+            }
+            
+            .admin-badge {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-title">
+                <i class="fas fa-crown fa-2x"></i>
+                <h1>Mode Administrateur</h1>
+            </div>
+            <div class="header-actions">
+                <div class="admin-badge">
+                    <i class="fas fa-user-shield"></i>
+                    <span>Super Admin</span>
+                </div>
+                <button id="backButton" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </button>
+            </div>
+        </header>
+        
+        <div class="stats-container">
+            <div class="stat-card stat-primary">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-value" id="totalUsers">0</div>
+                <div class="stat-label">Utilisateurs</div>
+            </div>
+            
+            <div class="stat-card stat-secondary">
+                <div class="stat-icon">
+                    <i class="fas fa-sync-alt"></i>
+                </div>
+                <div class="stat-value" id="totalTours">0</div>
+                <div class="stat-label">Tours Distribués</div>
+            </div>
+            
+            <div class="stat-card stat-warning">
+                <div class="stat-icon">
+                    <i class="fas fa-coins"></i>
+                </div>
+                <div class="stat-value" id="totalBalance">0</div>
+                <div class="stat-label">FCFA Distribués</div>
+            </div>
+            
+            <div class="stat-card stat-danger">
+                <div class="stat-icon">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <div class="stat-value" id="totalPrizes">0</div>
+                <div class="stat-label">Prix Gagnés</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2 class="card-title">Distribution de Tours</h2>
+            <div class="input-group">
+                <label for="tourAmount">Nombre de tours à distribuer:</label>
+                <input type="number" id="tourAmount" min="1" value="1">
+            </div>
+            <button id="distributeToursButton" class="btn btn-primary">
+                <i class="fas fa-gift"></i> Distribuer des tours à tous les utilisateurs
+            </button>
+        </div>
+        
+        <div class="control-panel">
+    <div class="input-group">
+        <input type="number" id="tourAmount" placeholder="Nombre de tours" min="1">
+        <button id="distributeToursButton" class="btn btn-primary">
+            <i class="fas fa-share-alt"></i> Distribuer à tous
+        </button>
+    </div>
+    
+    <!-- Nouveau bouton pour réinitialiser les tours -->
+    <button id="resetAllToursButton" class="btn btn-danger">
+        <i class="fas fa-trash"></i> Réinitialiser tous les tours
+    </button>
+    
+    <button id="backButton" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Retour
+    </button>
+</div>
+        
+        <div class="card">
+            <h2 class="card-title">Gestion des Utilisateurs</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Utilisateur</th>
+                            <th>Email</th>
+                            <th>Tours</th>
+                            <th>Solde</th>
+                            <th>Prix Gagnés</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <!-- Les utilisateurs seront insérés ici dynamiquement -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="action-confirmation" id="confirmationModal">
+        <div class="confirmation-box">
+            <h3 class="confirmation-title">Confirmation</h3>
+            <p class="confirmation-message" id="confirmationMessage">Êtes-vous sûr de vouloir effectuer cette action?</p>
+            <div class="confirmation-buttons">
+                <button id="confirmButton" class="btn btn-primary">Confirmer</button>
+                <button id="cancelButton" class="btn btn-danger">Annuler</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="toast" class="toast"></div>
+    
+   <script type="module">
+    // Import Firebase modules
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getDatabase, ref, set, get, update, onValue } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+    // Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyDIB-raa12rkzqxRhflOMLBwL4hBycTgmo",
+        authDomain: "coke-eea48.firebaseapp.com",
+        databaseURL: "https://coke-eea48-default-rtdb.firebaseio.com",
+        projectId: "coke-eea48",
+        storageBucket: "coke-eea48.firebaseapp.com",
+        messagingSenderId: "217366074971",
+        appId: "1:217366074971:web:948bdc5baeeea93fac117e"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+    
+    // Éléments DOM
+    const backButton = document.getElementById('backButton');
+    const tourAmountInput = document.getElementById('tourAmount');
+    const distributeToursButton = document.getElementById('distributeToursButton');
+    const resetAllToursButton = document.getElementById('resetAllToursButton'); // Nouveau bouton
+    const usersTableBody = document.getElementById('usersTableBody');
+    const toast = document.getElementById('toast');
+    const confirmationModal = document.getElementById('confirmationModal');
+    const confirmationMessage = document.getElementById('confirmationMessage');
+    const confirmButton = document.getElementById('confirmButton');
+    const cancelButton = document.getElementById('cancelButton');
+    
+    // Éléments de statistiques
+    const totalUsersElement = document.getElementById('totalUsers');
+    const totalToursElement = document.getElementById('totalTours');
+    const totalBalanceElement = document.getElementById('totalBalance');
+    const totalPrizesElement = document.getElementById('totalPrizes');
+    
+    // Variables globales
+    let allUsers = [];
+    let pendingAction = null;
+    
+    // Initialisation immédiate sans vérification d'authentification
+    document.addEventListener('DOMContentLoaded', () => {
+        // Charger les données des utilisateurs
+        loadAllUsers();
+        
+        // Calculer les statistiques
+        calculateStatistics();
+        
+        // Afficher un message de bienvenue pour confirmer l'accès superadmin
+        showToast('Mode super administrateur activé', 'success');
+    });
+    
+    // Fonction pour charger tous les utilisateurs
+    function loadAllUsers() {
+        const usersRef = ref(database, 'users');
+        onValue(usersRef, (snapshot) => {
+            allUsers = [];
+            usersTableBody.innerHTML = '';
+            
+            const usersData = snapshot.val() || {};
+            
+            // Convertir l'objet en tableau
+            Object.keys(usersData).forEach(userId => {
+                allUsers.push({
+                    id: userId,
+                    ...usersData[userId]
+                });
+            });
+            
+            // Afficher les utilisateurs dans le tableau
+            renderUsersTable();
+            
+            // Mettre à jour les statistiques
+            calculateStatistics();
+        });
+    }
+    
+    // Fonction pour afficher les utilisateurs dans le tableau
+    function renderUsersTable() {
+        usersTableBody.innerHTML = '';
+        
+        allUsers.forEach(user => {
+            const row = document.createElement('tr');
+            row.className = 'user-row';
+            
+            const prizesCount = user.prizes ? user.prizes.length : 0;
+            
+            row.innerHTML = `
+                <td>${user.username || 'Utilisateur ' + user.id.slice(0, 6)}</td>
+                <td>${user.email || 'N/A'}</td>
+                <td>${user.tours || 0}</td>
+                <td>${user.balance || 0} FCFA</td>
+                <td>${prizesCount}</td>
+                <td class="actions">
+                    <button class="action-btn action-btn-primary give-tour" data-userid="${user.id}">
+                        <i class="fas fa-plus-circle"></i> Tour
+                    </button>
+                    <button class="action-btn action-btn-danger reset-user" data-userid="${user.id}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            `;
+            
+            usersTableBody.appendChild(row);
+        });
+        
+        // Ajouter les écouteurs d'événements pour les boutons d'action
+        document.querySelectorAll('.give-tour').forEach(button => {
+            button.addEventListener('click', function() {
+                const userId = this.getAttribute('data-userid');
+                giveToursToUser(userId, 1);
+            });
+        });
+        
+        document.querySelectorAll('.reset-user').forEach(button => {
+            button.addEventListener('click', function() {
+                const userId = this.getAttribute('data-userid');
+                showConfirmation(
+                    `Êtes-vous sûr de vouloir réinitialiser cet utilisateur? Tous ses tours, prix et solde seront effacés.`,
+                    () => resetUser(userId)
+                );
+            });
+        });
+    }
+    
+    // Fonction pour calculer les statistiques
+    function calculateStatistics() {
+        const totalUsers = allUsers.length;
+        let totalTours = 0;
+        let totalBalance = 0;
+        let totalPrizes = 0;
+        
+        allUsers.forEach(user => {
+            totalTours += user.tours || 0;
+            totalBalance += user.balance || 0;
+            totalPrizes += user.prizes ? user.prizes.length : 0;
+        });
+        
+        // Mettre à jour les éléments d'affichage
+        totalUsersElement.textContent = totalUsers;
+        totalToursElement.textContent = totalTours;
+        totalBalanceElement.textContent = totalBalance + ' FCFA';
+        totalPrizesElement.textContent = totalPrizes;
+    }
+    
+    // Fonction pour distribuer des tours à tous les utilisateurs
+    function distributeToursToAll() {
+        const tourAmount = parseInt(tourAmountInput.value) || 0;
+        
+        if (tourAmount <= 0) {
+            showToast('Veuillez entrer un nombre de tours valide', 'error');
+            return;
+        }
+        
+        showConfirmation(
+            `Êtes-vous sûr de vouloir distribuer ${tourAmount} tour(s) à tous les utilisateurs?`,
+            () => {
+                // Pour chaque utilisateur, mettre à jour le nombre de tours
+                const updates = {};
+                
+                allUsers.forEach(user => {
+                    const currentTours = user.tours || 0;
+                    updates[`users/${user.id}/tours`] = currentTours + tourAmount;
+                });
+                
+                // Appliquer toutes les mises à jour en une seule opération
+                update(ref(database), updates)
+                    .then(() => {
+                        showToast(`${tourAmount} tour(s) distribué(s) à tous les utilisateurs avec succès!`, 'success');
+                    })
+                    .catch(error => {
+                        console.error("Erreur lors de la distribution des tours:", error);
+                        showToast('Erreur lors de la distribution des tours', 'error');
+                    });
+            }
+        );
+    }
+    
+    // Fonction pour réinitialiser les tours de tous les utilisateurs
+    function resetAllTours() {
+        showConfirmation(
+            `Êtes-vous sûr de vouloir réinitialiser les tours de TOUS les utilisateurs à zéro?`,
+            () => {
+                const updates = {};
+                
+                allUsers.forEach(user => {
+                    updates[`users/${user.id}/tours`] = 0;
+                });
+                
+                update(ref(database), updates)
+                    .then(() => {
+                        showToast('Tours réinitialisés pour tous les utilisateurs avec succès!', 'success');
+                    })
+                    .catch(error => {
+                        console.error("Erreur lors de la réinitialisation des tours:", error);
+                        showToast('Erreur lors de la réinitialisation des tours', 'error');
+                    });
+            }
+        );
+    }
+    
+    // Fonction pour donner des tours à un utilisateur spécifique
+    function giveToursToUser(userId, amount) {
+        const userRef = ref(database, 'users/' + userId);
+        
+        get(userRef).then((snapshot) => {
+            if (snapshot.exists()) {
+                const userData = snapshot.val();
+                const currentTours = userData.tours || 0;
+                
+                update(userRef, {
+                    tours: currentTours + amount
+                })
+                    .then(() => {
+                        showToast(`${amount} tour(s) ajouté(s) à l'utilisateur avec succès!`, 'success');
+                    })
+                    .catch(error => {
+                        console.error("Erreur lors de l'ajout de tours:", error);
+                        showToast('Erreur lors de l\'ajout de tours', 'error');
+                    });
+            }
+        });
+    }
+    
+    // Fonction pour réinitialiser un utilisateur
+    function resetUser(userId) {
+        const userRef = ref(database, 'users/' + userId);
+        
+        get(userRef).then((snapshot) => {
+            if (snapshot.exists()) {
+                const userData = snapshot.val();
+                
+                // Conserver certaines informations de base et s'assurer qu'aucun champ n'est undefined
+                const updatedUser = {
+                    email: userData.email || '',
+                    username: userData.username || '',
+                    tours: 0,
+                    balance: 0,
+                    prizes: []
+                };
+                
+                set(userRef, updatedUser)
+                    .then(() => {
+                        showToast('Utilisateur réinitialisé avec succès!', 'success');
+                    })
+                    .catch(error => {
+                        console.error("Erreur lors de la réinitialisation de l'utilisateur:", error);
+                        showToast('Erreur lors de la réinitialisation', 'error');
+                    });
+            }
+        });
+    }
+    
+    // Fonction pour afficher le modal de confirmation
+    function showConfirmation(message, callback) {
+        confirmationMessage.textContent = message;
+        confirmationModal.style.display = 'flex';
+        pendingAction = callback;
+    }
+    
+    // Fonction pour afficher une notification toast
+    function showToast(message, type) {
+        toast.textContent = message;
+        toast.className = `toast ${type}`;
+        toast.classList.add('show');
+        
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+    
+    // Écouteurs d'événements
+    distributeToursButton.addEventListener('click', distributeToursToAll);
+    if (resetAllToursButton) {
+        resetAllToursButton.addEventListener('click', resetAllTours);
+    }
+    backButton.addEventListener('click', () => window.location.href = 'index.html');
+    
+    confirmButton.addEventListener('click', () => {
+        confirmationModal.style.display = 'none';
+        if (pendingAction) {
+            pendingAction();
+            pendingAction = null;
+        }
+    });
+    
+    cancelButton.addEventListener('click', () => {
+        confirmationModal.style.display = 'none';
+        pendingAction = null;
+    });
+</script>
+</body>
+</html>

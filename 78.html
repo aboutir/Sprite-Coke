@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau Compact</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 5px;
+        }
+        .investment-table {
+            width: 100%;
+            max-width: 600px;
+            border-collapse: collapse;
+            margin: 0 auto;
+            font-size: 12px;
+        }
+        .investment-table th {
+            background-color: #4a86e8;
+            color: white;
+            padding: 5px;
+            text-align: center;
+            font-size: 11px;
+        }
+        .investment-table td {
+            padding: 4px;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .profit { color: #e84a4a; }
+        .roi { color: #e8824a; }
+        .rev-total { color: #4a5de8; }
+        .limite {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #e0f0ff;
+            color: #4a86e8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            font-size: 10px;
+        }
+        .produit { color: #2c5aa0; }
+    </style>
+</head>
+<body>
+<table class="investment-table">
+    <thead>
+        <tr>
+            <th>Produit</th>
+            <th>Prix</th>
+            <th>Rev/J</th>
+            <th>Durée</th>
+            <th>Total</th>
+            <th>Profit</th>
+            <th>ROI</th>
+            <th>Lim</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td class="produit">VIP1</td>
+            <td>5 000</td>
+            <td>1 500</td>
+            <td>30j</td>
+            <td class="rev-total">45 000</td>
+            <td class="profit">+40 000</td>
+            <td class="roi">+800%</td>
+            <td><div class="limite">1</div></td>
+        </tr>
+        <tr>
+            <td class="produit">VIP2</td>
+            <td>15 000</td>
+            <td>4 400</td>
+            <td>20j</td>
+            <td class="rev-total">88 000</td>
+            <td class="profit">+73 000</td>
+            <td class="roi">+487%</td>
+            <td><div class="limite">2</div></td>
+        </tr>
+        <tr>
+            <td class="produit">VIP3</td>
+            <td>90 000</td>
+            <td>38 400</td>
+            <td>5j</td>
+            <td class="rev-total">192 000</td>
+            <td class="profit">+102 000</td>
+            <td class="roi">+113%</td>
+            <td><div class="limite">2</div></td>
+        </tr>
+        <tr>
+            <td class="produit">VIP4</td>
+            <td>110 000</td>
+            <td>49 000</td>
+            <td>5j</td>
+            <td class="rev-total">245 000</td>
+            <td class="profit">+135 000</td>
+            <td class="roi">+123%</td>
+            <td><div class="limite">2</div></td>
+        </tr>
+        <tr>
+            <td class="produit">VIP5</td>
+            <td colspan="7">Bientôt disponible</td>
+        </tr>
+        <tr>
+            <td class="produit">VIP6</td>
+            <td colspan="7">Bientôt disponible</td>
+        </tr>
+    </tbody>
+</table>
+</body>
+</html>

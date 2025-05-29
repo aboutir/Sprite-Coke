@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Membres Investisseurs</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3a7bd5;
+            --secondary-color: #00d2ff;
+            --dark-color: #1f2937;
+            --light-color: #f9fafb;
+            --card-radius: 12px;
+            --transition: all 0.3s ease;
+            --highlight-color: #2563eb;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.5;
+            background-color: #f1f5f9;
+            color: #1e293b;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            padding: 1.2rem 0;
+            color: white;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .container {
+            max-width: 1100px;
+            margin: 1.5rem auto;
+            padding: 0 1rem;
+        }
+        
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: var(--card-radius);
+            padding: 1.2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+        
+        .stat-card.highlight {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+        
+        .stat-label {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-card.highlight .stat-label {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .table-container {
+            background: white;
+            border-radius: var(--card-radius);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        th {
+            background-color: #f8fafc;
+            font-weight: 600;
+            color: #64748b;
+            position: sticky;
+            top: 0;
+        }
+        
+        tbody tr:hover {
+            background-color: #f1f5f9;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .status.active {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        
+        .status.inactive {
+            background-color: #fee2e2;
+            color: #b91c1c;
+        }
+        
+        .phone-verified {
+            background-color: #dbeafe;
+            color: #1e40af;
+            border-radius: 2rem;
+            padding: 0.25rem 0.5rem;
+            font-weight: 500;
+        }
+        
+        .button-container {
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+        
+        .button {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 4px 6px rgba(58, 123, 213, 0.3);
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(58, 123, 213, 0.4);
+        }
+        
+        .message {
+            text-align: center;
+            padding: 2rem;
+            color: #64748b;
+            background: white;
+            border-radius: var(--card-radius);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        footer {
+            margin-top: auto;
+            padding: 1rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #64748b;
+            background-color: white;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .account-number, .phone-number {
+            color: var(--highlight-color);
+            font-weight: 500;
+        }
+        
+        .account-unavailable, .phone-unavailable {
+            color: #94a3b8;
+            font-style: italic;
+            font-weight: normal;
+        }
+        
+        .investment-amount {
+            font-weight: 600;
+            color: #0f766e;
+        }
+        
+        .filter-container {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .filter-label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #64748b;
+        }
+        
+        .filter-select {
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e2e8f0;
+            background-color: white;
+            color: #1e293b;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e2e8f0;
+            background-color: white;
+            color: #1e293b;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .highlight-row {
+            background-color: rgba(219, 234, 254, 0.4) !important;
+        }
+        
+        @media (max-width: 768px) {
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.8rem;
+            }
+            
+            th, td {
+                padding: 0.75rem 0.5rem;
+                font-size: 0.85rem;
+            }
+            
+            .hide-mobile {
+                display: none;
+            }
+            
+            .filter-container {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loader {
+            width: 24px;
+            height: 24px;
+            border: 3px solid #e2e8f0;
+            border-top: 3px solid #3a7bd5;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            animation: rotate 1s linear infinite;
+        }
+        
+        .investment-details {
+            display: none;
+            position: absolute;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+            z-index: 10;
+            min-width: 250px;
+            max-width: 350px;
+        }
+        
+        .details-header {
+            font-weight: 600;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--highlight-color);
+        }
+        
+        .details-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.25rem 0;
+            font-size: 0.85rem;
+        }
+        
+        .close-button {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: none;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Membres Investisseurs</h1>
+    </header>
+    
+    <main class="container">
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-label">Total membres</div>
+                <div id="total-members" class="stat-value">0</div>
+            </div>
+            <div class="stat-card highlight">
+                <div class="stat-label">Investissement total</div>
+                <div id="total-investment" class="stat-value">0 FCFA</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Membres actifs</div>
+                <div id="active-members" class="stat-value">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Numéros authentifiés</div>
+                <div id="verified-numbers" class="stat-value">0</div>
+            </div>
+        </div>
+        
+        <div class="filter-container">
+            <input type="text" class="search-input" id="search-input" placeholder="Rechercher par nom, numéro de téléphone ou compte...">
+            <div class="filter-group">
+                <span class="filter-label">Statut:</span>
+                <select id="status-filter" class="filter-select">
+                    <option value="all">Tous</option>
+                    <option value="active">Actifs</option>
+                    <option value="inactive">Inactifs</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <span class="filter-label">Trier par:</span>
+                <select id="sort-option" class="filter-select">
+                    <option value="investment-desc">Investissement (↓)</option>
+                    <option value="investment-asc">Investissement (↑)</option>
+                    <option value="date-desc">Date récente (↓)</option>
+                    <option value="date-asc">Date ancienne (↑)</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Membre</th>
+                        <th>N° de compte</th>
+                        <th>Téléphone</th>
+                        <th>Date d'inscription</th>
+                        <th>Investissements</th>
+                        <th>Moyenne/Inv.</th>
+                        <th class="hide-mobile">Dernier investissement</th>
+                        <th>Statut</th>
+                    </tr>
+                </thead>
+                <tbody id="members-table-body">
+                    <!-- Les membres seront ajoutés ici dynamiquement -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div id="loading" class="message">
+            <div class="loader"></div>
+            Chargement des données...
+        </div>
+        
+        <div id="no-members" class="message" style="display: none;">
+            Aucun membre avec des investissements n'a été trouvé.
+        </div>
+        
+        <div id="investment-details" class="investment-details">
+            <button class="close-button" id="close-details">×</button>
+            <div class="details-header" id="details-header">Détails d'investissement</div>
+            <div id="details-content"></div>
+        </div>
+        
+        <div class="button-container">
+            <a href="investi.html" class="button">Retour aux investissements</a>
+        </div>
+    </main>
+    
+    <footer>
+        <p>© 2025 | Tableau des membres investisseurs</p>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyDIB-raa12rkzqxRhflOMLBwL4hBycTgmo",
+            authDomain: "coke-eea48.firebaseapp.com",
+            databaseURL: "https://coke-eea48-default-rtdb.firebaseio.com",
+            projectId: "coke-eea48",
+            storageBucket: "coke-eea48.firebasestorage.app",
+            messagingSenderId: "217366074971",
+            appId: "1:217366074971:web:948bdc5baeeea93fac117e"
+        };
+
+        // Initialiser Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+
+        // Formater les dates
+        function formatDate(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleDateString('fr-FR');
+        }
+
+        // Formater les montants
+        function formatCurrency(amount) {
+            return (Number(amount) || 0).toLocaleString() + ' FCFA';
+        }
+
+        // Éléments DOM
+        const totalMembersElement = document.getElementById('total-members');
+        const totalInvestmentElement = document.getElementById('total-investment');
+        const activeMembersElement = document.getElementById('active-members');
+        const verifiedNumbersElement = document.getElementById('verified-numbers');
+        const membersTableBody = document.getElementById('members-table-body');
+        const loadingMessage = document.getElementById('loading');
+        const noMembersMessage = document.getElementById('no-members');
+        const searchInput = document.getElementById('search-input');
+        const statusFilter = document.getElementById('status-filter');
+        const sortOption = document.getElementById('sort-option');
+        const investmentDetails = document.getElementById('investment-details');
+        const detailsHeader = document.getElementById('details-header');
+        const detailsContent = document.getElementById('details-content');
+        const closeDetailsButton = document.getElementById('close-details');
+        
+        // Variables globales pour stocker les données
+        let allMembersData = [];
+        
+        // Fermer les détails d'investissement
+        closeDetailsButton.addEventListener('click', () => {
+            investmentDetails.style.display = 'none';
+        });
+        
+        // Événements pour filtrer et trier les données
+        searchInput.addEventListener('input', filterAndDisplayMembers);
+        statusFilter.addEventListener('change', filterAndDisplayMembers);
+        sortOption.addEventListener('change', filterAndDisplayMembers);
+        
+        // Fonction pour montrer les détails des investissements
+        function showInvestmentDetails(userId, memberName, investments) {
+            detailsHeader.textContent = `Investissements de ${memberName}`;
+            detailsContent.innerHTML = '';
+            
+            // Trier les investissements par date (récent en premier)
+            const sortedInvestments = Object.values(investments).sort((a, b) => {
+                return new Date(b.timestamp) - new Date(a.timestamp);
+            });
+            
+            sortedInvestments.forEach(investment => {
+                const detailItem = document.createElement('div');
+                detailItem.className = 'details-item';
+                detailItem.innerHTML = `
+                    <span>${formatDate(investment.timestamp)}</span>
+                    <span class="investment-amount">${formatCurrency(investment.investment)}</span>
+                `;
+                detailsContent.appendChild(detailItem);
+            });
+            
+            // Positionner et afficher
+            investmentDetails.style.display = 'block';
+            
+            // Fermer au clic à l'extérieur
+            document.addEventListener('click', function closeOnClickOutside(e) {
+                if (!investmentDetails.contains(e.target) && e.target.id !== 'show-details-' + userId) {
+                    investmentDetails.style.display = 'none';
+                    document.removeEventListener('click', closeOnClickOutside);
+                }
+            });
+        }
+        
+        // Fonction pour filtrer et afficher les membres
+        function filterAndDisplayMembers() {
+            const searchText = searchInput.value.toLowerCase();
+            const statusValue = statusFilter.value;
+            const sortValue = sortOption.value;
+            
+            // Filtrer les données
+            let filteredMembers = allMembersData.filter(member => {
+                const matchesSearch = 
+                    member.name.toLowerCase().includes(searchText) || 
+                    (member.accountNumber && member.accountNumber.toLowerCase().includes(searchText)) || 
+                    (member.phoneNumber && member.phoneNumber.toLowerCase().includes(searchText));
+                    
+                const matchesStatus = 
+                    statusValue === 'all' || 
+                    (statusValue === 'active' && member.activeInvestments > 0) ||
+                    (statusValue === 'inactive' && member.activeInvestments === 0);
+                    
+                return matchesSearch && matchesStatus;
+            });
+            
+            // Trier les données
+            filteredMembers.sort((a, b) => {
+                switch (sortValue) {
+                    case 'investment-desc':
+                        return b.totalInvestment - a.totalInvestment;
+                    case 'investment-asc':
+                        return a.totalInvestment - b.totalInvestment;
+                    case 'date-desc':
+                        return b.lastInvestmentDate - a.lastInvestmentDate;
+                    case 'date-asc':
+                        return a.lastInvestmentDate - b.lastInvestmentDate;
+                    default:
+                        return b.totalInvestment - a.totalInvestment;
+                }
+            });
+            
+            // Effacer le tableau
+            membersTableBody.innerHTML = '';
+            
+            // Afficher les résultats
+            if (filteredMembers.length > 0) {
+                filteredMembers.forEach(member => {
+                    const row = document.createElement('tr');
+                    if (member.phoneNumber && member.phoneNumber.trim() !== '') {
+                        row.classList.add('highlight-row');
+                    }
+                    
+                    // Format du numéro de compte avec classe différente si non disponible
+                    let accountNumberDisplay;
+                    if (member.accountNumber && member.accountNumber.trim() !== '') {
+                        accountNumberDisplay = `<span class="account-number">${member.accountNumber}</span>`;
+                    } else {
+                        accountNumberDisplay = `<span class="account-unavailable">Non disponible</span>`;
+                    }
+                    
+                    // Format du numéro de téléphone avec classe différente si non disponible
+                    let phoneNumberDisplay;
+                    if (member.phoneNumber && member.phoneNumber.trim() !== '') {
+                        phoneNumberDisplay = `<span class="phone-verified">${member.phoneNumber}</span>`;
+                    } else {
+                        phoneNumberDisplay = `<span class="phone-unavailable">Non disponible</span>`;
+                    }
+                    
+                    // Calculer la moyenne par investissement
+                    const averageInvestment = member.totalInvestment / member.investmentsCount;
+                    
+                    row.innerHTML = `
+                        <td>${member.name}</td>
+                        <td>${accountNumberDisplay}</td>
+                        <td>${phoneNumberDisplay}</td>
+                        <td>${typeof member.registrationDate === 'number' ? formatDate(member.registrationDate) : member.registrationDate}</td>
+                        <td>
+                            <span class="investment-amount">${formatCurrency(member.totalInvestment)}</span>
+                            <br><span style="font-size: 0.8rem; color: #64748b;">(${member.investmentsCount} opérations)</span>
+                            <button id="show-details-${member.userId}" class="button" style="font-size: 0.7rem; padding: 0.2rem 0.5rem; margin-left: 0.5rem;">Détails</button>
+                        </td>
+                        <td>${formatCurrency(averageInvestment)}</td>
+                        <td class="hide-mobile">${typeof member.lastInvestmentDate === 'number' ? formatDate(member.lastInvestmentDate) : member.lastInvestmentDate}</td>
+                        <td><span class="status ${member.activeInvestments > 0 ? 'active' : 'inactive'}">${member.activeInvestments > 0 ? 'Actif' : 'Inactif'}</span></td>
+                    `;
+                    membersTableBody.appendChild(row);
+                    
+                    // Ajouter l'événement pour afficher les détails
+                    document.getElementById(`show-details-${member.userId}`).addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        // Positionner la popup près du bouton
+                        const buttonRect = e.target.getBoundingClientRect();
+                        investmentDetails.style.top = `${buttonRect.bottom + window.scrollY + 10}px`;
+                        investmentDetails.style.left = `${buttonRect.left + window.scrollX - 150}px`;
+                        
+                        showInvestmentDetails(member.userId, member.name, member.investments);
+                    });
+                });
+                noMembersMessage.style.display = 'none';
+            } else {
+                noMembersMessage.style.display = 'block';
+            }
+        }
+
+        // Charger les données des membres
+        function loadMembersData() {
+            // Récupérer tous les utilisateurs
+            const usersRef = ref(database, 'users');
+            get(usersRef).then((usersSnapshot) => {
+                if (usersSnapshot.exists()) {
+                    const users = usersSnapshot.val();
+                    
+                    // Récupérer tous les investissements
+                    const investmentsRef = ref(database, 'investments');
+                    return get(investmentsRef).then((investmentsSnapshot) => {
+                        // Récupérer les données de compte bancaire
+                        const accountsRef = ref(database, 'accounts');
+                        return get(accountsRef).then((accountsSnapshot) => {
+                            return { 
+                                users, 
+                                investments: investmentsSnapshot.exists() ? investmentsSnapshot.val() : {},
+                                accounts: accountsSnapshot.exists() ? accountsSnapshot.val() : {}
+                            };
+                        });
+                    });
+                } else {
+                    return { users: {}, investments: {}, accounts: {} };
+                }
+            }).then(({ users, investments, accounts }) => {
+                loadingMessage.style.display = 'none';
+                
+                // Traiter les données
+                const membersWithInvestments = [];
+                let totalInvestment = 0;
+                let activeMembersCount = 0;
+                let verifiedNumbersCount = 0;
+                
+                // Pour chaque utilisateur, vérifier s'il a des investissements
+                Object.keys(users).forEach(userId => {
+                    const user = users[userId];
+                    const userInvestments = investments[userId] || {};
+                    const userAccount = accounts[userId] || {};
+                    
+                    // Compter les investissements actifs
+                    let activeInvestmentsCount = 0;
+                    let totalUserInvestment = 0;
+                    let lastInvestmentDate = 0;
+                    
+                    Object.values(userInvestments).forEach(investment => {
+                        const investmentAmount = Number(investment.investment) || 0;
+                        totalUserInvestment += investmentAmount;
+                        totalInvestment += investmentAmount;
+                        
+                        if (investment.status === 'active') {
+                            activeInvestmentsCount++;
+                        }
+                        
+                        const timestamp = new Date(investment.timestamp).getTime();
+                        if (timestamp > lastInvestmentDate) {
+                            lastInvestmentDate = timestamp;
+                        }
+                    });
+                    
+                    // Compter les numéros de téléphone vérifiés
+                    if (user.phoneNumber && user.phoneNumber.trim() !== '') {
+                        verifiedNumbersCount++;
+                    }
+                    
+                    // Si l'utilisateur a des investissements, l'ajouter à la liste
+                    if (Object.keys(userInvestments).length > 0) {
+                        membersWithInvestments.push({
+                            userId,
+                            name: user.displayName || user.email || "Utilisateur " + userId.slice(0, 5),
+                            registrationDate: user.createdAt || "N/A",
+                            investmentsCount: Object.keys(userInvestments).length,
+                            activeInvestments: activeInvestmentsCount,
+                            totalInvestment: totalUserInvestment,
+                            lastInvestmentDate: lastInvestmentDate || "N/A",
+                            accountNumber: userAccount.accountNumber || "",
+                            phoneNumber: user.phoneNumber || "",
+                            investments: userInvestments
+                        });
+                        
+                        if (activeInvestmentsCount > 0) {
+                            activeMembersCount++;
+                        }
+                    }
+                });
+                
+                // Stocker les données pour le filtrage
+                allMembersData = membersWithInvestments;
+                
+                // Mettre à jour les statistiques
+                totalMembersElement.textContent = membersWithInvestments.length;
+                totalInvestmentElement.textContent = formatCurrency(totalInvestment);
+                activeMembersElement.textContent = activeMembersCount;
+                verifiedNumbersElement.textContent = verifiedNumbersCount;
+                
+                // Afficher les membres
+                filterAndDisplayMembers();
+            }).catch((error) => {
+                console.error("Erreur lors du chargement des données:", error);
+                loadingMessage.textContent = "Erreur: " + error.message;
+            });
+        }
+
+        // Vérifier l'authentification et démarrer directement le chargement
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Charger directement les données sans vérifier les droits d'admin
+                loadMembersData();
+            } else {
+                // Utilisateur non connecté
+                loadingMessage.textContent = "Veuillez vous connecter pour accéder à cette page.";
+            }
+        });
+    </script>
+</body>
+</html>

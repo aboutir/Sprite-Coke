@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Équipe | Programme de Parrainage</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #7209b7;
+            --accent-color: #f72585;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #e0e0e0;
+            --success-color: #38b000;
+            --gradient-start: #4361ee;
+            --gradient-end: #7209b7;
+        }
+        
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMCAwIEwxMDAgMCBMMTAwIDEwMCBMMCAxMDAgWiIgZmlsbC1vcGFjaXR5PSIwLjA1IiBmaWxsPSIjZmZmZmZmIj48L3BhdGg+PC9zdmc+');
+            opacity: 0.4;
+            z-index: 0;
+        }
+
+        header .container {
+            position: relative;
+            z-index: 1;
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 36px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        
+        header p {
+            margin: 10px 0 0;
+            font-size: 18px;
+            opacity: 0.9;
+        }
+        
+        .tabs {
+            display: flex;
+            background-color: white;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 30px 0 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 18px 15px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: #555;
+            font-size: 15px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .tab i {
+            font-size: 18px;
+        }
+        
+        .tab.active {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: white;
+        }
+        
+        .tab:hover:not(.active) {
+            background-color: #f8f8f8;
+        }
+        
+        .content {
+            display: none;
+            padding: 30px;
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .content.active {
+            display: block;
+        }
+        
+        .team-stats {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            gap: 20px;
+        }
+        
+        .stat-card {
+            background-color: var(--card-bg);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            flex: 1;
+            min-width: 200px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--gradient-start), var(--gradient-end));
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            margin: 10px 0;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 15px;
+            font-weight: 500;
+        }
+        
+        .stat-icon {
+            font-size: 24px;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+        
+        .team-list {
+            margin-top: 30px;
+        }
+        
+        .member {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            background-color: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .member:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .member-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            margin-right: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 20px;
+        }
+        
+        .member-info {
+            flex: 1;
+        }
+        
+        .member-name {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        
+        .member-date {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .referral-box {
+            background-color: var(--card-bg);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            margin: 30px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .referral-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            opacity: 0.1;
+            border-radius: 50%;
+            transform: translate(50%, -50%);
+        }
+        
+        .referral-link {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 25px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid #eee;
+        }
+        
+        .link-text {
+            font-size: 15px;
+            color: #555;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-right: 10px;
+            font-family: monospace;
+            padding: 5px 10px;
+        }
+        
+        .copy-btn {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+        }
+        
+        .copy-btn:active {
+            transform: translateY(0);
+        }
+        
+        .promo-code {
+            font-size: 40px;
+            font-weight: 700;
+            color: var(--primary-color);
+            letter-spacing: 5px;
+            margin: 30px 0;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: inline-block;
+            border-bottom: 3px solid rgba(67, 97, 238, 0.2);
+        }
+        
+        .benefits-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 40px;
+        }
+        
+        .benefit-card {
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            flex: 1;
+            min-width: 250px;
+            max-width: 300px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .benefit-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .benefit-icon {
+            font-size: 40px;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .benefit-title {
+            font-weight: 700;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: conic-gradient(var(--primary-color) 0%, transparent 100%);
+            animation: spin 1s linear infinite;
+            position: relative;
+        }
+        
+        .spinner::before {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            right: 5px;
+            bottom: 5px;
+            background: white;
+            border-radius: 50%;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .error {
+            color: var(--accent-color);
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: rgba(247, 37, 133, 0.1);
+            display: none;
+        }
+        
+        .error.show {
+            display: block;
+        }
+        
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+        
+        .logout-btn:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .share-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .share-button {
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            min-width: 150px;
+            justify-content: center;
+        }
+        
+        .facebook {
+            background-color: #1877f2;
+        }
+        
+        .twitter {
+            background-color: #1da1f2;
+        }
+        
+        .whatsapp {
+            background-color: #25d366;
+        }
+        
+        .share-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .info-box {
+            background-color: rgba(67, 97, 238, 0.1);
+            border-left: 4px solid var(--primary-color);
+            padding: 15px 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-size: 15px;
+        }
+
+        .steps-list {
+            padding-left: 0;
+            list-style: none;
+            margin: 30px 0;
+        }
+        
+        .step-item {
+            display: flex;
+            margin-bottom: 20px;
+            align-items: flex-start;
+        }
+        
+        .step-number {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .step-content {
+            flex: 1;
+        }
+        
+        .step-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+        
+        .step-description {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .section-title {
+            position: relative;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            border-radius: 3px;
+        }
+
+        .benefits-container {
+            background-color: rgba(67, 97, 238, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .tabs {
+                flex-wrap: wrap;
+            }
+            
+            .tab {
+                flex: 1 0 50%;
+                border-bottom: 1px solid #eee;
+            }
+            
+            .team-stats {
+                flex-direction: column;
+            }
+            
+            .stat-card {
+                margin: 0;
+            }
+            
+            .referral-link {
+                flex-direction: column;
+            }
+            
+            .link-text {
+                margin-bottom: 15px;
+                margin-right: 0;
+                width: 100%;
+                text-align: center;
+            }
+            
+            .referral-box {
+                padding: 25px;
+            }
+            
+            .promo-code {
+                font-size: 30px;
+                letter-spacing: 3px;
+            }
+            
+            .benefit-card {
+                max-width: 100%;
+            }
+            
+            .share-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .share-button {
+                width: 100%;
+            }
+            
+            .member {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .member-avatar {
+                margin: 0 auto 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Mon Équipe</h1>
+            <p>Suivez la progression de votre équipe et gérez vos parrainages</p>
+            <button class="logout-btn" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i> 
+            </button>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="tabs">
+            <div class="tab active" onclick="openTab('team')">
+                <i class="fas fa-users"></i>
+                <span>Mon Équipe</span>
+            </div>
+            <div class="tab" onclick="openTab('referrals')">
+                <i class="fas fa-user-friends"></i>
+                <span>Mes Filleuls</span>
+            </div>
+            <div class="tab" onclick="openTab('link')">
+                <i class="fas fa-link"></i>
+                <span>Lien de Parrainage</span>
+            </div>
+            <div class="tab" onclick="openTab('code')">
+                <i class="fas fa-ticket-alt"></i>
+                <span>Code de Parrainage</span>
+            </div>
+        </div>
+        
+        <!-- Tab 1: Team & Bonuses -->
+        <div id="team" class="content active">
+            <h2 class="section-title">Performance de l'Équipe</h2>
+            
+            <div class="info-box">
+                <i class="fas fa-info-circle"></i> En tant que parrain, vous gagnez 10% de commission sur chaque rechargement effectué par vos filleuls !
+            </div>
+            
+            <div id="teamStats" class="team-stats">
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+            
+            <div class="benefits-container">
+                <h3 class="section-title">Avantages du Programme de Parrainage</h3>
+                
+                <div class="benefits-list">
+                    <div class="benefit-card">
+                        <div class="benefit-icon"><i class="fas fa-percentage"></i></div>
+                        <div class="benefit-title">Commissions</div>
+                        <p>Recevez 10% de commission lorsque vos filleuls rechargent leur compte</p>
+                    </div>
+                    
+                    <div class="benefit-card">
+                        <div class="benefit-icon"><i class="fas fa-chart-line"></i></div>
+                        <div class="benefit-title">Suivi en Temps Réel</div>
+                        <p>Suivez la progression de votre équipe directement depuis votre tableau de bord</p>
+                    </div>
+                    
+                    <div class="benefit-card">
+                        <div class="benefit-icon"><i class="fas fa-users"></i></div>
+                        <div class="benefit-title">Réseau Illimité</div>
+                        <p>Développez votre réseau sans limite et augmentez vos gains</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab 2: My Referrals -->
+        <div id="referrals" class="content">
+            <h2 class="section-title">Mes Filleuls</h2>
+            <p>Voici la liste de vos filleuls et leur contribution au volume d'équipe.</p>
+            
+            <div id="referralsList" class="team-list">
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab 3: Referral Link -->
+        <div id="link" class="content">
+            <h2 class="section-title">Lien de Parrainage</h2>
+            <p>Partagez ce lien avec vos amis, votre famille ou vos collègues pour les inviter à rejoindre votre équipe.</p>
+            
+            <div class="referral-box">
+                <h3>Votre lien personnel</h3>
+                <div class="referral-link">
+                    <div id="referralLink" class="link-text">Chargement...</div>
+                    <button class="copy-btn" onclick="copyReferralLink()">
+                        <i class="fas fa-copy"></i> Copier
+                    </button>
+                </div>
+                
+                <h3 class="section-title">Comment ça marche ?</h3>
+                
+                <div class="steps-list">
+                    <div class="step-item">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <div class="step-title">Partagez votre lien</div>
+                            <div class="step-description">Envoyez votre lien de parrainage à vos amis, famille et contacts</div>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <div class="step-title">Ils s'inscrivent</div>
+                            <div class="step-description">Vos contacts créent un compte en utilisant votre lien</div>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <div class="step-title">Ils rejoignent votre équipe</div>
+                            <div class="step-description">Ils deviennent membres de votre équipe</div>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <div class="step-title">Commission continue</div>
+                            <div class="step-description">Vous gagnez 10% de commission sur les rechargements de vos filleuls</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="share-buttons">
+                    <button class="share-button facebook" onclick="shareOnFacebook()">
+                        <i class="fab fa-facebook-f"></i> Facebook
+                    </button>
+                    <button class="share-button twitter" onclick="shareOnTwitter()">
+                        <i class="fab fa-twitter"></i> Twitter
+                    </button>
+                    <button class="share-button whatsapp" onclick="shareOnWhatsApp()">
+                        <i class="fab fa-whatsapp"></i> WhatsApp
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab 4: Referral Code -->
+        <div id="code" class="content">
+            <h2 class="section-title">Code de Parrainage</h2>
+            <p>Partagez ce code avec vos contacts pour qu'ils puissent le saisir lors de leur inscription.</p>
+            
+            <div class="referral-box">
+                <h3>Votre code personnel</h3>
+                <div id="promoCode" class="promo-code">Chargement...</div>
+                <button class="copy-btn" onclick="copyPromoCode()">
+                    <i class="fas fa-copy"></i> Copier le code
+                </button>
+                
+                <div class="info-box">
+                    <i class="fas fa-star"></i> En tant que parrain, vous gagnez 10% de commission sur les rechargements de vos filleuls !
+                </div>
+                
+                <h3 class="section-title">Instructions pour vos filleuls</h3>
+                <div class="steps-list">
+                    <div class="step-item">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <div class="step-title">Créer un compte</div>
+                            <div class="step-description">Votre filleul crée un compte sur notre plateforme</div>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <div class="step-title">Saisir le code</div>
+                            <div class="step-description">Il saisit votre code de parrainage durant l'inscription</div>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <div class="step-title">Rejoindre votre équipe</div>
+                            <div class="step-description">Votre filleul rejoint officiellement votre équipe</div>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <div class="step-title">Commission continue</div>
+                            <div class="step-description">Vous gagnez 10% de commission sur les rechargements de votre filleul</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+   <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+import { getDatabase, ref, set, get, onValue, query, orderByChild, equalTo, update } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
+
+// Configuration Firebase
+const firebaseConfig = {
+    apiKey: "AIzaSyDIB-raa12rkzqxRhflOMLBwL4hBycTgmo",
+    authDomain: "coke-eea48.firebaseapp.com",
+    databaseURL: "https://coke-eea48-default-rtdb.firebaseio.com",
+    projectId: "coke-eea48",
+    storageBucket: "coke-eea48.firebasestorage.app",
+    messagingSenderId: "217366074971",
+    appId: "1:217366074971:web:948bdc5baeeea93fac117e"
+};
+
+// Initialiser Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth();
+const database = getDatabase(app);
+
+// Variables globales pour stocker les données
+window.auth = auth;
+window.database = database;
+window.currentUser = null;
+window.userData = null;
+window.referrals = [];
+window.lastCalculatedBonus = 0;
+window.totalProcessedBonus = 0;
+
+// Vérifier l'authentification et rediriger si non connecté
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        console.log('Utilisateur connecté:', user.uid);
+        window.currentUser = user;
+        loadUserData(user.uid);
+    } else {
+        console.log('Utilisateur déconnecté');
+        window.location.href = 'index.html'; // Redirection vers la page de connexion
+    }
+});
+
+// Charger les données utilisateur
+async function loadUserData(userId) {
+    const userRef = ref(database, 'users/' + userId);
+    onValue(userRef, (snapshot) => {
+        const data = snapshot.val();
+        window.userData = data;
+        
+        // Définir des valeurs par défaut si nécessaire
+        if (!data.totalProcessedBonus) {
+            window.totalProcessedBonus = 0;
+        } else {
+            window.totalProcessedBonus = data.totalProcessedBonus;
+        }
+        
+        if (!data.lastProcessedBonus) {
+            window.lastCalculatedBonus = 0;
+        } else {
+            window.lastCalculatedBonus = data.lastProcessedBonus;
+        }
+        
+        // Mettre à jour l'interface avec les données utilisateur
+        updateReferralCode();
+        loadReferrals();
+    });
+}
+
+// Charger les filleuls
+async function loadReferrals() {
+    // S'assurer que les données utilisateur sont disponibles
+    if (!window.userData || !window.userData.referralCode) {
+        console.log("Données utilisateur non disponibles pour charger les filleuls");
+        return;
+    }
+    
+    const usersRef = ref(database, 'users');
+    const usersQuery = query(usersRef, orderByChild('referredBy'), equalTo(window.userData.referralCode));
+    
+    onValue(usersQuery, (snapshot) => {
+        const referralsList = document.getElementById('referralsList');
+        if (!referralsList) {
+            console.log("Élément referralsList introuvable");
+            return;
+        }
+        
+        referralsList.innerHTML = '';
+        
+        // Initialiser un tableau vide même s'il n'y a pas de filleuls
+        window.referrals = [];
+        
+        if (!snapshot.exists()) {
+            referralsList.innerHTML = '<p>Vous n\'avez pas encore de filleuls.</p>';
+        } else {
+            snapshot.forEach((childSnapshot) => {
+                const referral = childSnapshot.val();
+                referral.id = childSnapshot.key;
+                window.referrals.push(referral);
+            });
+            
+            // Afficher les filleuls
+            window.referrals.forEach((referral) => {
+                const date = new Date(referral.createdAt);
+                const formattedDate = date.toLocaleDateString('fr-FR', { 
+                    day: '2-digit', 
+                    month: 'short', 
+                    year: 'numeric' 
+                });
+                
+                // Obtenir les initiales pour l'avatar
+                const telephone = referral.telephone || '';
+                const initials = telephone.substring(0, 2);
+                
+                referralsList.innerHTML += `
+                    <div class="member">
+                        <div class="member-avatar">${initials}</div>
+                        <div class="member-info">
+                            <div class="member-name">+${referral.countryCode || ''} ${formatPhoneNumber(referral.telephone || '')}</div>
+                            <div class="member-date">Rejoint le ${formattedDate}</div>
+                        </div>
+                        <div class="member-contribution">${referral.balance || 0} pts</div>
+                    </div>
+                `;
+            });
+        }
+        
+        // Mettre à jour les statistiques après chargement des filleuls
+        updateTeamStats();
+        
+        // Vérifier et traiter les bonus - après une courte pause pour s'assurer que les données sont chargées
+        setTimeout(() => {
+            processTeamBonus();
+        }, 500);
+        
+        // Mettre à jour l'affichage des bonus épinglés
+        updatePinnedBonuses();
+    });
+}
+
+// Traiter le bonus d'équipe - version corrigée
+async function processTeamBonus() {
+    // Vérifier que les données nécessaires sont disponibles
+    if (!window.currentUser || !window.userData) {
+        console.log("Données utilisateur indisponibles pour le traitement du bonus");
+        return;
+    }
+    
+    // Utiliser une valeur par défaut pour referrals
+    const referrals = window.referrals || [];
+    
+    // Calcul du volume total de l'équipe
+    const totalVolume = referrals.reduce((sum, referral) => sum + (referral.balance || 0), 0);
+    
+    // Calcul du bonus de 10% sur le volume total
+    const bonusRate = 10;
+    const calculatedBonus = Math.floor(totalVolume * (bonusRate / 100));
+    
+    console.log("Bonus calculé:", calculatedBonus);
+    console.log("Dernier bonus traité:", window.userData.lastProcessedBonus || 0);
+    
+    // Obtenir les données les plus récentes de l'utilisateur
+    const userRef = ref(database, 'users/' + window.currentUser.uid);
+    
+    try {
+        const snapshot = await get(userRef);
+        const userData = snapshot.val() || {};
+        
+        // Définir des valeurs par défaut si nécessaire
+        const lastProcessedBonus = userData.lastProcessedBonus || 0;
+        const totalProcessedBonus = userData.totalProcessedBonus || 0;
+        
+        // Vérifier s'il y a un nouveau bonus à ajouter
+        if (calculatedBonus > lastProcessedBonus) {
+            // Calculer le montant supplémentaire à ajouter
+            const bonusToAdd = calculatedBonus - lastProcessedBonus;
+            
+            if (bonusToAdd <= 0) {
+                console.log("Pas de nouveau bonus à ajouter");
+                return;
+            }
+            
+            console.log("Nouveau bonus à ajouter:", bonusToAdd);
+            
+            // Mettre à jour le solde et les bonus
+            const currentBalance = userData.balance || 0;
+            const newTotalProcessedBonus = totalProcessedBonus + bonusToAdd;
+            
+            // Préparer les mises à jour
+            const updates = {
+                balance: currentBalance + bonusToAdd,
+                lastProcessedBonus: calculatedBonus,
+                totalProcessedBonus: newTotalProcessedBonus,
+                lastBonusDate: Date.now()
+            };
+            
+            // Mettre à jour la variable globale
+            window.totalProcessedBonus = newTotalProcessedBonus;
+            window.lastCalculatedBonus = calculatedBonus;
+            
+            // Créer l'entrée d'historique des bonus
+            const bonusHistoryEntry = {
+                amount: bonusToAdd,
+                date: Date.now(),
+                totalVolume: totalVolume,
+                bonusRate: bonusRate
+            };
+            
+            // Récupérer l'historique actuel des bonus
+            const bonusHistory = userData.bonusHistory || [];
+            const updatedHistory = Array.isArray(bonusHistory) ? 
+                [...bonusHistory, bonusHistoryEntry] : 
+                [bonusHistory, bonusHistoryEntry];
+            
+            // Ajouter l'historique aux mises à jour
+            updates.bonusHistory = updatedHistory;
+            
+            // Appliquer les mises à jour dans la base de données
+            await update(userRef, updates);
+            
+            console.log(`Bonus de ${bonusToAdd} points ajouté avec succès. Nouveau solde: ${currentBalance + bonusToAdd}`);
+            
+            // Afficher une notification
+            showBonusNotification(bonusToAdd);
+            
+            // Actualiser les données utilisateur
+            loadUserData(window.currentUser.uid);
+        } else {
+            console.log("Pas de nouveau bonus à ajouter - bonus actuel déjà traité");
+        }
+    } catch (error) {
+        console.error("Erreur lors du traitement du bonus:", error);
+    }
+}
+
+// Afficher une notification de bonus
+function showBonusNotification(amount) {
+    // Créer un élément de notification
+    const notification = document.createElement('div');
+    notification.className = 'bonus-notification';
+    notification.innerHTML = `
+        <div class="bonus-notification-content">
+            <span class="bonus-icon">🎁</span>
+            <span class="bonus-message">Félicitations! Vous avez reçu ${amount} points de bonus!</span>
+            <button class="close-notification">×</button>
+        </div>
+    `;
+    
+    // Styles CSS pour la notification
+    notification.style.position = 'fixed';
+    notification.style.bottom = '20px';
+    notification.style.right = '20px';
+    notification.style.backgroundColor = '#4CAF50';
+    notification.style.color = 'white';
+    notification.style.padding = '15px';
+    notification.style.borderRadius = '5px';
+    notification.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+    notification.style.zIndex = '1000';
+    notification.style.transition = 'all 0.5s ease';
+    
+    // Ajouter la notification au document
+    document.body.appendChild(notification);
+    
+    // Gestionnaire pour fermer la notification
+    const closeButton = notification.querySelector('.close-notification');
+    closeButton.addEventListener('click', () => {
+        document.body.removeChild(notification);
+    });
+    
+    // Supprimer automatiquement après 5 secondes
+    setTimeout(() => {
+        if (notification.parentNode) {
+            document.body.removeChild(notification);
+        }
+    }, 5000);
+}
+
+// Mettre à jour les statistiques d'équipe
+function updateTeamStats() {
+    // Vérifier si l'élément existe
+    const teamStatsElement = document.getElementById('teamStats');
+    if (!teamStatsElement) {
+        console.log("Élément teamStats introuvable");
+        return;
+    }
+    
+    // Utilisation des valeurs par défaut
+    const referrals = window.referrals || [];
+    
+    // Calculer les statistiques
+    const totalMembers = referrals.length;
+    const totalVolume = referrals.reduce((sum, referral) => sum + (referral.balance || 0), 0);
+    
+    // Taux de bonus fixe de 10%
+    const bonusRate = 10;
+    
+    // Calculer le bonus actuel
+    const currentBonus = Math.floor(totalVolume * (bonusRate / 100));
+    
+    // Mettre à jour la variable globale
+    window.lastCalculatedBonus = currentBonus;
+    
+    // Mettre à jour l'interface avec les 4 cartes de statistiques
+    const statsContent = `
+        <div class="stat-card">
+            <div class="stat-value">${totalMembers}</div>
+            <div class="stat-label">Membres d'équipe</div>
+        </div>
+        <div class="stat-card highlight">
+            <div class="stat-value">${totalVolume}</div>
+            <div class="stat-label">Volume total (points)</div>
+        </div>
+        <div class="stat-card highlight">
+            <div class="stat-value">${currentBonus}</div>
+            <div class="stat-label">Bonus actuel</div>
+        </div>
+        <div class="stat-card highlight">
+            <div class="stat-value">${window.totalProcessedBonus || 0}</div>
+            <div class="stat-label">Total des bonus cumulés</div>
+        </div>
+    `;
+    
+    teamStatsElement.innerHTML = statsContent;
+    
+    // Mise à jour des métriques individuelles
+    updateIndividualMetrics(totalMembers, totalVolume, currentBonus);
+    
+    console.log("Statistiques mises à jour:", { 
+        totalMembers, 
+        totalVolume, 
+        currentBonus, 
+        totalProcessedBonus: window.totalProcessedBonus 
+    });
+}
+
+// Mettre à jour les métriques individuelles
+function updateIndividualMetrics(members, volume, currentBonus) {
+    // Mettre à jour les éléments individuels s'ils existent
+    const membersElement = document.getElementById('teamMembersCount');
+    const volumeElement = document.getElementById('teamVolumeCount');
+    const currentBonusElement = document.getElementById('currentBonusCount');
+    const totalBonusElement = document.getElementById('totalBonusCount');
+    
+    if (membersElement) membersElement.textContent = members;
+    if (volumeElement) volumeElement.textContent = volume;
+    if (currentBonusElement) currentBonusElement.textContent = currentBonus;
+    if (totalBonusElement) totalBonusElement.textContent = window.totalProcessedBonus || 0;
+}
+
+// Mettre à jour l'affichage du code de parrainage
+function updateReferralCode() {
+    if (window.userData) {
+        const promoCodeElement = document.getElementById('promoCode');
+        const referralLinkElement = document.getElementById('referralLink');
+        
+        if (promoCodeElement && referralLinkElement) {
+            promoCodeElement.textContent = window.userData.referralCode || '';
+            referralLinkElement.textContent = `${window.location.origin}/index.html?ref=${window.userData.referralCode || ''}`;
+        }
+    }
+}
+
+// Mettre à jour les bonus épinglés
+function updatePinnedBonuses() {
+    if (!window.userData) {
+        return;
+    }
+    
+    const pinnedBonusesContainer = document.getElementById('pinnedBonuses');
+    if (!pinnedBonusesContainer) {
+        return;
+    }
+    
+    // Vider le conteneur
+    pinnedBonusesContainer.innerHTML = '';
+    
+    // Récupérer l'historique des bonus s'il existe
+    let bonusHistory = window.userData.bonusHistory || [];
+    
+    // S'assurer que l'historique est un tableau
+    if (!Array.isArray(bonusHistory)) {
+        bonusHistory = [bonusHistory];
+    }
+    
+    // Créer des éléments pour les derniers bonus (max 5)
+    const recentBonuses = bonusHistory.slice(-5).reverse();
+    
+    if (recentBonuses.length === 0) {
+        // Afficher un message si aucun bonus
+        pinnedBonusesContainer.innerHTML = '<p>Vous n\'avez pas encore reçu de bonus.</p>';
+    } else {
+        recentBonuses.forEach(bonus => {
+            const date = new Date(bonus.date);
+            const formattedDate = date.toLocaleDateString('fr-FR', { 
+                day: '2-digit', 
+                month: 'short', 
+                year: 'numeric' 
+            });
+            
+            const bonusElement = document.createElement('div');
+            bonusElement.className = 'pinned-bonus';
+            bonusElement.innerHTML = `
+                <div class="bonus-amount">+${bonus.amount} pts</div>
+                <div class="bonus-detail">
+                    <span class="bonus-date">${formattedDate}</span>
+                    <span class="bonus-source">Volume d'équipe: ${bonus.totalVolume} pts</span>
+                </div>
+            `;
+            
+            pinnedBonusesContainer.appendChild(bonusElement);
+        });
+    }
+}
+
+// Utilitaire: Formater le numéro de téléphone pour l'affichage
+function formatPhoneNumber(phone) {
+    if (!phone) return '';
+    return phone.replace(/(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4 $5');
+}
+
+// Gestion des onglets
+window.openTab = function(tabName) {
+    const contents = document.getElementsByClassName("content");
+    for (let i = 0; i < contents.length; i++) {
+        contents[i].classList.remove("active");
+    }
+    
+    const tabs = document.getElementsByClassName("tab");
+    for (let i = 0; i < tabs.length; i++) {
+        tabs[i].classList.remove("active");
+    }
+    
+    document.getElementById(tabName).classList.add("active");
+    event.currentTarget.classList.add("active");
+};
+
+// Fonctions de copie
+window.copyReferralLink = function() {
+    const referralLink = document.getElementById('referralLink').textContent;
+    navigator.clipboard.writeText(referralLink)
+        .then(() => alert('Lien de parrainage copié !'))
+        .catch(err => console.error('Erreur lors de la copie:', err));
+};
+
+window.copyPromoCode = function() {
+    const promoCode = document.getElementById('promoCode').textContent;
+    navigator.clipboard.writeText(promoCode)
+        .then(() => alert('Code de parrainage copié !'))
+        .catch(err => console.error('Erreur lors de la copie:', err));
+};
+
+// Fonctions de partage
+window.shareOnFacebook = function() {
+    const referralLink = document.getElementById('referralLink').textContent;
+    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralLink)}`;
+    window.open(url, '_blank');
+};
+
+window.shareOnTwitter = function() {
+    const referralLink = document.getElementById('referralLink').textContent;
+    const text = "Rejoignez-moi et recevez un bonus de points! Utilisez mon lien de parrainage:";
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(referralLink)}`;
+    window.open(url, '_blank');
+};
+
+window.shareOnWhatsApp = function() {
+    const referralLink = document.getElementById('referralLink').textContent;
+    const text = "Rejoignez-moi et recevez un bonus de points! Utilisez mon lien de parrainage: " + referralLink;
+    const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank');
+};
+
+// Fonction de déconnexion
+document.addEventListener('DOMContentLoaded', function() {
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            signOut(auth).then(() => {
+                window.location.href = 'index.html';
+            }).catch((error) => {
+                console.error('Erreur de déconnexion:', error);
+            });
+        });
+    }
+    
+    // Initialiser l'affichage des statistiques à zéro si nécessaire
+    initializeEmptyStats();
+});
+
+// Initialiser les statistiques vides si nécessaire
+function initializeEmptyStats() {
+    // S'assurer que les éléments existent avant de les mettre à jour
+    if (!document.getElementById('teamStats')) {
+        console.log("Création des éléments de statistiques");
+        
+        // Créer la section des statistiques si elle n'existe pas
+        const statsContainer = document.createElement('div');
+        statsContainer.id = 'teamStats';
+        statsContainer.className = 'team-stats';
+        
+        // Insérer dans le document à l'emplacement approprié
+        const mainContent = document.querySelector('.main-content') || document.body;
+        mainContent.appendChild(statsContainer);
+        
+        // Initialiser avec des valeurs à zéro
+        updateTeamStats();
+    }
+}
+</script >
+</body>
+</html>

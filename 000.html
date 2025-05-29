@@ -1,0 +1,900 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modifier les dates de retrait</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* Variables globales */
+        :root {
+            --bg-image: url('https://image.noelshack.com/fichiers/2025/09/3/1740570275-images-9.jpeg');
+            --section-bg-image: url('https://image.noelshack.com/fichiers/2025/09/3/1740570275-images-9.jpeg');
+            
+            /* Couleurs */
+            --text-color: #ffffff;
+            --text-secondary: #dddddd;
+            --amount-color: #ff6b6b;
+            --fees-color: #ffd700;
+            --success-color: #4CAF50;
+            --net-amount-color: #00ff9d;
+            --edit-color: #3498db;
+            --save-color: #2ecc71;
+            --cancel-color: #e74c3c;
+            
+            /* Espacements */
+            --spacing-sm: 10px;
+            --spacing-md: 20px;
+            --spacing-lg: 30px;
+            
+            /* Border radius */
+            --radius-sm: 8px;
+            --radius-md: 15px;
+            --radius-lg: 20px;
+        }
+
+        /* Reset et styles de base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+                        var(--bg-image) center/cover fixed;
+            color: var(--text-color);
+            padding: var(--spacing-md);
+        }
+
+        /* Container principal */
+        .container {
+            background: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1)),
+                        var(--section-bg-image) center/cover;
+            backdrop-filter: blur(10px);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 800px;
+            margin: var(--spacing-md) auto;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            backdrop-filter: blur(5px);
+            z-index: 0;
+        }
+
+        .content-wrapper {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Titres et textes */
+        h1 {
+            text-align: center;
+            margin-bottom: var(--spacing-lg);
+            font-size: 2.2rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            position: relative;
+            padding-bottom: var(--spacing-sm);
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, 
+                transparent, 
+                var(--edit-color),
+                transparent
+            );
+        }
+
+        /* Sélecteur d'utilisateur */
+        .user-selector {
+            margin-bottom: var(--spacing-lg);
+            background: rgba(0, 0, 0, 0.6);
+            padding: var(--spacing-md);
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .user-selector select {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.7);
+            color: var(--text-color);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .user-selector select:focus {
+            outline: none;
+            border-color: var(--edit-color);
+        }
+
+        .user-selector label {
+            display: block;
+            margin-bottom: var(--spacing-sm);
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+        }
+
+        /* Section de recherche */
+        .search-section {
+            margin-bottom: var(--spacing-md);
+            padding: var(--spacing-md);
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .search-section h3 {
+            margin-top: 0;
+            margin-bottom: var(--spacing-sm);
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+        }
+
+        .search-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        #search-input {
+            flex: 1;
+            padding: 10px 15px;
+            background: rgba(0, 0, 0, 0.7);
+            color: var(--text-color);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--radius-sm);
+        }
+
+        #search-button {
+            padding: 10px 15px;
+            background: rgba(52, 152, 219, 0.3);
+            color: var(--edit-color);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        #search-button:hover {
+            background: rgba(52, 152, 219, 0.5);
+            transform: translateY(-2px);
+        }
+
+        /* Éléments d'historique */
+        .history-item {
+            background: rgba(0, 0, 0, 0.6);
+            margin-bottom: var(--spacing-md);
+            padding: 25px;
+            border-radius: var(--radius-md);
+            transition: transform 0.3s ease,
+                        background-color 0.3s ease,
+                        box-shadow 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            position: relative;
+        }
+
+        .history-item:hover {
+            transform: translateY(-3px);
+            background: rgba(0, 0, 0, 0.7);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-sm);
+            padding-bottom: var(--spacing-sm);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        /* Montants et valeurs */
+        .amount {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--amount-color);
+            display: flex;
+            align-items: center;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .amount::before {
+            content: '\f068';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            margin-right: var(--spacing-sm);
+            font-size: 1rem;
+        }
+
+        .fees {
+            color: var(--fees-color);
+            font-size: 1.1rem;
+            margin: var(--spacing-sm) 0;
+            display: flex;
+            align-items: center;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .fees::before {
+            content: '\f0d6';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            margin-right: var(--spacing-sm);
+        }
+
+        .net-amount {
+            color: var(--net-amount-color);
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin: var(--spacing-sm) 0;
+            display: flex;
+            align-items: center;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .net-amount::before {
+            content: '\f155';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            margin-right: var(--spacing-sm);
+        }
+
+        .amount-details {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: var(--radius-sm);
+            padding: var(--spacing-sm);
+            margin-top: var(--spacing-sm);
+        }
+
+        .status {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: rgba(76, 175, 80, 0.2);
+            backdrop-filter: blur(5px);
+        }
+
+        .status.completed {
+            background: rgba(76, 175, 80, 0.3);
+            color: var(--success-color);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .date {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-top: var(--spacing-sm);
+            display: flex;
+            align-items: center;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .date::before {
+            content: '\f017';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            margin-right: var(--spacing-sm);
+            color: var(--text-secondary);
+        }
+
+        .no-history {
+            text-align: center;
+            padding: var(--spacing-lg);
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: var(--radius-md);
+            margin: var(--spacing-md) 0;
+            backdrop-filter: blur(5px);
+        }
+
+        /* Boutons et actions */
+        .edit-actions {
+            display: flex;
+            margin-top: var(--spacing-md);
+            gap: var(--spacing-sm);
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 8px 15px;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-edit {
+            background: rgba(52, 152, 219, 0.3);
+            color: var(--edit-color);
+        }
+
+        .btn-save {
+            background: rgba(46, 204, 113, 0.3);
+            color: var(--save-color);
+        }
+
+        .btn-cancel {
+            background: rgba(231, 76, 60, 0.3);
+            color: var(--cancel-color);
+        }
+
+        .btn i {
+            font-size: 0.9rem;
+        }
+
+        /* Formulaire d'édition */
+        .date-edit-form {
+            display: none;
+            background: rgba(0, 0, 0, 0.5);
+            padding: var(--spacing-md);
+            border-radius: var(--radius-sm);
+            margin-top: var(--spacing-md);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: var(--spacing-sm);
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 15px;
+            border-radius: var(--radius-sm);
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-color);
+            font-size: 1rem;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--edit-color);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.3);
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: var(--radius-md);
+            background: rgba(0, 0, 0, 0.8);
+            color: var(--text-color);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.5s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notification.success {
+            border-left: 4px solid var(--success-color);
+        }
+
+        .notification.error {
+            border-left: 4px solid var(--cancel-color);
+        }
+
+        .notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Navigation */
+        .back-link {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            margin-bottom: var(--spacing-md);
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: var(--text-color);
+            transform: translateX(-3px);
+        }
+
+        /* Media queries */
+        @media (max-width: 600px) {
+            :root {
+                --spacing-lg: 20px;
+                --spacing-md: 15px;
+                --spacing-sm: 8px;
+            }
+
+            .container {
+                margin: var(--spacing-sm);
+                padding: var(--spacing-md);
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .history-item {
+                padding: var(--spacing-md);
+            }
+
+            .amount, .net-amount {
+                font-size: 1.2rem;
+            }
+
+            .fees {
+                font-size: 1rem;
+            }
+
+            .edit-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .search-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content-wrapper">
+            <!-- Lien de retour -->
+            <a href="index.html" class="back-link">
+                <i class="fas fa-arrow-left"></i> Retour à l'historique
+            </a>
+            
+            <h1>Modifier les dates de retrait</h1>
+            
+            <!-- Sélecteur d'utilisateur -->
+            <div class="user-selector">
+                <label for="user-select">
+                    <i class="fas fa-user"></i> Sélectionner un utilisateur
+                </label>
+                <select id="user-select" class="form-control">
+                    <option value="">Chargement des utilisateurs...</option>
+                </select>
+            </div>
+            
+            <!-- Section de recherche -->
+            <div class="search-section">
+                <h3>Rechercher un utilisateur</h3>
+                <div class="search-container">
+                    <input type="text" id="search-input" class="form-control" placeholder="Nom, email ou téléphone...">
+                    <button id="search-button" class="btn btn-edit">
+                        <i class="fas fa-search"></i> Rechercher
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Liste d'historique -->
+            <div id="history-list">
+                <!-- Les retraits seront chargés ici dynamiquement -->
+                <div class="no-history">
+                    <i class="fas fa-spinner fa-spin"></i> 
+                    Chargement de l'historique des retraits...
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notification -->
+    <div id="notification" class="notification">
+        <i class="fas fa-check-circle"></i>
+        <span id="notification-message">Modification enregistrée</span>
+    </div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
+    import { getDatabase, ref, set, get, onValue, update } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDIB-raa12rkzqxRhflOMLBwL4hBycTgmo",
+        authDomain: "coke-eea48.firebaseapp.com",
+        databaseURL: "https://coke-eea48-default-rtdb.firebaseio.com",
+        projectId: "coke-eea48",
+        storageBucket: "coke-eea48.firebasestorage.app",
+        messagingSenderId: "217366074971",
+        appId: "1:217366074971:web:948bdc5baeeea93fac117e"
+    };
+
+    // Initialisation Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const database = getDatabase(app);
+
+    // Éléments DOM
+    const userSelect = document.getElementById('user-select');
+    const historyList = document.getElementById('history-list');
+    const notification = document.getElementById('notification');
+    const notificationMessage = document.getElementById('notification-message');
+    const searchInput = document.getElementById('search-input');
+    const searchButton = document.getElementById('search-button');
+
+    // Variables globales
+    let currentUser = null;
+    let usersData = {};
+    // Définir isAdmin à true par défaut puisque vous êtes admin et ne vous connectez pas
+    let isAdmin = true;
+
+    // Fonctions utilitaires
+    function formatAmount(amount) {
+        if (typeof amount !== 'number') amount = Number(amount) || 0;
+        return amount.toLocaleString('fr-FR') + ' FCFA';
+    }
+
+    function formatDate(timestamp) {
+        if (!timestamp) return "Date inconnue";
+        const date = new Date(timestamp);
+        return date.toLocaleString('fr-FR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+
+    function calculateNetAmount(amount, fees) {
+        return (Number(amount) || 0) - (Number(fees) || 0);
+    }
+
+    function formatDateForInput(timestamp) {
+        if (!timestamp) return "";
+        const date = new Date(timestamp);
+        
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
+
+    function showNotification(message, type = 'success') {
+        notificationMessage.textContent = message;
+        notification.className = `notification ${type}`;
+        notification.classList.add('show');
+        
+        setTimeout(() => {
+            notification.classList.remove('show');
+        }, 3000);
+    }
+
+    // Fonction pour charger tous les utilisateurs
+    async function loadUsers() {
+        try {
+            userSelect.innerHTML = '<option value="">Chargement des utilisateurs...</option>';
+            const usersRef = ref(database, 'users');
+            const snapshot = await get(usersRef);
+            
+            if (snapshot.exists()) {
+                usersData = snapshot.val();
+                
+                // Vider la liste d'utilisateurs actuelle
+                userSelect.innerHTML = '<option value="">Sélectionner un utilisateur</option>';
+                
+                // Ajouter chaque utilisateur à la liste déroulante
+                Object.entries(usersData).forEach(([userId, userData]) => {
+                    const userName = userData.fullName || userData.email || userId;
+                    const option = document.createElement('option');
+                    option.value = userId;
+                    option.textContent = userName;
+                    userSelect.appendChild(option);
+                });
+            } else {
+                userSelect.innerHTML = '<option value="">Aucun utilisateur trouvé</option>';
+            }
+        } catch (error) {
+            console.error('Erreur lors du chargement des utilisateurs:', error);
+            userSelect.innerHTML = '<option value="">Erreur lors du chargement</option>';
+        }
+    }
+
+    // Fonction de recherche d'utilisateurs
+    function searchUsers(query) {
+        if (!query || query.trim() === '') {
+            // Si la recherche est vide, afficher tous les utilisateurs
+            userSelect.innerHTML = '<option value="">Sélectionner un utilisateur</option>';
+            
+            Object.entries(usersData).forEach(([userId, userData]) => {
+                const userName = userData.fullName || userData.email || userId;
+                const option = document.createElement('option');
+                option.value = userId;
+                option.textContent = userName;
+                userSelect.appendChild(option);
+            });
+            
+            return;
+        }
+        
+        // Nettoyer l'entrée de recherche
+        query = query.trim().toLowerCase();
+        
+        // Filtrer les utilisateurs qui correspondent à la requête
+        const filteredUsers = Object.entries(usersData).filter(([userId, userData]) => {
+            const userName = (userData.fullName || '').toLowerCase();
+            const userEmail = (userData.email || '').toLowerCase();
+            const userPhone = (userData.phoneNumber || '').toLowerCase();
+            
+            return userName.includes(query) || 
+                   userEmail.includes(query) || 
+                   userPhone.includes(query) ||
+                   userId.toLowerCase().includes(query);
+        });
+        
+        // Mettre à jour le sélecteur d'utilisateurs avec les résultats filtrés
+        userSelect.innerHTML = '';
+        
+        if (filteredUsers.length === 0) {
+            userSelect.innerHTML = '<option value="">Aucun utilisateur trouvé</option>';
+            return;
+        }
+        
+        // Ajouter les utilisateurs filtrés à la liste
+        filteredUsers.forEach(([userId, userData]) => {
+            const userName = userData.fullName || userData.email || userId;
+            const option = document.createElement('option');
+            option.value = userId;
+            option.textContent = userName;
+            userSelect.appendChild(option);
+        });
+        
+        // S'il n'y a qu'un seul résultat, sélectionner automatiquement cet utilisateur et afficher ses informations
+        if (filteredUsers.length === 1) {
+            const userId = filteredUsers[0][0];
+            userSelect.value = userId;
+            loadUserWithdrawals(userId);
+        }
+    }
+
+    // Fonction d'affichage de l'historique des retraits d'un utilisateur
+    function displayWithdrawalHistory(userId, history) {
+        historyList.innerHTML = '';
+
+        if (!history || Object.keys(history).length === 0) {
+            historyList.innerHTML = `
+                <div class="no-history">
+                    <i class="fas fa-history"></i> 
+                    Aucun historique de retrait
+                </div>`;
+            return;
+        }
+
+        // Tri et affichage des retraits
+        Object.entries(history)
+            .sort(([, a], [, b]) => (b.timestamp || 0) - (a.timestamp || 0))
+            .forEach(([withdrawalId, withdrawal]) => {
+                const netAmount = calculateNetAmount(withdrawal.amount, withdrawal.fees);
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                historyItem.dataset.withdrawalId = withdrawalId;
+                historyItem.dataset.userId = userId;
+                
+                historyItem.innerHTML = `
+                    <div class="history-header">
+                        <span class="amount">${formatAmount(withdrawal.amount)}</span>
+                        <span class="status ${withdrawal.status ? withdrawal.status.toLowerCase() : 'unknown'}">
+                            ${withdrawal.status || "Inconnu"}
+                        </span>
+                    </div>
+                    <div class="amount-details">
+                        <div class="fees">Frais: ${formatAmount(withdrawal.fees)}</div>
+                        <div class="net-amount">Montant net: ${formatAmount(netAmount)}</div>
+                    </div>
+                    <div class="date">Date du retrait: ${formatDate(withdrawal.timestamp)}</div>
+                    
+                    <div class="edit-actions">
+                        <button class="btn btn-edit" onclick="toggleDateEdit('${withdrawalId}')">
+                            <i class="fas fa-edit"></i> Modifier la date
+                        </button>
+                    </div>
+                    
+                    <div id="date-form-${withdrawalId}" class="date-edit-form">
+                        <div class="form-group">
+                            <label for="date-${withdrawalId}">Nouvelle date et heure</label>
+                            <input type="datetime-local" 
+                                   id="date-${withdrawalId}" 
+                                   class="form-control"
+                                   value="${formatDateForInput(withdrawal.timestamp)}" 
+                                   required>
+                        </div>
+                        <div class="edit-actions">
+                            <button class="btn btn-save" onclick="saveNewDate('${userId}', '${withdrawalId}')">
+                                <i class="fas fa-save"></i> Enregistrer
+                            </button>
+                            <button class="btn btn-cancel" onclick="toggleDateEdit('${withdrawalId}')">
+                                <i class="fas fa-times"></i> Annuler
+                            </button>
+                        </div>
+                    </div>
+                `;
+                historyList.appendChild(historyItem);
+            });
+    }
+
+    // Chargement des retraits d'un utilisateur spécifique
+    async function loadUserWithdrawals(userId) {
+        try {
+            if (!userId) {
+                historyList.innerHTML = `
+                    <div class="no-history">
+                        <i class="fas fa-user"></i> 
+                        Veuillez sélectionner un utilisateur
+                    </div>`;
+                return;
+            }
+
+            historyList.innerHTML = `
+                <div class="no-history">
+                    <i class="fas fa-spinner fa-spin"></i> 
+                    Chargement de l'historique...
+                </div>`;
+
+            const withdrawalRef = ref(database, `users/${userId}/withdrawalHistory`);
+            const snapshot = await get(withdrawalRef);
+            
+            if (snapshot.exists()) {
+                displayWithdrawalHistory(userId, snapshot.val());
+            } else {
+                historyList.innerHTML = `
+                    <div class="no-history">
+                        <i class="fas fa-history"></i> 
+                        Aucun historique de retrait pour cet utilisateur
+                    </div>`;
+            }
+        } catch (error) {
+            console.error('Erreur lors du chargement des retraits:', error);
+            historyList.innerHTML = `
+                <div class="no-history">
+                    <i class="fas fa-exclamation-triangle"></i> 
+                    Erreur lors du chargement des données
+                </div>`;
+        }
+    }
+
+    // Charger directement les utilisateurs au démarrage (sans vérification d'authentification)
+    document.addEventListener('DOMContentLoaded', function() {
+        // Charger tous les utilisateurs immédiatement, puisque vous êtes admin
+        loadUsers();
+    });
+
+    // Gestionnaire d'événement pour le changement d'utilisateur
+    userSelect.addEventListener('change', (e) => {
+        const userId = e.target.value;
+        loadUserWithdrawals(userId);
+    });
+
+    // Gestionnaire d'événement pour la recherche d'utilisateurs
+    searchButton.addEventListener('click', () => {
+        const query = searchInput.value;
+        searchUsers(query);
+    });
+
+    // Gestionnaire d'événement pour la recherche avec la touche Enter
+    searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            const query = searchInput.value;
+            searchUsers(query);
+        }
+    });
+
+    // Fonction pour basculer l'affichage du formulaire d'édition
+    window.toggleDateEdit = function(withdrawalId) {
+        const dateForm = document.getElementById(`date-form-${withdrawalId}`);
+        
+        if (dateForm.style.display === 'block') {
+            dateForm.style.display = 'none';
+        } else {
+            // Fermer tous les autres formulaires ouverts
+            document.querySelectorAll('.date-edit-form').forEach(form => {
+                form.style.display = 'none';
+            });
+            
+            dateForm.style.display = 'block';
+        }
+    };
+
+    // Fonction pour enregistrer la nouvelle date
+    window.saveNewDate = async function(userId, withdrawalId) {
+        try {
+            const dateInput = document.getElementById(`date-${withdrawalId}`);
+            
+            if (!dateInput.value) {
+                showNotification('Veuillez sélectionner une date valide', 'error');
+                return;
+            }
+            
+            const newTimestamp = new Date(dateInput.value).getTime();
+            
+            // Mise à jour dans la base de données
+            const withdrawalRef = ref(database, `users/${userId}/withdrawalHistory/${withdrawalId}`);
+            
+            await update(withdrawalRef, {
+                timestamp: newTimestamp
+            });
+            
+            // Mettre à jour l'affichage
+            const dateDisplay = document.querySelector(`.history-item[data-withdrawal-id="${withdrawalId}"] .date`);
+            dateDisplay.innerHTML = `Date du retrait: ${formatDate(newTimestamp)}`;
+            
+            // Fermer le formulaire
+            toggleDateEdit(withdrawalId);
+            
+            // Afficher la notification
+            showNotification('Date modifiée avec succès');
+            
+        } catch (error) {
+            console.error('Erreur lors de la mise à jour de la date:', error);
+            showNotification('Erreur lors de la mise à jour de la date', 'error');
+        }
+    };
+</script>
+    
+</body>
+</html>

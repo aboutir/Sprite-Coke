@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page de Recharge</title>
+    <style>
+        :root {
+            --primary-color: #0003ff; /* Visa bleu */
+            --secondary-color: #ff4900; /* Mastercard rouge */
+            --accent-color: #ff0a00; /* PayPal orange */
+            --success-color: #00A650; /* Amex vert */
+            --error-color: https://image.noelshack.com/fichiers/2025/09/3/1740570275-images-9.jpeg; /* Rouge standard pour les erreurs */
+            --background-color: #ff0a00;
+            --text-color: #ff0a00;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--text-color);
+            line-height: 1.5;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 15px;
+            /* Remplacer les styles de fond précédents par l'image */
+            background-image: url('https://image.noelshack.com/fichiers/2025/09/3/1740570275-images-9.jpeg'); /* Remplacez par l'URL de votre image */
+            background-size: cover; /* Pour couvrir toute la zone */
+            background-position: center center; /* Centrage de l'image */
+            background-repeat: no-repeat; /* Éviter la répétition */
+            background-attachment: fixed; /* Image fixe lors du défilement */
+            /* Ajouter un filtre pour assurer la lisibilité du contenu */
+            position: relative;
+        }
+
+        /* Overlay pour améliorer la lisibilité */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8); /* Fond blanc semi-transparent */
+            z-index: -1;
+        }
+
+        .container {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 12px rgba(26, 31, 113, 0.08);
+            border: 1px solid rgba(235, 0, 27, 0.1);
+            position: relative; /* Assure que le contenu reste au-dessus du fond */
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            font-size: 1.5rem;
+            margin-bottom: 1.2rem;
+            font-weight: 600;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .operator-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .operator-option {
+            position: relative;
+        }
+
+        .operator-option input[type="radio"] {
+            display: none;
+        }
+
+        .operator-logo {
+            border: 1px solid #E5E7EB;
+            border-radius: 0.5rem;
+            padding: 0.5rem;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            cursor: pointer;
+            background: rgba(248, 249, 250, 0.5);
+        }
+
+        .operator-logo svg {
+            width: 36px;
+            height: 36px;
+        }
+
+        .operator-logo span {
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        .operator-option input[type="radio"]:checked + .operator-logo {
+            border-color: var(--secondary-color);
+            background-color: #ff0a00;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 4px rgba(235, 0, 27, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: #000000;
+        }
+
+        .help-text {
+            display: block;
+            font-size: 0.7rem;
+            color: #0e0a7e;
+            margin-top: 0.25rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.6rem;
+            border: 1px solid #ff0a00;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(26, 31, 113, 0.1);
+        }
+
+        .error {
+            color: var(--error-color);
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            width: 100%;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, var(--secondary-color), var(--accent-color));
+            box-shadow: 0 4px 6px rgba(26, 31, 113, 0.2);
+        }
+
+        button:disabled {
+            background-color: #65ff00;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(26, 31, 113, 0.1);
+            border-right: 3px solid var(--primary-color);
+            border-bottom: 3px solid var(--secondary-color);
+            border-left: 3px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .notification {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            color: white;
+            display: none;
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            font-size: 0.85rem;
+        }
+
+        .success { background-color: var(--success-color); }
+        .error-notification { background-color: var(--error-color); }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @media (max-width: 480px) {
+            .operator-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Deposit center  </h1>
+        <form id="rechargeForm">
+            <div class="operator-grid">
+                <label class="operator-option">
+                    <input type="radio" name="operator" value="mtn" required>
+                    <div class="operator-logo">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="10" fill="#FDB913"/>
+                            <text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="white" font-family="Arial" font-weight="bold" font-size="6">MTN</text>
+                        </svg>
+                        <span>MTN</span>
+                    </div>
+                </label>
+                
+                
+                
+                
+                <label class="operator-option">
+                    <input type="radio" name="operator" value="moov" required>
+                    <div class="operator-logo">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="10" fill="#00A3E0"/>
+                            <text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="white" font-family="moov money au nom de ISSA ADOUM" font-weight="bold" font-size="6">MOOV</text>
+                        </svg>
+                        <span>Moov</span>
+                    </div>
+                </label>
+                
+                          
+                <label class="operator-option">
+                    <input type="radio" name="operator" value="orange" required>
+                    <div class="operator-logo">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="10" fill="#FF6600"/>
+                            <text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="white" font-family="Arial" font-weight="bold" font-size="5">ORANGE</text>
+                        </svg>
+                        <span>Orange</span>
+                    </div>
+                </label>
+                <label class="operator-option">
+                    <input type="radio" name="operator" value="wave" required>
+                    <div class="operator-logo">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="10" fill="#1DC1EC"/>
+                            <text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="white" font-family="Arial" font-weight="bold" font-size="6">WAVE</text>
+                        </svg>
+                        <span>Wave</span>
+                    </div>
+                </label>
+                <label class="operator-option">
+                    <input type="radio" name="operator" value="usdt" required>
+                    <div class="operator-logo">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="10" fill="#26A17B"/>
+                            <text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="white" font-family="Arial" font-weight="bold" font-size="6">USDT</text>
+                        </svg>
+                        <span>USDT</span>
+                    </div>
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Numéro de téléphone</label>
+                <input type="tel" id="phone" name="phone" required 
+                       placeholder="Votre numéro de recharge"
+                       title="Numéro à 8 ou 10 chiffres">
+                <span class="help-text"></span>
+                <div id="phoneError" class="error"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="amount">Montant</label>
+                <input type="number" id="amount" name="amount" min="5000" 
+                       placeholder="Veuillez saisir le montant de votre paiement" required>
+                <span class="help-text">minimum deposit 5000 FCFA </span>
+                <div id="amountError" class="error"></div>
+            </div>
+
+            <button type="submit" id="submitButton">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+                Procéder au paiement
+            </button>
+        </form>
+    </div>
+
+    <div class="loading">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+<script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+        import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDIB-raa12rkzqxRhflOMLBwL4hBycTgmo",
+            authDomain: "coke-eea48.firebaseapp.com",
+            databaseURL: "https://coke-eea48-default-rtdb.firebaseio.com",
+            projectId: "coke-eea48",
+            storageBucket: "coke-eea48.firebasestorage.app",
+            messagingSenderId: "217366074971",
+            appId: "1:217366074971:web:948bdc5baeeea93fac117e"
+        };
+
+        // Initialiser Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        // Dictionnaire des numéros par opérateur
+        const operatorNumbers = {
+            'mtn': '2250595883343',
+            'moov': '2250173750225',
+            'orange': 'indisponible',
+            'wave': '2250710745207',
+            'usdt': 'indisponible'
+           
+        };
+
+        // Fonctions utilitaires
+        function showLoading() {
+            document.querySelector('.loading').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.querySelector('.loading').style.display = 'none';
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.style.display = 'block';
+
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 5000);
+        }
+
+        function showError(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+
+        function clearErrors() {
+            const errorElements = document.querySelectorAll('.error');
+            errorElements.forEach(element => {
+                element.style.display = 'none';
+                element.textContent = '';
+            });
+        }
+
+        // Validation du numéro de téléphone (8 ou 10 chiffres)
+        function isValidPhoneNumber(phone) {
+            return /^[0-9]{8}$/.test(phone) || /^[0-9]{10}$/.test(phone);
+        }
+
+        // Validation des données
+        function validateForm(operator, phone, amount) {
+            let isValid = true;
+            clearErrors();
+
+            if (!operator) {
+                showError('operatorError', 'Veuillez sélectionner un opérateur');
+                isValid = false;
+            }
+
+            if (!isValidPhoneNumber(phone)) {
+                showError('phoneError', 'Le numéro doit contenir 8 ou 10 chiffres');
+                isValid = false;
+            }
+
+           if (amount < 100) {
+                showError('amountError', 'Le montant minimum est de 100 FCFA');
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        // Vérifier l'authentification au chargement
+        window.addEventListener('load', () => {
+            onAuthStateChanged(auth, (user) => {
+                if (!user) {
+                    showNotification('Veuillez vous connecter pour continuer', 'error-notification');
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                }
+            });
+        });
+
+        // Gérer la soumission du formulaire
+        document.getElementById('rechargeForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const user = auth.currentUser;
+            if (!user) {
+                showNotification('Veuillez vous connecter pour continuer', 'error-notification');
+                return;
+            }
+
+            const operator = document.querySelector('input[name="operator"]:checked')?.value;
+            const phone = document.getElementById('phone').value;
+            const amount = parseInt(document.getElementById('amount').value);
+
+            if (!validateForm(operator, phone, amount)) {
+                return;
+            }
+
+            showLoading();
+
+            try {
+                // Créer l'objet de recharge
+                const rechargeData = {
+                    operator: operator,
+                    phone: phone,
+                    amount: amount,
+                    operatorNumber: operatorNumbers[operator],
+                    date: new Date().toISOString(),
+                    userId: user.uid,
+                    userEmail: user.email,
+                    status: 'pending'
+                };
+
+                // Stocker dans sessionStorage
+                sessionStorage.setItem('rechargeData', JSON.stringify(rechargeData));
+
+                // Sauvegarder dans Firebase
+                const rechargeRef = ref(db, `recharges/${user.uid}/${Date.now()}`);
+                await set(rechargeRef, rechargeData);
+
+                // Rediriger vers la page de confirmation
+                window.location.href = 'confirmation.html';
+
+            } catch (error) {
+                console.error('Erreur:', error);
+                showNotification('Une erreur est survenue. Veuillez réessayer.', 'error-notification');
+            } finally {
+                hideLoading();
+            }
+        });
+
+        // Validation en temps réel du numéro de téléphone
+        document.getElementById('phone').addEventListener('input', function(e) {
+            const phone = e.target.value;
+            if (phone && !isValidPhoneNumber(phone)) {
+                showError('phoneError', 'Le numéro doit contenir 8 ou 10 chiffres');
+            } else {
+                document.getElementById('phoneError').style.display = 'none';
+            }
+        });
+
+        // Validation en temps réel du montant
+        document.getElementById('amount').addEventListener('input', function(e) {
+            const amount = parseInt(e.target.value);
+            if (amount < 1) {
+                showError('amountError', 'Le montant minimum est de 5000 FCFA');
+            } else {
+                document.getElementById('amountError').style.display = 'none';
+            }
+        });
+    </script>
+    </body>
+</html> 

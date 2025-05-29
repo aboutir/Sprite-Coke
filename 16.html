@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historique des retraits</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* Variables globales */
+        :root {
+            --bg-image: url('https://image.noelshack.com/fichiers/2025/09/3/1740570275-images-9.jpeg');
+            --section-bg-image: url('https://image.noelshack.com/fichiers/2025/09/3/1740570275-images-9.jpeg');
+            
+            /* Couleurs */
+            --text-color: #ffffff;
+            --text-secondary: #dddddd;
+            --amount-color: #ff6b6b;
+            --fees-color: #ffd700;
+            --success-color: #4CAF50;
+            --net-amount-color: #00ff9d;
+            
+            /* Espacements */
+            --spacing-sm: 10px;
+            --spacing-md: 20px;
+            --spacing-lg: 30px;
+            
+            /* Border radius */
+            --radius-sm: 8px;
+            --radius-md: 15px;
+            --radius-lg: 20px;
+        }
+
+        /* Reset et styles de base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+                        var(--bg-image) center/cover fixed;
+            color: var(--text-color);
+            padding: var(--spacing-md);
+        }
+
+        .container {
+            background: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1)),
+                        var(--section-bg-image) center/cover;
+            backdrop-filter: blur(10px);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 800px;
+            margin: var(--spacing-md) auto;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            backdrop-filter: blur(5px);
+            z-index: 0;
+        }
+
+        .content-wrapper {
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: var(--spacing-lg);
+            font-size: 2.2rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            position: relative;
+            padding-bottom: var(--spacing-sm);
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, 
+                transparent, 
+                var(--success-color),
+                transparent
+            );
+        }
+
+        .history-item {
+            background: rgba(0, 0, 0, 0.6);
+            margin-bottom: var(--spacing-md);
+            padding: 25px;
+            border-radius: var(--radius-md);
+            transition: transform 0.3s ease,
+                        background-color 0.3s ease,
+                        box-shadow 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+        }
+
+        .history-item:hover {
+            transform: translateY(-3px);
+            background: rgba(0, 0, 0, 0.7);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-sm);
+            padding-bottom: var(--spacing-sm);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .amount {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--amount-color);
+            display: flex;
+            align-items: center;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .amount::before {
+            content: '\f068';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            margin-right: var(--spacing-sm);
+            font-size: 1rem;
+        }
+
+        .fees {
+            color: var(--fees-color);
+            font-size: 1.1rem;
+            margin: var(--spacing-sm) 0;
+            display: flex;
+            align-items: center;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .fees::before {
+            content: '\f0d6';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            margin-right: var(--spacing-sm);
+        }
+
+        /* Nouveau style pour le montant net */
+        .net-amount {
+            color: var(--net-amount-color);
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin: var(--spacing-sm) 0;
+            display: flex;
+            align-items: center;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .net-amount::before {
+            content: '\f155';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            margin-right: var(--spacing-sm);
+        }
+
+        .amount-details {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: var(--radius-sm);
+            padding: var(--spacing-sm);
+            margin-top: var(--spacing-sm);
+        }
+
+        .status {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: rgba(76, 175, 80, 0.2);
+            backdrop-filter: blur(5px);
+        }
+
+        .status.completed {
+            background: rgba(76, 175, 80, 0.3);
+            color: var(--success-color);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .date {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-top: var(--spacing-sm);
+            display: flex;
+            align-items: center;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .date::before {
+            content: '\f017';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            margin-right: var(--spacing-sm);
+            color: var(--text-secondary);
+        }
+
+        .no-history {
+            text-align: center;
+            padding: var(--spacing-lg);
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: var(--radius-md);
+            margin: var(--spacing-md) 0;
+            backdrop-filter: blur(5px);
+        }
+
+        @media (max-width: 600px) {
+            :root {
+                --spacing-lg: 20px;
+                --spacing-md: 15px;
+                --spacing-sm: 8px;
+            }
+
+            .container {
+                margin: var(--spacing-sm);
+                padding: var(--spacing-md);
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .history-item {
+                padding: var(--spacing-md);
+            }
+
+            .amount, .net-amount {
+                font-size: 1.2rem;
+            }
+
+            .fees {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content-wrapper">
+            <h1>Historique des fonds</h1>
+            <div id="history-list">
+                <!-- Exemple d'historique -->
+                <div class="history-item">
+                    <div class="history-header">
+                        <div class="amount"> 5.886 FCFA</div>
+                        <div class="status completed">Approuvé</div>
+                    </div>
+                    <div class="amount-details">
+                        <div class="fees">Frais: 588,6 FCFA</div>
+                        <div class="net-amount">Montant net: 5.297,4 FCFA</div>
+                    </div>
+                    <div class="date">27 février 2025 à 10:00</div>
+                </div>
+                
+                
+                <div class="history-item">
+                    <div class="history-header">
+                        <div class="amount">10.400 FCFA</div>
+                        <div class="status completed">Approuvé</div>
+                    </div>
+                    <div class="amount-details">
+                        <div class="fees">Frais: 1.040 FCFA</div>
+                        <div class="net-amount">Montant net: 9.360</div>
+                    </div>
+                    <div class="date">28 février 2025 à 09:30</div>
+                </div>
+                
+                
+                <div class="history-item">
+                    <div class="history-header">
+                        <div class="amount">36.000 FCFA</div>
+                        <div class="status completed">patientez</div>
+                    </div>
+                    <div class="amount-details">
+                        <div class="fees">Frais: 3.600 FCFA</div>
+                        <div class="net-amount">Montant net: 32.400</div>
+                    </div>
+                    <div class="date">01 mars 2025 à 09:50</div>
+                </div>
+                
+                <!-- Vous pouvez ajouter d'autres éléments d'historique ici -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Vous pouvez ajouter du JavaScript ici pour charger dynamiquement les données
+        // Exemple:
+        /*
+        document.addEventListener('DOMContentLoaded', function() {
+            // Exemple de données
+            const historyData = [
+                { 
+                    amount: '500,00 €', 
+                    status: 'Complété', 
+                    fees: '15,00 €', 
+                    netAmount: '485,00 €', 
+                    date: '25 février 2025 à 14:30' 
+                },
+                // Ajoutez d'autres entrées ici
+            ];
+            
+            const historyList = document.getElementById('history-list');
+            
+            if (historyData.length === 0) {
+                historyList.innerHTML = '<div class="no-history">Aucun historique de retrait disponible</div>';
+                return;
+            }
+            
+            let historyHTML = '';
+            
+            historyData.forEach(item => {
+                historyHTML += `
+                    <div class="history-item">
+                        <div class="history-header">
+                            <div class="amount">${item.amount}</div>
+                            <div class="status completed">${item.status}</div>
+                        </div>
+                        <div class="amount-details">
+                            <div class="fees">Frais: ${item.fees}</div>
+                            <div class="net-amount">Montant net: ${item.netAmount}</div>
+                        </div>
+                        <div class="date">${item.date}</div>
+                    </div>
+                `;
+            });
+            
+            historyList.innerHTML = historyHTML;
+        });
+        */
+    </script>
+</body>
+</html>

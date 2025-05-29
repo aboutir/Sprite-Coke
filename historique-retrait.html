@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historiques de Retraits</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Reset et styles de base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            line-height: 1.4;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
+            background-image: radial-gradient(circle at 10% 20%, #1a1a1a 0%, #121212 90%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .main-container {
+            max-width: 800px;
+            margin: 0 auto;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* En-tête de page */
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .page-header h1 {
+            color: #ffffff;
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            position: relative;
+            text-shadow: 0 0 15px rgba(187, 134, 252, 0.5);
+            letter-spacing: 1px;
+        }
+        
+        .page-header h1:after {
+            content: "";
+            position: absolute;
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(to right, #bb86fc, #03dac6);
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 3px;
+            box-shadow: 0 0 10px rgba(3, 218, 198, 0.5);
+        }
+        
+        /* Conteneur des transactions */
+        .transactions-container {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        /* Carte de transaction */
+        .transaction-card {
+            border-radius: 16px;
+            background-color: #1f1f1f;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05);
+            border-left: 3px solid #bb86fc;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+            background-image: linear-gradient(135deg, rgba(40, 40, 40, 0.6) 0%, rgba(30, 30, 30, 0.6) 100%);
+        }
+        
+        .transaction-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.07);
+            border-left: 3px solid #03dac6;
+        }
+        
+        /* En-tête de transaction */
+        .transaction-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: #2d2d2d;
+            border-bottom: 1px solid #3d3d3d;
+            font-weight: 600;
+            color: #e0e0e0;
+            font-size: 16px;
+        }
+        
+        .transaction-header i {
+            color: #bb86fc;
+            margin-right: 10px;
+            font-size: 18px;
+        }
+        
+        /* Badge de statut */
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .status-success {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+        
+        .status-pending {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+        
+        /* Contenu de transaction */
+        .transaction-content {
+            padding: 15px 20px;
+        }
+        
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #3d3d3d;
+            align-items: center;
+        }
+        
+        .transaction-item:last-of-type {
+            border-bottom: none;
+            margin-bottom: 15px;
+        }
+        
+        .item-label {
+            color: #a0a0a0;
+            font-weight: 500;
+            font-size: 15px;
+            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .item-label i {
+            font-size: 16px;
+            width: 20px;
+        }
+        
+        .item-label.coins i {
+            color: #bb86fc;
+        }
+        
+        .item-label.fees {
+            color: #ff4757;
+        }
+        
+        .item-label.fees i {
+            color: #ff4757;
+        }
+        
+        .item-label.wallet i {
+            color: #866aff;
+        }
+        
+        .item-value {
+            font-weight: 700;
+            color: #fff;
+            font-size: 16px;
+            text-shadow: 0 0 10px rgba(255,255,255,0.2);
+        }
+        
+        .item-value.fees {
+            background: rgba(255, 71, 87, 0.15);
+            color: #ff4757;
+            padding: 8px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 71, 87, 0.3);
+        }
+        
+        /* Montant à recevoir mis en évidence avec le même format */
+        .amount-value {
+            font-weight: 700;
+            font-size: 14px;
+            color: #00d4aa;
+            text-shadow: 0 0 15px rgba(0, 212, 170, 0.4);
+            background: rgba(0, 212, 170, 0.15);
+            padding: 10px 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 212, 170, 0.3);
+        }
+        
+        /* Pied de transaction */
+        .transaction-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 15px;
+            border-top: 1px solid #3d3d3d;
+            font-size: 13px;
+        }
+        
+        .timestamp {
+            color: #bb86fc;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .timestamp i {
+            color: #00d4aa;
+            font-size: 14px;
+        }
+        
+        .reference {
+            color: #a0a0a0;
+            font-weight: 400;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .reference i {
+            color: #bb86fc;
+            font-size: 14px;
+        }
+        
+        /* Message d'absence d'historique */
+        .no-history {
+            text-align: center;
+            padding: 60px 20px;
+            color: #a0a0a0;
+            font-size: 16px;
+        }
+        
+        .no-history i {
+            font-size: 48px;
+            color: #bb86fc;
+            margin-bottom: 20px;
+            opacity: 0.6;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            
+            .transaction-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .transaction-footer {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            
+            .page-header h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="page-header">
+            <h1>Historiques de Retraits</h1>
+        </div>
+        
+        <!-- Conteneur pour l'affichage dynamique -->
+        <div id="history-list" class="transactions-container">
+            <!-- Les données de retrait seront injectées ici par JavaScript -->
+        </div>
+    </div>
+
+    <!-- Font Awesome pour les icônes -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    
+    <!-- Script Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDIB-raa12rkzqxRhflOMLBwL4hBycTgmo",
+            authDomain: "coke-eea48.firebaseapp.com",
+            databaseURL: "https://coke-eea48-default-rtdb.firebaseio.com",
+            projectId: "coke-eea48",
+            storageBucket: "coke-eea48.firebasestorage.app",
+            messagingSenderId: "217366074971",
+            appId: "1:217366074971:web:948bdc5baeeea93fac117e"
+        };
+
+        // Initialisation Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+
+        // Fonctions utilitaires
+        function formatAmount(amount) {
+            if (typeof amount !== 'number') amount = Number(amount) || 0;
+            return amount.toLocaleString('fr-FR');
+        }
+        
+        function formatAmountWithCurrency(amount) {
+            if (typeof amount !== 'number') amount = Number(amount) || 0;
+            return amount.toLocaleString('fr-FR') + ' FCFA';
+        }
+
+        function formatDate(timestamp) {
+            if (!timestamp) return "Date inconnue";
+            const date = new Date(timestamp);
+            return date.toLocaleString('fr-FR', {
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function calculateNetAmount(amount, fees) {
+            return (Number(amount) || 0) - (Number(fees) || 0);
+        }
+
+        // Génère un ID de référence unique pour les transactions
+        function generateReferenceId(timestamp) {
+            const date = new Date(timestamp);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hour = String(date.getHours()).padStart(2, '0');
+            const minute = String(date.getMinutes()).padStart(2, '0');
+            const second = String(date.getSeconds()).padStart(2, '0');
+            const random = String(Math.floor(Math.random() * 1000)).padStart(3, '0');
+            
+            return `TRX-${year}${month}${day}-${hour}${minute}${second}-${random}`;
+        }
+
+        // Fonction d'affichage de l'historique avec le style unifié
+        function displayWithdrawalHistory(history) {
+            const historyList = document.getElementById('history-list');
+            historyList.innerHTML = '';
+
+            if (!history || Object.keys(history).length === 0) {
+                historyList.innerHTML = `
+                    <div class="no-history">
+                        <i class="fas fa-history"></i> 
+                        <p>Aucun historique de retrait</p>
+                    </div>`;
+                return;
+            }
+
+            // Tri et affichage des retraits
+            Object.entries(history)
+                .sort(([, a], [, b]) => (b.timestamp || 0) - (a.timestamp || 0))
+                .forEach(([key, withdrawal], index) => {
+                    const netAmount = calculateNetAmount(withdrawal.amount, withdrawal.fees);
+                    const transactionId = withdrawal.id || `#${12540 + index}`;
+                    const reference = withdrawal.reference || generateReferenceId(withdrawal.timestamp || Date.now());
+                    
+                    const transactionCard = document.createElement('div');
+                    transactionCard.className = 'transaction-card';
+                    
+                    transactionCard.innerHTML = `
+                        <div class="transaction-header">
+                            <span><i class="fas fa-money-bill-wave"></i>Retrait ${transactionId}</span>
+                            <span class="status-badge status-success"><i class="fas fa-clock"></i>${withdrawal.status === "En attente" ? "En attente" : "Payé"}</span>
+                        </div>
+                        <div class="transaction-content">
+                            <div class="transaction-item">
+                                <span class="item-label coins"><i class="fas fa-coins"></i>Montant retiré</span>
+                                <span class="item-value">${formatAmountWithCurrency(withdrawal.amount)}</span>
+                            </div>
+                            <div class="transaction-item">
+                                <span class="item-label fees"><i class="fas fa-hand-holding-usd"></i>Frais de retrait 5%</span>
+                                <span class="item-value fees">${formatAmountWithCurrency(withdrawal.fees)}</span>
+                            </div>
+                            <div class="transaction-item">
+                                <span class="item-label wallet"><i class="fas fa-wallet"></i>Montant à recevoir</span>
+                                <span class="amount-value">${formatAmountWithCurrency(netAmount)}</span>
+                            </div>
+                            <div class="transaction-footer">
+                                <span class="timestamp"><i class="fas fa-calendar-alt"></i>${formatDate(withdrawal.timestamp)}</span>
+                                <span class="reference"><i class="fas fa-hashtag"></i>Réf: ${reference}</span>
+                            </div>
+                        </div>
+                    `;
+                    
+                    historyList.appendChild(transactionCard);
+                });
+        }
+
+        // Gestion de l'authentification
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const historyRef = ref(database, `users/${user.uid}/withdrawalHistory`);
+                onValue(historyRef, (snapshot) => {
+                    const history = snapshot.val();
+                    displayWithdrawalHistory(history);
+                });
+            } else {
+                // Redirection vers la page de connexion ou affichage d'exemple pour démonstration
+                console.log('Utilisateur non connecté');
+                
+                // Pour le développement, on peut afficher des données fictives
+                const demoData = {
+                    withdrawal1: {
+                        id: "#12540",
+                        amount: 71000,
+                        fees: 3000,
+                        status: "Réussi",
+                        timestamp: new Date("2025-03-10T09:50:00").getTime(),
+                        reference: "TRX-20250310-95043"
+                    },
+                    withdrawal2: {
+                        id: "#12541",
+                        amount: 104500,
+                        fees: 4500,
+                        status: "Réussi",
+                        timestamp: new Date("2025-03-11T14:25:00").getTime(),
+                        reference: "TRX-20250311-14250"
+                    },
+                    withdrawal3: {
+                        id: "#12542",
+                        amount: 25000,
+                        fees: 2000,
+                        status: "En attente",
+                        timestamp: new Date("2025-03-12T16:30:00").getTime(),
+                        reference: "TRX-20250312-16300"
+                    }
+                };
+                
+                displayWithdrawalHistory(demoData);
+                // Décommenter la ligne suivante en production
+                // window.location.href = 'login.html';
+            }
+        });
+    </script>
+</body>
+</html>
