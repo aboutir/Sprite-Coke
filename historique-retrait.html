@@ -122,15 +122,21 @@
         }
         
         .status-success {
-            background: rgba(255, 193, 7, 0.2);
-            color: #ffc107;
-            border: 1px solid rgba(255, 193, 7, 0.3);
+            background: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+            border: 1px solid rgba(76, 175, 80, 0.3);
         }
         
         .status-pending {
             background: rgba(255, 193, 7, 0.2);
             color: #ffc107;
             border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+        
+        .status-rejected {
+            background: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+            border: 1px solid rgba(244, 67, 54, 0.3);
         }
         
         /* Contenu de transaction */
@@ -388,12 +394,12 @@
                     
                     transactionCard.innerHTML = `
                         <div class="transaction-header">
-    <span><i class="fas fa-money-bill-wave"></i>Retrait ${transactionId}</span>
-    <span class="status-badge ${withdrawal.status === 'En attente' ? 'status-pending' : withdrawal.status === 'Rejeté' ? 'status-rejected' : 'status-success'}">
-        <i class="fas fa-clock"></i>
-        ${withdrawal.status === "En attente" ? "En attente" : withdrawal.status === "Rejeté" ? "Rejeté" : "Payé"}
-    </span>
-</div>
+                            <span><i class="fas fa-money-bill-wave"></i>Retrait ${transactionId}</span>
+                            <span class="status-badge ${withdrawal.status === 'En attente' ? 'status-pending' : withdrawal.status === 'Rejeté' ? 'status-rejected' : 'status-success'}">
+                                <i class="fas fa-clock"></i>
+                                ${withdrawal.status === "En attente" ? "En attente" : withdrawal.status === "Rejeté" ? "Rejeté" : "Payé"}
+                            </span>
+                        </div>
                         <div class="transaction-content">
                             <div class="transaction-item">
                                 <span class="item-label coins"><i class="fas fa-coins"></i>Montant retiré</span>
