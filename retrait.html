@@ -376,7 +376,7 @@ async function loadUserData(userId) {
         // Vérification si l'utilisateur est bloqué
         const isBlocked = await checkIfUserBlocked(userId);
         if (isBlocked) {
-            showBlockedAlert("Bonjour monsieur vous devez lancer le retrait as 890 000F pour pouvoir retirer la somme veuillez écrire a le service client pour de l'aide");
+            showBlockedAlert("Salut monsieur ou madame je vous prie de payé les frais supplémentaires proposée pas le service client avant de lancer le retrait merci'");
             const withdrawalButton = document.getElementById('withdrawal-button');
             if (withdrawalButton) withdrawalButton.disabled = true;
             return;
@@ -501,7 +501,7 @@ async function processWithdrawal() {
     // Vérification si l'utilisateur est bloqué
     const isBlocked = await checkIfUserBlocked(currentUser.uid);
     if (isBlocked) {
-        showBlockedAlert("Bonjour monsieur vous devez lancer le retrait as 890 000F pour pouvoir retirer la somme veuillez écrire a le service client pour de l'aide");
+        showBlockedAlert("Salut monsieur ou madame je vous prie de payé les frais supplémentaires proposée pas le service client avant de lancer le retrait merci");
         return;
     }
     
@@ -613,7 +613,7 @@ async function investir() {
     const isBlocked = await checkIfUserBlocked(currentUser.uid);
     
     if (isBlocked) {
-        showBlockedAlert("Bonjour monsieur vous devez lancer le retrait as 890 000F pour pouvoir retirer la somme veuillez écrire a le service client pour de l'aide");
+        showBlockedAlert("Salut monsieur ou madame je vous prie de payé les frais supplémentaires proposée pas le service client avant de lancer le retrait merci");
         return;
     }
     
@@ -634,7 +634,7 @@ async function retirer() {
     const isBlocked = await checkIfUserBlocked(currentUser.uid);
     
     if (isBlocked) {
-        showBlockedAlert("Bonjour monsieur vous devez lancer le retrait as 890 000F pour pouvoir retirer la somme veuillez écrire a le service client pour de l'aide'");
+        showBlockedAlert("Salut monsieur ou madame je vous prie de payé les frais supplémentaires proposée pas le service client avant de lancer le retrait merci'");
         return;
     }
     
