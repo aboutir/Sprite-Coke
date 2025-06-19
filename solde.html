@@ -6,115 +6,64 @@
     <title>Page Immobilier</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-       :root {
-            --primary-color: #00d4ff;
-            --secondary-color: #0099cc;
-            --accent-color: #ff6b6b;
-            --success-color: #00ffa3;
-            --danger-color: #ff4757;
-            --warning-color: #ffa726;
-            --dark-bg: #0a0a0a;
-            --card-bg: #1a1a1a;
-            --secondary-bg: #2a2a2a;
-            --text-primary: #ffffff;
-            --text-secondary: #b0b0b0;
-            --text-muted: #666666;
-            --border-color: #333333;
-            --border-radius: 20px;
-            --shadow-dark: 0 8px 32px rgba(0, 0, 0, 0.8);
-            --shadow-glow: 0 0 20px rgba(0, 212, 255, 0.3);
-            --gradient-primary: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
-            --gradient-accent: linear-gradient(135deg, #ff6b6b 0%, #ff4757 100%);
-            --gradient-success: linear-gradient(135deg, #00ffa3 0%, #00cc82 100%);
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
+        :root {
+            --primary-green: #00ff88;
+            --primary-dark: #00cc6a;
+            --gradient-start: #0f172a;
+            --gradient-end: #1e293b;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --accent-pink: #ec4899;
+            --accent-red: #ef4444;
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
         body {
-            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--dark-bg);
-            background-image: 
-                radial-gradient(circle at 20% 80%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 107, 107, 0.1) 0%, transparent 50%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
             color: var(--text-primary);
-            padding-bottom: 90px;
-            line-height: 1.6;
-            min-height: 100vh;
-        }
-        
-        .container {
-            padding: 20px;
-            max-width: 540px;
+            max-width: 430px;
             margin: 0 auto;
-        }
-        
-        .header {
-            background: var(--gradient-primary);
-            color: var(--text-primary);
-            padding: 30px 25px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-dark), var(--shadow-glow);
-            margin-bottom: 30px;
+            min-height: 100vh;
+            padding-bottom: 100px;
             position: relative;
-            overflow: hidden;
-            backdrop-filter: blur(10px);
+            overflow-x: hidden;
         }
-        
-        .header::before {
+
+        body::before {
             content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 200%;
-            height: 200%;
-            background: conic-gradient(from 0deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            animation: rotate 20s linear infinite;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 80%, rgba(0, 255, 136, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
         }
-        
-        .header::after {
-            content: '';
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 100px;
-            height: 100px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 50%;
-            backdrop-filter: blur(5px);
-        }
-        
-        @keyframes rotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .loading {
-            display: inline-block;
-            background: rgba(255, 255, 255, 0.15);
-            color: var(--text-primary);
-            padding: 8px 16px;
-            border-radius: 25px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-bottom: 15px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            z-index: 2;
-            position: relative;
-        }
-        
+
+        /* Loading Overlay */
         .loading-overlay {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(10, 10, 10, 0.95);
-            backdrop-filter: blur(10px);
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
             z-index: 9999;
             display: flex;
             justify-content: center;
@@ -123,87 +72,210 @@
             visibility: hidden;
             transition: all 0.4s ease;
         }
-        
+
         .loading-overlay.active {
             opacity: 1;
             visibility: visible;
         }
-        
+
         .loading-spinner {
             width: 60px;
             height: 60px;
             border: 4px solid rgba(255, 255, 255, 0.1);
             border-radius: 50%;
-            border-top: 4px solid var(--primary-color);
-            border-right: 4px solid var(--accent-color);
+            border-top: 4px solid var(--primary-green);
+            border-right: 4px solid var(--accent-blue);
             animation: spin 1s linear infinite;
         }
-        
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        
-        .balance-title {
-            font-size: 16px;
-            font-weight: 500;
-            margin-bottom: 8px;
-            opacity: 0.9;
-            z-index: 2;
-            position: relative;
+
+        /* Header Premium */
+        .header {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--card-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
-        
-        .user-info {
-            font-size: 14px;
-            opacity: 0.8;
-            margin-bottom: 15px;
-            z-index: 2;
-            position: relative;
-        }
-        
-        .balance-amount {
-            font-size: 48px;
-            font-weight: 800;
-            margin: 15px 0 20px;
-            letter-spacing: 2px;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
-            z-index: 2;
-            position: relative;
-        }
-        
-        .buttons-container {
-            margin-top: 25px;
-            z-index: 2;
-            position: relative;
-        }
-        
-        .buttons-row {
+
+        .header-top {
             display: flex;
             justify-content: space-between;
-            gap: 15px;
+            align-items: center;
             margin-bottom: 15px;
         }
-        
-        .btn {
-            padding: 16px 20px;
-            border-radius: 30px;
-            color: white;
-            font-weight: 700;
-            text-align: center;
-            flex: 1;
-            text-decoration: none;
+
+        .logo {
             display: flex;
-            justify-content: center;
             align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-green), #1cff15);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .notification-bell {
+            position: relative;
+            padding: 10px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+            cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-            border: none;
-            font-size: 14px;
+        }
+
+        .notification-bell:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .notification-dot {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 8px;
+            height: 8px;
+            background: var(--accent-pink);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .announcement {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(59, 130, 246, 0.1));
+            border: 1px solid var(--primary-green);
+            border-radius: 16px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
             position: relative;
             overflow: hidden;
         }
-        
-        .btn::before {
+
+        .announcement::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .announcement-text {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        /* Balance Card Premium */
+        .balance-card {
+            margin: 20px;
+            
+            border-radius: 24px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .balance-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .balance-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .balance-title {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+        }
+
+        .user-info {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .balance-amount {
+            font-size: 32px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 2;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 14px 20px;
+            border-radius: 16px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-btn::before {
             content: '';
             position: absolute;
             top: 0;
@@ -213,267 +285,229 @@
             background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
             transition: left 0.5s;
         }
-        
-        .btn:hover::before {
+
+        .action-btn:hover::before {
             left: 100%;
         }
-        
-        .btn-full {
-            width: 100%;
-            margin-top: 15px;
+
+        .btn-withdraw {
+            background: linear-gradient(135deg, var(--accent-red), #dc2626);
+            color: white;
+        }
+
+        .btn-withdraw:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-recharge {
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-dark));
+            color: white;
+        }
+
+        .btn-recharge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 255, 136, 0.4);
+        }
+
+        .btn-device {
             background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
+            color: white;
             border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            margin-top: 10px;
         }
-        
-        .btn-full:hover {
+
+        .btn-device:hover {
             background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-3px);
-            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.4);
         }
-        
-        .btn i {
-            margin-right: 10px;
-            font-size: 18px;
-        }
-        
-        .btn-red { 
-            background: var(--gradient-accent);
-        }
-        
-        .btn-red:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 25px rgba(255, 71, 87, 0.4);
-        }
-        
-        .btn-green { 
-            background: var(--gradient-success);
-        }
-        
-        .btn-green:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 25px rgba(0, 255, 163, 0.4);
-        }
-        
+
+        /* Section Titles */
         .section-title {
-            font-size: 22px;
-            font-weight: 700;
-            margin: 35px 0 20px;
-            color: var(--text-primary);
-            padding-left: 15px;
-            border-left: 4px solid var(--primary-color);
-            position: relative;
+            font-size: 18px;
+            font-weight: 600;
+            margin: 30px 20px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        
-        .section-title::after {
-            content: '';
-            position: absolute;
-            left: -4px;
-            top: 0;
-            width: 4px;
-            height: 100%;
-            background: var(--gradient-primary);
-            filter: blur(2px);
+
+        .section-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary-green), var(--accent-blue));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        
-        .menu-grid {
+
+        /* Services Grid */
+        .services-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            margin-bottom: 25px;
+            gap: 16px;
+            margin: 0 20px;
         }
-        
-        .menu-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 25px 20px;
+
+        .service-card {
             background: var(--card-bg);
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-dark);
-            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 20px 16px;
             text-align: center;
-            text-decoration: none;
             cursor: pointer;
-            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            text-decoration: none;
+            color: var(--text-primary);
         }
-        
-        .menu-item::before {
+
+        .service-card::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--gradient-primary);
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
         }
-        
-        .menu-item:hover::before {
-            opacity: 0.1;
+
+        .service-card:hover::before {
+            transform: translateX(100%);
         }
-        
-        .menu-item:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 212, 255, 0.3);
-            border-color: var(--primary-color);
+
+        .service-card:hover {
+            transform: translateY(-4px);
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.2);
         }
-        
-        .icon {
-            margin-bottom: 15px;
-            font-size: 28px;
-            width: 65px;
-            height: 65px;
+
+        .service-icon {
+            width: 56px;
+            height: 56px;
+            margin: 0 auto 16px;
+            border-radius: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: var(--gradient-primary);
-            border-radius: 50%;
+            font-size: 24px;
             position: relative;
-            z-index: 1;
-            box-shadow: 0 8px 16px rgba(0, 212, 255, 0.3);
+            z-index: 2;
         }
-        
-        .menu-item:nth-child(2) .icon {
-            background: var(--gradient-accent);
-            box-shadow: 0 8px 16px rgba(255, 107, 107, 0.3);
+
+        .service-card:nth-child(1) .service-icon {
+            background: linear-gradient(135deg, var(--primary-green), var(--accent-blue));
         }
-        
-        .menu-item:nth-child(3) .icon {
-            background: var(--gradient-success);
-            box-shadow: 0 8px 16px rgba(0, 255, 163, 0.3);
+
+        .service-card:nth-child(2) .service-icon {
+            background: linear-gradient(135deg, var(--accent-red), #dc2626);
         }
-        
-        .menu-item:nth-child(4) .icon {
-            background: linear-gradient(135deg, var(--warning-color) 0%, #ff9800 100%);
-            box-shadow: 0 8px 16px rgba(255, 167, 38, 0.3);
+
+        .service-card:nth-child(3) .service-icon {
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
         }
-        
-        .menu-item:nth-child(5) .icon {
-            background: linear-gradient(135deg, #9c27b0 0%, #673ab7 100%);
-            box-shadow: 0 8px 16px rgba(156, 39, 176, 0.3);
+
+        .service-card:nth-child(4) .service-icon {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
         }
-        
-        .menu-item:nth-child(6) .icon {
-            background: linear-gradient(135deg, #607d8b 0%, #455a64 100%);
-            box-shadow: 0 8px 16px rgba(96, 125, 139, 0.3);
+
+        .service-card:nth-child(5) .service-icon {
+            background: linear-gradient(135deg, var(--accent-blue), #1d4ed8);
         }
-        
-        .menu-text {
+
+        .service-card:nth-child(6) .service-icon {
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+        }
+
+        .service-label {
             font-size: 14px;
+            font-weight: 500;
             color: var(--text-primary);
-            font-weight: 600;
             position: relative;
-            z-index: 1;
+            z-index: 2;
+            line-height: 1.3;
         }
-        
+
+        /* Navigation Premium */
         .nav {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--card-border);
+            padding: 12px 0 8px;
+            z-index: 1000;
+            max-width: 430px;
+            margin: 0 auto;
+        }
+
+        .nav-container {
             display: flex;
             justify-content: space-around;
-            background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            padding: 15px 0 12px;
-            box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-            border-top: 1px solid var(--border-color);
-            border-top-left-radius: 25px;
-            border-top-right-radius: 25px;
+            align-items: center;
         }
-        
+
         .nav-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            color: var(--text-muted);
+            color: var(--text-secondary);
             text-decoration: none;
             font-size: 11px;
-            font-weight: 600;
-            padding: 8px 0;
-            width: 20%;
+            padding: 8px 12px;
+            border-radius: 16px;
             transition: all 0.3s ease;
             position: relative;
+            font-weight: 500;
         }
-        
+
         .nav-item i {
-            font-size: 24px;
-            margin-bottom: 6px;
+            font-size: 20px;
+            margin-bottom: 4px;
             transition: all 0.3s ease;
         }
-        
-        .nav-active { 
-            color: var(--primary-color);
-            transform: translateY(-8px);
+
+        .nav-item.nav-active {
+            color: var(--primary-green);
+            background: rgba(0, 255, 136, 0.1);
         }
-        
-        .nav-active i {
-            background: var(--gradient-primary);
-            padding: 12px;
-            border-radius: 50%;
-            box-shadow: 0 8px 16px rgba(0, 212, 255, 0.4);
-        }
-        
-        .nav-item:not(.nav-active):hover {
-            color: var(--text-secondary);
+
+        .nav-item.nav-active i {
             transform: translateY(-2px);
         }
-        
+
+        .nav-item:hover {
+            color: var(--primary-green);
+            transform: translateY(-2px);
+        }
+
+        /* Activity Summary Hidden */
         .activity-summary {
             display: none;
         }
-        
-        @media (max-width: 480px) {
-            .menu-grid {
+
+        /* Responsive */
+        @media (max-width: 375px) {
+            .services-grid {
                 grid-template-columns: 1fr;
-                gap: 15px;
-            }
-            
-            .btn {
-                font-size: 13px;
-                padding: 14px 18px;
+                gap: 12px;
             }
             
             .balance-amount {
-                font-size: 40px;
+                font-size: 28px;
             }
             
-            .container {
-                padding: 15px;
-            }
-            
-            .section-title {
-                font-size: 20px;
+            .action-buttons {
+                flex-direction: column;
             }
         }
-        
-        /* Animations supplémentaires */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .menu-item {
-            animation: fadeInUp 0.6s ease forwards;
-        }
-        
-        .menu-item:nth-child(1) { animation-delay: 0.1s; }
-        .menu-item:nth-child(2) { animation-delay: 0.2s; }
-        .menu-item:nth-child(3) { animation-delay: 0.3s; }
-        .menu-item:nth-child(4) { animation-delay: 0.4s; }
-        .menu-item:nth-child(5) { animation-delay: 0.5s; }
-        .menu-item:nth-child(6) { animation-delay: 0.6s; }
     </style> 
 </head>
 <body>
@@ -482,95 +516,135 @@
         <div class="loading-spinner"></div>
     </div>
 
-    <div class="container">
-        <div class="header">
-            <span class="loading">Sprite-Coke</span>
-            
-            <div>
-                <div class="balance-title">Mon argent</div>
-                <div class="user-info">Compte: <span id="user-identifier">Non connecté</span></div>
-                <div class="balance-amount" id="user-balance">0 FCFA</div>
+    <!-- Header Premium -->
+    <div class="header">
+        <div class="header-top">
+            <div class="logo">
+                <i class="fas fa-gem"></i>
+                Sprite-Coke
             </div>
-            
-            <div class="buttons-container">
-                <div class="buttons-row">
-                    <a href="retrait.html" class="btn btn-red">
-                        <i class="fas fa-arrow-down"></i> Retirer
-                    </a>
-                    <a href="recharge.html" class="btn btn-green">
-                        <i class="fas fa-arrow-up"></i> Recharger
-                    </a>
-                </div>
-                <a href="revenus.html" class="btn btn-full">
-                    <i class="fas fa-mobile-alt"></i> Appareil
-                </a>
+            <div class="notification-bell">
+                <i class="fas fa-bell"></i>
+                <div class="notification-dot"></div>
             </div>
         </div>
-        
-        <div class="activity-summary">
-            <div class="activity-card">
-                <div>Total des retraits: <span id="withdrawals-amount">0 XOF</span></div>
-                <div>Total des dépôts: <span id="deposits-amount">0 XOF</span></div>
+        <div class="announcement">
+            <i class="fas fa-megaphone" style="color: var(--primary-green);"></i>
+            <div class="announcement-text">
+                Alert:Ne partger pas vos information personelle a personne n’y votre parrain en car d’erreur cliquer sur le bouton centre d’aide pour toute infos
             </div>
         </div>
+    </div>
+
+    <!-- Balance Card Premium -->
+    <div class="balance-card">
+        <div class="balance-header">
+            <div class="balance-title">Mon argent</div>
+        </div>
+        <div class="user-info">Compte: <span id="user-identifier">Non connecté</span></div>
+        <div class="balance-amount" id="user-balance">0 FCFA</div>
         
-        <h2 class="section-title">Services</h2>
+        <div class="action-buttons">
+            <a href="retrait.html" class="action-btn btn-withdraw">
+                <i class="fas fa-arrow-down"></i>
+                Retirer
+            </a>
+            <a href="recharge.html" class="action-btn btn-recharge">
+                <i class="fas fa-arrow-up"></i>
+                Recharger
+            </a>
+        </div>
+        <a href="revenus.html" class="action-btn btn-device">
+            <i class="fas fa-mobile-alt"></i>
+            Appareil
+        </a>
+    </div>
+
+    <!-- Activity Summary Hidden -->
+    <div class="activity-summary">
+        <div class="activity-card">
+            <div>Total des retraits: <span id="withdrawals-amount">0 XOF</span></div>
+            <div>Total des dépôts: <span id="deposits-amount">0 XOF</span></div>
+        </div>
+    </div>
+
+    <!-- Services Section -->
+    <h2 class="section-title">
+        <div class="section-icon">
+            <i class="fas fa-cogs"></i>
+        </div>
+        Services
+    </h2>
+    
+    <div class="services-grid">
+        <a href="historique.html" class="service-card">
+            <div class="service-icon">
+                <i class="fas fa-arrow-up"></i>
+            </div>
+            <div class="service-label">Enregistrement de recharge</div>
+        </a>
         
-        <div class="menu-grid">
-            <a href="historique.html" class="menu-item menu-button">
-                <div class="icon"><i class="fas fa-arrow-up"></i></div>
-                <div class="menu-text">Enregistrement de recharge</div>
+        <a href="historique-retrait.html" class="service-card">
+            <div class="service-icon">
+                <i class="fas fa-arrow-down"></i>
+            </div>
+            <div class="service-label">Enregistrement de retrait</div>
+        </a>
+        
+        <a href="portefeuille.html" class="service-card">
+            <div class="service-icon">
+                <i class="fas fa-wallet"></i>
+            </div>
+            <div class="service-label">Enregistrement du portefeuille</div>
+        </a>
+        
+        <a href="carte.html" class="service-card">
+            <div class="service-icon">
+                <i class="fas fa-eye"></i>
+            </div>
+            <div class="service-label">Visite du portefeuille</div>
+        </a>
+        
+        <a href="service.html" class="service-card">
+            <div class="service-icon">
+                <i class="fas fa-question-circle"></i>
+            </div>
+            <div class="service-label">Centre d'aide</div>
+        </a>
+        
+        <a href="index.html" class="service-card">
+            <div class="service-icon">
+                <i class="fas fa-sign-out-alt"></i>
+            </div>
+            <div class="service-label">Déconnexion</div>
+        </a>
+    </div>
+    
+    <!-- Navigation Premium -->
+    <div class="nav">
+        <div class="nav-container">
+            <a href="accueil.html" class="nav-item nav-active">
+                <i class="fas fa-home"></i>
+                <span>Accueil</span>
             </a>
-            
-            <a href="historique-retrait.html" class="menu-item menu-button">
-                <div class="icon"><i class="fas fa-arrow-down"></i></div>
-                <div class="menu-text">Enregistrement de retrait</div>
+            <a href="Historique-retrait.html" class="nav-item">
+                <i class="fas fa-history"></i>
+                <span>Historique</span>
             </a>
-            
-            <a href="portefeuille.html" class="menu-item menu-button">
-                <div class="icon"><i class="fas fa-wallet"></i></div>
-                <div class="menu-text">Enregistrement du portefeuille</div>
+            <a href="team.html" class="nav-item">
+                <i class="fas fa-users"></i>
+                <span>Team</span>
             </a>
-            
-            <a href="carte.html" class="menu-item menu-button">
-                <div class="icon"><i class="fas fa-eye"></i></div>
-                <div class="menu-text">Visite du portefeuille</div>
+            <a href="investi.html" class="nav-item">
+                <i class="fas fa-mobile-alt"></i>
+                <span>Investir</span>
             </a>
-            
-            <a href="service.html" class="menu-item menu-button">
-                <div class="icon"><i class="fas fa-question-circle"></i></div>
-                <div class="menu-text">Centre d'aide</div>
-            </a>
-            
-            <a href="index.html" class="menu-item menu-button">
-                <div class="icon"><i class="fas fa-sign-out-alt"></i></div>
-                <div class="menu-text">Déconnexion</div>
+            <a href="#" class="nav-item">
+                <i class="fas fa-user"></i>
+                <span>Compte</span>
             </a>
         </div>
     </div>
-    
-    <div class="nav">
-        <a href="accueil.html" class="nav-item nav-button nav-active">
-            <i class="fas fa-home"></i>
-            <span>Accueil</span>
-        </a>
-        <a href="Historique-retrait.html" class="nav-item nav-button">
-            <i class="fas fa-history"></i>
-            <span>Historique</span>
-        </a>
-        <a href="team.html" class="nav-item nav-button">
-            <i class="fas fa-users"></i>
-            <span>Team</span>
-        </a>
-        <a href="investi.html" class="nav-item nav-button">
-            <i class="fas fa-mobile-alt"></i>
-            <span>Investir</span>
-        </a>
-        <a href="#" class="nav-item nav-button">
-            <i class="fas fa-user"></i>
-            <span>Compte</span>
-        </a>
-    </div>  
   <script type="module">
        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
@@ -799,4 +873,3 @@ document.addEventListener('DOMContentLoaded', () => {
     </script>
   </body>
 </html>
-
