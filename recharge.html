@@ -311,21 +311,18 @@
                     </div>
                 </label>
             </div>
-
-            <div class="form-group">
-                <label for="phone">Numéro de téléphone</label>
-                <input type="tel" id="phone" name="phone" required 
-                       placeholder="Votre numéro de recharge"
-                       title="Numéro à 8 ou 10 chiffres">
-                <span class="help-text"></span>
-                <div id="phoneError" class="error"></div>
-            </div>
-
+<div class="form-group">
+    <label for="phone">Numéro de téléphone</label>
+    <input type="tel" id="phone" name="phone" required 
+           placeholder="Votre numéro de recharge">
+    <span class="help-text"></span>
+    <div id="phoneError" class="error"></div>
+</div>
             <div class="form-group">
                 <label for="amount">Montant</label>
-                <input type="number" id="amount" name="amount" min="5000" 
+                <input type="number" id="amount" name="amount" min="5800" 
                        placeholder="Veuillez saisir le montant de votre paiement" required>
-                <span class="help-text">minimum deposit 5000 FCFA </span>
+                <span class="help-text">minimum deposit 5 800 FCFA </span>
                 <div id="amountError" class="error"></div>
             </div>
 
@@ -345,179 +342,160 @@
     <div id="notification" class="notification"></div>
 
 <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
-        import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDIB-raa12rkzqxRhflOMLBwL4hBycTgmo",
-            authDomain: "coke-eea48.firebaseapp.com",
-            databaseURL: "https://coke-eea48-default-rtdb.firebaseio.com",
-            projectId: "coke-eea48",
-            storageBucket: "coke-eea48.firebasestorage.app",
-            messagingSenderId: "217366074971",
-            appId: "1:217366074971:web:948bdc5baeeea93fac117e"
-        };
+    const firebaseConfig = {
+        apiKey: "AIzaSyDIB-raa12rkzqxRhflOMLBwL4hBycTgmo",
+        authDomain: "coke-eea48.firebaseapp.com",
+        databaseURL: "https://coke-eea48-default-rtdb.firebaseio.com",
+        projectId: "coke-eea48",
+        storageBucket: "coke-eea48.firebasestorage.app",
+        messagingSenderId: "217366074971",
+        appId: "1:217366074971:web:948bdc5baeeea93fac117e"
+    };
 
-        // Initialiser Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
 
-        // Dictionnaire des numéros par opérateur
-        const operatorNumbers = {
-            'mtn': '2250576501033',
-            'moov': '2250173750225',
-            'orange': 'contacter le service client',
-            'wave': '2250712778991',
-            'usdt': 'indisponible'
-           
-        };
+    const operatorNumbers = {
+        'mtn': '2250595883343',
+        'moov': '2250173750225',
+        'orange': 'indisponible',
+        'wave': '2250576501033',
+        'usdt': 'indisponible'
+    };
 
-        // Fonctions utilitaires
-        function showLoading() {
-            document.querySelector('.loading').style.display = 'flex';
-        }
+    function showLoading() {
+        document.querySelector('.loading').style.display = 'flex';
+    }
 
-        function hideLoading() {
-            document.querySelector('.loading').style.display = 'none';
-        }
+    function hideLoading() {
+        document.querySelector('.loading').style.display = 'none';
+    }
 
-        function showNotification(message, type = 'success') {
-            const notification = document.getElementById('notification');
-            notification.textContent = message;
-            notification.className = `notification ${type}`;
-            notification.style.display = 'block';
+    function showNotification(message, type = 'success') {
+        const notification = document.getElementById('notification');
+        notification.textContent = message;
+        notification.className = `notification ${type}`;
+        notification.style.display = 'block';
 
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 5000);
-        }
+        setTimeout(() => {
+            notification.style.display = 'none';
+        }, 5000);
+    }
 
-        function showError(elementId, message) {
-            const errorElement = document.getElementById(elementId);
-            errorElement.textContent = message;
-            errorElement.style.display = 'block';
-        }
+    function showError(elementId, message) {
+        const errorElement = document.getElementById(elementId);
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+    }
 
-        function clearErrors() {
-            const errorElements = document.querySelectorAll('.error');
-            errorElements.forEach(element => {
-                element.style.display = 'none';
-                element.textContent = '';
-            });
-        }
-
-        // Validation du numéro de téléphone (8 ou 10 chiffres)
-        function isValidPhoneNumber(phone) {
-            return /^[0-9]{8}$/.test(phone) || /^[0-9]{10}$/.test(phone);
-        }
-
-        // Validation des données
-        function validateForm(operator, phone, amount) {
-            let isValid = true;
-            clearErrors();
-
-            if (!operator) {
-                showError('operatorError', 'Veuillez sélectionner un opérateur');
-                isValid = false;
-            }
-
-            if (!isValidPhoneNumber(phone)) {
-                showError('phoneError', 'Le numéro doit contenir 8 ou 10 chiffres');
-                isValid = false;
-            }
-
-           if (amount < 100) {
-                showError('amountError', 'Le montant minimum est de 100 FCFA');
-                isValid = false;
-            }
-
-            return isValid;
-        }
-
-        // Vérifier l'authentification au chargement
-        window.addEventListener('load', () => {
-            onAuthStateChanged(auth, (user) => {
-                if (!user) {
-                    showNotification('Veuillez vous connecter pour continuer', 'error-notification');
-                    setTimeout(() => {
-                        window.location.href = 'login.html';
-                    }, 2000);
-                }
-            });
+    function clearErrors() {
+        const errorElements = document.querySelectorAll('.error');
+        errorElements.forEach(el => {
+            el.style.display = 'none';
+            el.textContent = '';
         });
+    }
 
-        // Gérer la soumission du formulaire
-        document.getElementById('rechargeForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const user = auth.currentUser;
+    function validateForm(operator, phone, amount) {
+        let isValid = true;
+        clearErrors();
+
+        if (!operator) {
+            showError('operatorError', 'Veuillez sélectionner un opérateur');
+            isValid = false;
+        }
+
+        if (!phone || phone.trim() === '') {
+            showError('phoneError', 'Veuillez entrer un numéro');
+            isValid = false;
+        }
+
+        if (isNaN(amount) || amount <= 0) {
+            showError('amountError', 'Veuillez entrer un montant valide');
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    window.addEventListener('load', () => {
+        onAuthStateChanged(auth, (user) => {
             if (!user) {
                 showNotification('Veuillez vous connecter pour continuer', 'error-notification');
-                return;
-            }
-
-            const operator = document.querySelector('input[name="operator"]:checked')?.value;
-            const phone = document.getElementById('phone').value;
-            const amount = parseInt(document.getElementById('amount').value);
-
-            if (!validateForm(operator, phone, amount)) {
-                return;
-            }
-
-            showLoading();
-
-            try {
-                // Créer l'objet de recharge
-                const rechargeData = {
-                    operator: operator,
-                    phone: phone,
-                    amount: amount,
-                    operatorNumber: operatorNumbers[operator],
-                    date: new Date().toISOString(),
-                    userId: user.uid,
-                    userEmail: user.email,
-                    status: 'pending'
-                };
-
-                // Stocker dans sessionStorage
-                sessionStorage.setItem('rechargeData', JSON.stringify(rechargeData));
-
-                // Sauvegarder dans Firebase
-                const rechargeRef = ref(db, `recharges/${user.uid}/${Date.now()}`);
-                await set(rechargeRef, rechargeData);
-
-                // Rediriger vers la page de confirmation
-                window.location.href = 'confirmation.html';
-
-            } catch (error) {
-                console.error('Erreur:', error);
-                showNotification('Une erreur est survenue. Veuillez réessayer.', 'error-notification');
-            } finally {
-                hideLoading();
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
             }
         });
 
-        // Validation en temps réel du numéro de téléphone
-        document.getElementById('phone').addEventListener('input', function(e) {
-            const phone = e.target.value;
-            if (phone && !isValidPhoneNumber(phone)) {
-                showError('phoneError', 'Le numéro doit contenir 8 ou 10 chiffres');
-            } else {
-                document.getElementById('phoneError').style.display = 'none';
-            }
-        });
+        // Valeur par défaut du montant = 5800
+        document.getElementById('amount').value = "5800";
+    });
 
-        // Validation en temps réel du montant
-        document.getElementById('amount').addEventListener('input', function(e) {
-            const amount = parseInt(e.target.value);
-            if (amount < 1) {
-                showError('amountError', 'Le montant minimum est de 5000 FCFA');
-            } else {
-                document.getElementById('amountError').style.display = 'none';
-            }
-        });
-    </script>
+    document.getElementById('rechargeForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const user = auth.currentUser;
+        if (!user) {
+            showNotification('Veuillez vous connecter pour continuer', 'error-notification');
+            return;
+        }
+
+        const operator = document.querySelector('input[name="operator"]:checked')?.value;
+        const phone = document.getElementById('phone').value.trim();
+        const amount = parseInt(document.getElementById('amount').value);
+
+        if (!validateForm(operator, phone, amount)) {
+            return;
+        }
+
+        showLoading();
+
+        try {
+            const rechargeData = {
+                operator: operator,
+                phone: phone,
+                amount: amount,
+                operatorNumber: operatorNumbers[operator],
+                date: new Date().toISOString(),
+                userId: user.uid,
+                userEmail: user.email,
+                status: 'pending'
+            };
+
+            sessionStorage.setItem('rechargeData', JSON.stringify(rechargeData));
+
+            const rechargeRef = ref(db, `recharges/${user.uid}/${Date.now()}`);
+            await set(rechargeRef, rechargeData);
+
+            window.location.href = 'confirmation.html';
+
+        } catch (error) {
+            console.error('Erreur:', error);
+            showNotification('Une erreur est survenue. Veuillez réessayer.', 'error-notification');
+        } finally {
+            hideLoading();
+        }
+    });
+
+    // Plus aucune validation de numéro ici
+    document.getElementById('phone').addEventListener('input', function () {
+        document.getElementById('phoneError').style.display = 'none';
+    });
+
+    document.getElementById('amount').addEventListener('input', function (e) {
+        const amount = parseInt(e.target.value);
+        if (amount <= 0) {
+            showError('amountError', 'Veuillez entrer un montant valide');
+        } else {
+            document.getElementById('amountError').style.display = 'none';
+        }
+    });
+</script>
     </body>
 </html> 
