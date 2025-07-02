@@ -490,81 +490,83 @@
         window.auth = auth;
         window.database = database;
 
-        // Functions to handle page toggling
-        window.togglePage = () => {
+        // Fonction sécurisée pour basculer entre les pages
+        window.togglePage = function() {
             const loginPage = document.getElementById('loginPage');
             const registrationPage = document.getElementById('registrationPage');
-            loginPage.classList.toggle('hidden');
-            registrationPage.classList.toggle('hidden');
+            
+            if (loginPage && registrationPage) {
+                loginPage.classList.toggle('hidden');
+                registrationPage.classList.toggle('hidden');
+                
+                // Réinitialiser les messages d'erreur
+                const errorMessages = document.querySelectorAll('.error-message');
+                errorMessages.forEach(el => {
+                    if (el) el.classList.remove('show');
+                });
+            }
         };
 
-        window.toggleDropdown = (button) => {
-            const dropdown = button.nextElementSibling;
+        // Fonction sécurisée pour le dropdown
+        window.toggleDropdown = function(button) {
+            if (!button) return;
+            
+            const dropdown = button.parentElement.querySelector('.dropdown');
+            if (!dropdown) return;
+            
             dropdown.classList.toggle('show');
-
-            // Close dropdown when clicking outside
-            const closeDropdown = (event) => {
-                if (!button.contains(event.target)) {
-                    dropdown.classList.remove('show');
-                    document.removeEventListener('click', closeDropdown);
+            
+            // Fermer les autres dropdowns ouverts
+            document.querySelectorAll('.dropdown').forEach(dd => {
+                if (dd && dd !== dropdown && dd.classList.contains('show')) {
+                    dd.classList.remove('show');
                 }
-            };
-            setTimeout(() => {
-                document.addEventListener('click', closeDropdown);
-            }, 0);
+            });
         };
 
-        // Handle country selection
-        document.querySelectorAll('.country-option').forEach(option => {
-            option.addEventListener('click', () => {
-                const code = option.dataset.code;
-                const country = option.dataset.country;
-                const maxLength = option.dataset.max;
-                const button = option.closest('.country-select').querySelector('.selected-code span');
-                button.textContent = code;
+        // Fonction sécurisée pour sélectionner un pays
+        window.selectCountry = function(option) {
+            if (!option) return;
+            
+            const code = option.getAttribute('data-code');
+            const maxLength = option.getAttribute('data-max');
+            const dropdown = option.closest('.dropdown');
+            const selectedCode = dropdown ? dropdown.previousElementSibling : null;
+            
+            if (selectedCode) {
+                selectedCode.innerHTML = `<span>${code}</span><i class="fas fa-chevron-down"></i>`;
                 
-                // Update maxlength of telephone input
+                // Mettre à jour le maxlength des champs de téléphone
                 const form = option.closest('.container');
-                const telephoneInput = form.querySelector('input[type="tel"]');
-                telephoneInput.maxLength = maxLength;
-                telephoneInput.placeholder = `Numéro de téléphone (${maxLength} chiffres)`;
+                if (form) {
+                    const telephoneInput = form.querySelector('input[type="tel"]');
+                    if (telephoneInput) {
+                        telephoneInput.maxLength = maxLength;
+                        telephoneInput.placeholder = `Numéro de téléphone (${maxLength} chiffres)`;
+                    }
+                }
                 
-                option.closest('.dropdown').classList.remove('show');
-            });
-        });
+                if (dropdown) dropdown.classList.remove('show');
+            }
+        };
 
-        // Handle code verification
-        document.querySelectorAll('.verification-input input').forEach((input, index) => {
-            input.addEventListener('input', (e) => {
-                validateInput(e);
-                if (input.value.length === 1) {
-                    const nextInput = input.nextElementSibling;
-                    if (nextInput) nextInput.focus();
-                }
-            });
-
-            input.addEventListener('keydown', (e) => {
-                if (e.key === 'Backspace' && input.value.length === 0) {
-                    const prevInput = input.previousElementSibling;
-                    if (prevInput) prevInput.focus();
-                }
-            });
-        });
-
-        // Input validation helper
+        // Fonction pour valider les entrées
         function validateInput(e) {
+            if (!e || !e.target) return;
             const input = e.target;
             input.value = input.value.replace(/[^0-9]/g, '');
         }
 
-        // Phone number validation
+        // Fonction pour valider le numéro de téléphone
         function validatePhoneNumber(phone, countryCode) {
+            if (!phone || !countryCode) return false;
+            
             let maxLength = 10; // Default to Côte d'Ivoire
             
             // Get the selected country's max length
             const countryOptions = document.querySelectorAll('.country-option');
             for (const option of countryOptions) {
-                if (option.dataset.code === countryCode) {
+                if (option && option.dataset.code === countryCode) {
                     maxLength = parseInt(option.dataset.max);
                     break;
                 }
@@ -573,12 +575,15 @@
             return phone.length === maxLength;
         }
 
-        // Handle login
-        window.handleLogin = async () => {
+        // Gestion de la connexion
+        window.handleLogin = async function() {
             const errorElement = document.getElementById('loginError');
-            const telephone = document.getElementById('loginTelephone').value;
-            const password = document.getElementById('loginPassword').value;
-            const countryCode = document.querySelector('#loginPage .selected-code span').textContent;
+            if (!errorElement) return;
+            
+            const telephone = document.getElementById('loginTelephone') ? document.getElementById('loginTelephone').value : '';
+            const password = document.getElementById('loginPassword') ? document.getElementById('loginPassword').value : '';
+            const countryCodeElement = document.querySelector('#loginPage .selected-code span');
+            const countryCode = countryCodeElement ? countryCodeElement.textContent : '+225';
 
             try {
                 if (!telephone || !password) {
@@ -600,18 +605,21 @@
             }
         };
 
-        // Handle registration
-        window.handleRegistration = async () => {
+        // Gestion de l'inscription
+        window.handleRegistration = async function() {
             const errorElement = document.getElementById('registerError');
-            const telephone = document.getElementById('signupTelephone').value;
-            const password = document.getElementById('signupPassword').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            const referralCode = document.getElementById('referralCode').value;
-            const countryCode = document.querySelector('#registrationPage .selected-code span').textContent;
+            if (!errorElement) return;
+            
+            const telephone = document.getElementById('signupTelephone') ? document.getElementById('signupTelephone').value : '';
+            const password = document.getElementById('signupPassword') ? document.getElementById('signupPassword').value : '';
+            const confirmPassword = document.getElementById('confirmPassword') ? document.getElementById('confirmPassword').value : '';
+            const referralCode = document.getElementById('referralCode') ? document.getElementById('referralCode').value : '';
+            const countryCodeElement = document.querySelector('#registrationPage .selected-code span');
+            const countryCode = countryCodeElement ? countryCodeElement.textContent : '+225';
             
             // Get verification code inputs
-            const verificationInputs = document.querySelectorAll('.verification-input input');
-            const userCode = Array.from(verificationInputs).map(input => input.value).join('');
+            const verificationInputs = document.querySelectorAll('.verification-inputs input');
+            const userCode = verificationInputs ? Array.from(verificationInputs).map(input => input.value).join('') : '';
             const correctCode = '72941'; // Code affiché dans l'interface
 
             try {
@@ -633,7 +641,8 @@
                 }
 
                 if (userCode !== correctCode) {
-                    document.getElementById('errorMessage').classList.add('show');
+                    const errorMessage = document.getElementById('errorMessage');
+                    if (errorMessage) errorMessage.classList.add('show');
                     throw new Error('Code de vérification incorrect');
                 }
 
@@ -660,7 +669,7 @@
                     const users = referrerSnapshot.val();
                     if (users) {
                         for (const userId in users) {
-                            if (users[userId].referralCode === referralCode) {
+                            if (users[userId] && users[userId].referralCode === referralCode) {
                                 const currentBalance = users[userId].balance || 0;
                                 await set(ref(database, `users/${userId}/balance`), currentBalance + 0);
                                 await set(ref(database, `users/${user.uid}/balance`), 0);
@@ -701,45 +710,68 @@
         // Initialize country data and maxlength on page load
         document.addEventListener('DOMContentLoaded', () => {
             // Set initial max length for both forms
-            const loginCountryCode = document.querySelector('#loginPage .selected-code span').textContent;
-            const signupCountryCode = document.querySelector('#registrationPage .selected-code span').textContent;
+            const loginCountryCodeElement = document.querySelector('#loginPage .selected-code span');
+            const signupCountryCodeElement = document.querySelector('#registrationPage .selected-code span');
+            
+            const loginCountryCode = loginCountryCodeElement ? loginCountryCodeElement.textContent : '+225';
+            const signupCountryCode = signupCountryCodeElement ? signupCountryCodeElement.textContent : '+225';
             
             let loginMaxLength = 10;
             let signupMaxLength = 10;
             
             const countryOptions = document.querySelectorAll('.country-option');
             for (const option of countryOptions) {
-                if (option.dataset.code === loginCountryCode) {
+                if (option && option.dataset.code === loginCountryCode) {
                     loginMaxLength = option.dataset.max;
                 }
-                if (option.dataset.code === signupCountryCode) {
+                if (option && option.dataset.code === signupCountryCode) {
                     signupMaxLength = option.dataset.max;
                 }
             }
             
-            document.getElementById('loginTelephone').maxLength = loginMaxLength;
-            document.getElementById('loginTelephone').placeholder = `Numéro de téléphone (${loginMaxLength} chiffres)`;
+            const loginTelephone = document.getElementById('loginTelephone');
+            const signupTelephone = document.getElementById('signupTelephone');
             
-            document.getElementById('signupTelephone').maxLength = signupMaxLength;
-            document.getElementById('signupTelephone').placeholder = `Numéro de téléphone (${signupMaxLength} chiffres)`;
+            if (loginTelephone) {
+                loginTelephone.maxLength = loginMaxLength;
+                loginTelephone.placeholder = `Numéro de téléphone (${loginMaxLength} chiffres)`;
+            }
+            
+            if (signupTelephone) {
+                signupTelephone.maxLength = signupMaxLength;
+                signupTelephone.placeholder = `Numéro de téléphone (${signupMaxLength} chiffres)`;
+            }
+
+            // Gestion des champs de code de vérification
+            const verificationInputs = document.querySelectorAll('.verification-inputs input');
+            if (verificationInputs) {
+                verificationInputs.forEach((input, index) => {
+                    input.addEventListener('input', (e) => {
+                        validateInput(e);
+                        if (input.value.length === 1 && index < 4) {
+                            const nextInput = input.nextElementSibling;
+                            if (nextInput) nextInput.focus();
+                        }
+                    });
+
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'Backspace' && input.value.length === 0 && index > 0) {
+                            const prevInput = input.previousElementSibling;
+                            if (prevInput) prevInput.focus();
+                        }
+                    });
+                });
+            }
+            
+            // Récupérer le code de parrainage depuis l'URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const referralCode = urlParams.get("ref");
+            const referralInput = document.getElementById("referralCode");
+            
+            if (referralCode && referralInput) {
+                referralInput.value = referralCode;
+            }
         });
-        
-        // Fonction pour récupérer la valeur du paramètre "ref"
-function getReferralCode() {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get("ref");
-}
-
-// Attendre que la page soit chargée avant d'exécuter le script
-window.onload = function () {
-    const referralCode = getReferralCode(); // Récupérer le code de parrainage
-    const inputField = document.getElementById("referralCode");
-
-    if (referralCode && inputField) {
-        inputField.value = referralCode; // Insérer le code dans l'input
-    }
-};
     </script>
 </body>
 </html>
-
