@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Authentification | CANAL BOX</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <style>
         * {
             margin: 0;
@@ -358,14 +358,19 @@
                             <span>+221</span>
                             <span>Sénégal</span>
                         </div>
+                        <!-- Ajout +223 Mali -->
+                        <div class="country-option" onclick="selectCountry(this)" data-code="+223" data-country="Mali" data-max="8">
+                            <span>+223</span>
+                            <span>Mali</span>
+                        </div>
                     </div>
                 </div>
-                <input type="tel" id="loginTelephone" placeholder="Votre numéro de téléphone" maxlength="10">
+                <input type="tel" id="loginTelephone" placeholder="Votre numéro de téléphone" maxlength="10" />
             </div>
 
             <div class="input-group">
                 <i class="fas fa-lock"></i>
-                <input type="password" id="loginPassword" placeholder="Votre mot de passe">
+                <input type="password" id="loginPassword" placeholder="Votre mot de passe" />
             </div>
             
             <div class="error-message" id="loginError">
@@ -412,25 +417,30 @@
                             <span>+221</span>
                             <span>Sénégal</span>
                         </div>
+                        <!-- Ajout +223 Mali -->
+                        <div class="country-option" onclick="selectCountry(this)" data-code="+223" data-country="Mali" data-max="8">
+                            <span>+223</span>
+                            <span>Mali</span>
+                        </div>
                     </div>
                 </div>
-                <input type="tel" id="signupTelephone" placeholder="Votre numéro de téléphone" maxlength="10">
+                <input type="tel" id="signupTelephone" placeholder="Votre numéro de téléphone" maxlength="10" />
             </div>
 
             <div class="input-group">
                 <i class="fas fa-lock"></i>
-                <input type="password" id="signupPassword" placeholder="Créez un mot de passe sécurisé">
+                <input type="password" id="signupPassword" placeholder="Créez un mot de passe sécurisé" />
             </div>
             <p class="info-text">Minimum 8 caractères avec chiffres et lettres</p>
 
             <div class="input-group">
                 <i class="fas fa-lock"></i>
-                <input type="password" id="confirmPassword" placeholder="Confirmez votre mot de passe">
+                <input type="password" id="confirmPassword" placeholder="Confirmez votre mot de passe" />
             </div>
 
             <div class="input-group">
                 <i class="fas fa-gift"></i>
-                <input type="text" placeholder="Code parrain (optionnel)" id="referralCode">
+                <input type="text" placeholder="Code parrain (optionnel)" id="referralCode" />
             </div>
         </div>
 
@@ -439,11 +449,11 @@
             <p class="info-text">Entrez le code à 5 chiffres envoyé par SMS</p>
             
             <div class="verification-inputs">
-                <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric">
-                <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric">
-                <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric">
-                <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric">
-                <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" />
+                <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" />
+                <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" />
+                <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" />
+                <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" />
             </div>
             
             <div class="verification-code-display">
